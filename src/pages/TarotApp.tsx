@@ -1,74 +1,16 @@
+
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
 import WalletConnector from '@/components/wallet/WalletConnector';
-import DeckSelector from '@/components/tarot/DeckSelector';
-import IntentionForm from '@/components/tarot/IntentionForm';
-import PreparingReading from '@/components/tarot/PreparingReading';
-import CardSelection from '@/components/tarot/CardSelection';
-import CardReading from '@/components/tarot/CardReading';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
-import { Separator } from '@/components/ui/separator';
 import GlitchText from '@/components/GlitchText';
-import HeroSection from '@/components/HeroSection';
+import GlitchLogo from '@/components/GlitchLogo';
 
 const TarotApp: React.FC = () => {
-  const { phase } = useTarot();
   const { connected } = useWallet();
   const { t } = useTranslation();
-
-  // Maneja el clic en el botón del Hero Section
-  const handleHeroClick = () => {
-    // Aquí puedes definir lo que quieres que haga el botón
-    console.log("Hero button clicked");
-  };
-
-  // Renderiza el contenido apropiado basado en la fase actual
-  const renderPhaseContent = () => {
-    if (!connected) {
-      return (
-        <div className="flex flex-col items-center justify-center py-16">
-          <img 
-            src="/img/logos/FUDFATE_logo.png" 
-            alt="Tarot Card" 
-            className="w-40 h-auto mb-8"
-          />
-          <GlitchText
-            text={t('tarot.connectWalletToStart')}
-            className="text-2xl font-bold mb-6 text-gray-800"
-            goldEffect={true}
-          />
-          <p className="text-gray-600 max-w-md text-center mb-8">
-            {t('tarot.connectWalletDescription')}
-          </p>
-          <WalletConnector />
-        </div>
-      );
-    }
-
-    switch (phase) {
-      case 'intention':
-        return (
-          <>
-            <HeroSection onClick={handleHeroClick} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <IntentionForm />
-              <DeckSelector />
-            </div>
-          </>
-        );
-      case 'preparing':
-        return <PreparingReading className="max-w-2xl mx-auto" />;
-      case 'selection':
-        return <CardSelection />;
-      case 'reading':
-      case 'complete':
-        return <CardReading />;
-      default:
-        return <IntentionForm />;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-white text-gray-800">
@@ -91,20 +33,25 @@ const TarotApp: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* App Title */}
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-gray-800">
-            <GlitchText text={t('tarot.appTitle')} goldEffect={true} />
-          </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            {t('tarot.appDescription')}
-          </p>
-        </div>
+      <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+        {/* Hero Logo */}
+        <GlitchLogo 
+          imageUrl="/img/logos/FUDFATE_logo.png" 
+          alt="FUDFATE Logo"
+          className="my-12"
+        />
         
-        {/* Reading Content */}
-        <div className="max-w-4xl mx-auto">
-          {renderPhaseContent()}
+        {/* Connect Wallet Message */}
+        <div className="text-center max-w-2xl mx-auto my-8">
+          <GlitchText
+            text={t('tarot.connectWalletToStart')}
+            className="text-2xl font-bold mb-6 text-gray-800"
+            goldEffect={true}
+          />
+          <p className="text-gray-600 max-w-md mx-auto text-center mb-8">
+            {t('tarot.connectWalletDescription')}
+          </p>
+          <WalletConnector />
         </div>
       </main>
 
