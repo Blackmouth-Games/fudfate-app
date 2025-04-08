@@ -25,7 +25,7 @@ const queryClient = new QueryClient();
 const App = () => {
   // Set the title inside the component
   useEffect(() => {
-    document.title = "FudFate - Web3 Tarot Experience";
+    document.title = "Fudfate";
   }, []);
 
   return (
