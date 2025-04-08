@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTarot, ReadingPhase } from '@/contexts/TarotContext';
+import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
 import WalletConnector from '@/components/wallet/WalletConnector';
 import DeckSelector from '@/components/tarot/DeckSelector';
@@ -12,13 +11,20 @@ import CardReading from '@/components/tarot/CardReading';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Separator } from '@/components/ui/separator';
 import GlitchText from '@/components/GlitchText';
+import HeroSection from '@/components/HeroSection';
 
 const TarotApp: React.FC = () => {
   const { phase } = useTarot();
   const { connected } = useWallet();
   const { t } = useTranslation();
 
-  // Render the appropriate component based on the current phase
+  // Maneja el clic en el botón del Hero Section
+  const handleHeroClick = () => {
+    // Aquí puedes definir lo que quieres que haga el botón
+    console.log("Hero button clicked");
+  };
+
+  // Renderiza el contenido apropiado basado en la fase actual
   const renderPhaseContent = () => {
     if (!connected) {
       return (
@@ -44,10 +50,13 @@ const TarotApp: React.FC = () => {
     switch (phase) {
       case 'intention':
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <IntentionForm />
-            <DeckSelector />
-          </div>
+          <>
+            <HeroSection onClick={handleHeroClick} />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <IntentionForm />
+              <DeckSelector />
+            </div>
+          </>
         );
       case 'preparing':
         return <PreparingReading className="max-w-2xl mx-auto" />;
