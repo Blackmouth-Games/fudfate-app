@@ -1,16 +1,23 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
+import { useEnvironment } from '@/hooks/useEnvironment';
 
 // Define types for our wallet providers
 export type WalletType = 'phantom' | 'metamask' | null;
 export type Network = 'solana' | 'ethereum' | null;
+
+interface UserData {
+  userId: string;
+  runsToday: number;
+}
 
 interface WalletContextType {
   connected: boolean;
   walletType: WalletType;
   walletAddress: string | null;
   network: Network;
+  userData: UserData | null;
   connectWallet: (type: WalletType) => Promise<boolean>;
   disconnectWallet: () => void;
   signMessage: (message: string) => Promise<string | null>;
@@ -23,6 +30,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [walletType, setWalletType] = useState<WalletType>(null);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<Network>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const { webhooks } = useEnvironment();
 
   // Check for a stored session on component mount
   useEffect(() => {
@@ -56,6 +65,37 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
+  // Call webhook after successful login
+  const callLoginWebhook = async (walletType: WalletType, walletAddress: string): Promise<UserData | null> => {
+    try {
+      const response = await fetch(webhooks.login, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: new Date().toISOString(),
+          wallet: walletAddress,
+          walletType: walletType
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return {
+        userId: data.userid,
+        runsToday: data.runs_today
+      };
+    } catch (error) {
+      console.error('Error calling login webhook:', error);
+      toast.error('Error registering wallet session');
+      return null;
+    }
+  };
+
   // Connect to wallet
   const connectWallet = async (type: WalletType): Promise<boolean> => {
     try {
@@ -87,11 +127,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         address = accounts[0];
         currentNetwork = 'ethereum';
-        
-        // For now, we'll just set it to ethereum, but in a real app
-        // you would check the chainId to ensure it's on the correct network
       }
 
+      // Call login webhook to register the session
+      const userDataResponse = await callLoginWebhook(type, address);
+      
       // Create a session
       const sessionExpiry = new Date();
       sessionExpiry.setMinutes(sessionExpiry.getMinutes() + 30); // 30 minute session
@@ -109,6 +149,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setWalletType(type);
       setWalletAddress(address);
       setNetwork(currentNetwork);
+      setUserData(userDataResponse);
       
       // Track connection (anonymous)
       trackWalletConnection(type, address);
@@ -133,6 +174,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     setWalletType(null);
     setWalletAddress(null);
     setNetwork(null);
+    setUserData(null);
   };
 
   // Sign a message for authentication
@@ -166,7 +208,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   // Track wallet connection (anonymous)
   const trackWalletConnection = (type: WalletType, address: string) => {
-    // Here you would normally send this data to your analytics service
     // This is just a placeholder for the functionality
     console.log(`Tracked connection: ${type}, ${address}`);
     
@@ -178,7 +219,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       language: navigator.language
     };
 
-    // In a real app, you would send this to your analytics service
     console.log("Connection metrics:", metrics);
   };
 
@@ -191,8 +231,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   // Helper function to hash wallet address for anonymous tracking
   const hashAddress = (address: string): string => {
-    // This is a simple hash function for demonstration
-    // In a real app, you would use a proper hashing algorithm
+    // Simple hash function for demonstration
     let hash = 0;
     for (let i = 0; i < address.length; i++) {
       const char = address.charCodeAt(i);
@@ -207,6 +246,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     walletType,
     walletAddress,
     network,
+    userData,
     connectWallet,
     disconnectWallet,
     signMessage

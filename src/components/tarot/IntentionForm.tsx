@@ -9,16 +9,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Sparkles } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
+import { useEnvironment } from '@/hooks/useEnvironment';
 
 interface IntentionFormProps {
   className?: string;
 }
 
 const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
-  const { intention, setIntention, startReading, loading } = useTarot();
-  const { connected } = useWallet();
+  const { intention, setIntention, startReading, loading, setSelectedCards, setFinalMessage } = useTarot();
+  const { connected, userData } = useWallet();
   const { t } = useTranslation();
-
+  const { webhooks } = useEnvironment();
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -31,8 +33,61 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
       toast.error(t('tarot.enterIntention'));
       return;
     }
+
+    if (!userData?.userId) {
+      toast.error("User ID not available. Please reconnect your wallet.");
+      return;
+    }
     
-    await startReading();
+    try {
+      // Call the reading webhook
+      const response = await fetch(webhooks.reading, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userid: userData.userId,
+          question: intention
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Process the received data for tarot reading
+      if (data.fatemessage && data.cards) {
+        setFinalMessage(data.fatemessage);
+        
+        // Process cards if they are returned from the webhook
+        if (Array.isArray(data.cards) && data.cards.length > 0) {
+          // Map the received cards to the format expected by the app
+          const processedCards = data.cards.map((card: any, index: number) => ({
+            id: card.id || `card-${index}`,
+            name: card.name || `Card ${index + 1}`,
+            image: card.image || `/img/cards/carddeck1/deck1_${index}_TheDegen.png`,
+            interpretation: card.interpretation || "No interpretation available",
+            revealed: true
+          }));
+          
+          setSelectedCards(processedCards);
+        }
+        
+        // Continue with the tarot reading flow
+        await startReading();
+      } else {
+        toast.error("Invalid response from server");
+      }
+    } catch (error) {
+      console.error("Error fetching tarot reading:", error);
+      toast.error("Failed to get your tarot reading. Please try again.");
+      
+      // Fall back to the regular reading process if the webhook fails
+      await startReading();
+    }
   };
 
   return (
