@@ -38,14 +38,14 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               <div 
                 className={`aspect-[2/3] w-full max-w-[200px] rounded-lg shadow-lg overflow-hidden 
                   ${card.revealed 
-                    ? 'bg-gradient-to-br from-indigo-800 to-purple-900 border border-purple-400/50' 
-                    : 'bg-gradient-to-br from-indigo-900 to-purple-900 border border-purple-500/30 cursor-pointer hover:border-purple-400/50 transition-all'
+                    ? 'bg-gradient-to-br from-amber-800 to-black border border-amber-400/50' 
+                    : 'bg-gradient-to-br from-black to-gray-900 border border-amber-500/30 cursor-pointer hover:border-amber-400/50 transition-all'
                   }`}
                 onClick={() => !card.revealed && !loading && revealCard(index)}
               >
                 {card.revealed ? (
                   <div className="p-3 h-full flex flex-col">
-                    <div className="text-center font-bold text-purple-200 mb-2">
+                    <div className="text-center font-bold text-amber-200 mb-2">
                       {card.name}
                     </div>
                     <div className="flex-1 flex items-center justify-center">
@@ -60,7 +60,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center p-2">
                       <div className="text-4xl mb-2">🃏</div>
-                      <div className="text-xs text-purple-300">
+                      <div className="text-xs text-amber-300">
                         {loading ? t('common.loading') : t('tarot.clickToReveal')}
                       </div>
                     </div>
@@ -69,7 +69,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               </div>
               
               {card.revealed && (
-                <div className="bg-black/30 p-3 rounded-lg border border-purple-500/20">
+                <div className="bg-black/30 p-3 rounded-lg border border-amber-500/20">
                   <p className="text-sm italic text-gray-200">
                     "{card.interpretation}"
                   </p>
@@ -80,7 +80,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="bg-black/30 p-4 sm:p-6 rounded-lg border border-purple-500/20">
+          <div className="bg-black/30 p-4 sm:p-6 rounded-lg border border-amber-500/20">
             <h4 className="font-bold mb-3 text-center">
               {t('tarot.finalMessage')}
             </h4>
@@ -93,10 +93,10 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
             {selectedCards.map((card) => (
               <div 
                 key={card.id}
-                className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-indigo-800 to-purple-900 border border-purple-400/30"
+                className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-800 to-black border border-amber-400/30"
               >
                 <div className="p-2 h-full flex flex-col">
-                  <div className="text-center text-xs font-bold text-purple-200 mb-1">
+                  <div className="text-center text-xs font-bold text-amber-200 mb-1">
                     {card.name}
                   </div>
                   <div className="flex-1 flex items-center justify-center">
@@ -114,7 +114,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           <div className="flex justify-center pt-4">
             <Button
               onClick={resetReading}
-              className="bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700"
+              className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-black font-bold"
             >
               {t('tarot.newReading')}
             </Button>

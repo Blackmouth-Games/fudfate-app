@@ -4,25 +4,25 @@
 @tailwind utilities;
 
 :root {
-  --background: 220 22% 8%;
-  --foreground: 0 0% 98%;
-  --card: 218 50% 4%;
-  --card-foreground: 0 0% 98%;
-  --popover: 218 50% 4%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 272 60% 64%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 35% 60%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 250 30% 60%;
-  --accent-foreground: 0 0% 98%;
+  --background: 0 0% 0%;
+  --foreground: 45 100% 98%;
+  --card: 0 0% 4%;
+  --card-foreground: 45 100% 98%;
+  --popover: 0 0% 4%;
+  --popover-foreground: 45 100% 98%;
+  --primary: 45 100% 60%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 45 70% 50%;
+  --secondary-foreground: 0 0% 0%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 45 20.2% 65.1%;
+  --accent: 45 70% 55%;
+  --accent-foreground: 0 0% 0%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 214 32% 91%;
-  --ring: 272 60% 64%;
+  --destructive-foreground: 45 100% 98%;
+  --border: 45 30% 25%;
+  --input: 45 30% 25%;
+  --ring: 45 100% 60%;
   --radius: 0.5rem;
 }
 
@@ -36,7 +36,7 @@ body {
 
 /* Glowing text effects */
 .glow-text {
-  text-shadow: 0 0 10px rgba(147, 112, 219, 0.5), 0 0 20px rgba(147, 112, 219, 0.3);
+  text-shadow: 0 0 10px rgba(250, 209, 43, 0.8), 0 0 20px rgba(250, 209, 43, 0.5);
 }
 
 /* Card hover effects */
@@ -76,7 +76,7 @@ body {
 }
 
 .mystic-bg {
-  background: linear-gradient(45deg, #131822, #0a0a16, #1a1535, #0a0a16);
+  background: linear-gradient(45deg, #000000, #111111, #1a1500, #0a0a00);
   background-size: 400% 400%;
   animation: mystical-bg 15s ease infinite;
 }
@@ -87,14 +87,14 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(12, 10, 29, 0.8);
+  background: rgba(0, 0, 0, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(111, 76, 255, 0.5);
+  background: rgba(250, 209, 43, 0.5);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(111, 76, 255, 0.7);
+  background: rgba(250, 209, 43, 0.7);
 }

@@ -28,7 +28,7 @@ const TarotApp: React.FC = () => {
           </div>
         );
       case 'preparing':
-        return <PreparingReading />;
+        return <PreparingReading className="max-w-2xl mx-auto" />;
       case 'selection':
         return <CardSelection />;
       case 'reading':
@@ -40,12 +40,12 @@ const TarotApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#131822] to-[#0a0a16] text-white">
+    <div className="min-h-screen bg-gradient-to-b from-[#000000] to-[#0a0a00] text-amber-50">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/30 backdrop-blur-md border-b border-purple-500/20">
+      <header className="sticky top-0 z-50 bg-black/70 backdrop-blur-md border-b border-amber-500/20">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-violet-500">
+            <h1 className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500">
               FUDFATE
             </h1>
           </div>
@@ -61,7 +61,7 @@ const TarotApp: React.FC = () => {
       <main className="container mx-auto px-4 py-8">
         {/* App Title */}
         <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-violet-600">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500 glow-text">
             {t('tarot.appTitle')}
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto">
@@ -71,7 +71,7 @@ const TarotApp: React.FC = () => {
 
         {/* Connection Status */}
         {!connected && phase === 'intention' && (
-          <div className="bg-purple-900/30 border border-purple-500/30 p-4 rounded-lg mb-8 text-center">
+          <div className="bg-amber-900/30 border border-amber-500/30 p-4 rounded-lg mb-8 text-center">
             <p>{t('tarot.connectWalletMessage')}</p>
           </div>
         )}
@@ -83,7 +83,7 @@ const TarotApp: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="mt-auto py-6 border-t border-purple-500/20 bg-black/20">
+      <footer className="mt-auto py-6 border-t border-amber-500/20 bg-black/20">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-400">
             FUDFATE © 2025. {t('footer.allRightsReserved')}

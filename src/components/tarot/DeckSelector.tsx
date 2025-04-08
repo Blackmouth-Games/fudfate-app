@@ -19,9 +19,9 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   };
 
   return (
-    <Card className={`bg-black/30 border-purple-500/30 ${className}`}>
+    <Card className={`bg-black/30 border-amber-500/30 ${className}`}>
       <CardContent className="pt-6">
-        <h3 className="text-xl font-bold mb-4 text-center">
+        <h3 className="text-xl font-bold mb-4 text-center text-amber-100">
           {t('tarot.selectDeck')}
         </h3>
         
@@ -31,9 +31,9 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
           className="grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <div className="flex items-start space-x-2">
-            <RadioGroupItem value="deck1" id="deck1" className="mt-1" />
+            <RadioGroupItem value="deck1" id="deck1" className="mt-1 border-amber-500" />
             <div className="grid gap-1.5">
-              <Label htmlFor="deck1" className="font-bold">
+              <Label htmlFor="deck1" className="font-bold text-amber-100">
                 {t('tarot.deck1Name')}
               </Label>
               <p className="text-sm text-gray-300">
@@ -55,19 +55,19 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
           </div>
           
           <div className="flex items-start space-x-2">
-            <RadioGroupItem value="deck2" id="deck2" className="mt-1" />
+            <RadioGroupItem value="deck2" id="deck2" className="mt-1 border-amber-500" />
             <div className="grid gap-1.5">
-              <Label htmlFor="deck2" className="font-bold">
+              <Label htmlFor="deck2" className="font-bold text-amber-100">
                 {t('tarot.deck2Name')}
               </Label>
               <p className="text-sm text-gray-300">
                 {t('tarot.deck2Description')}
               </p>
               <div className="flex mt-2 space-x-1">
-                <div className="h-16 w-12 bg-gradient-to-br from-indigo-800 to-blue-500 rounded-md shadow-md flex items-center justify-center text-xs text-white font-medium p-1 text-center">
+                <div className="h-16 w-12 bg-gradient-to-br from-amber-800 to-amber-500 rounded-md shadow-md flex items-center justify-center text-xs text-black font-medium p-1 text-center">
                   {t('tarot.comingSoon')}
                 </div>
-                <div className="h-16 w-12 bg-gradient-to-br from-indigo-800 to-blue-500 rounded-md shadow-md flex items-center justify-center text-xs text-white font-medium p-1 text-center">
+                <div className="h-16 w-12 bg-gradient-to-br from-amber-800 to-amber-500 rounded-md shadow-md flex items-center justify-center text-xs text-black font-medium p-1 text-center">
                   {t('tarot.comingSoon')}
                 </div>
               </div>

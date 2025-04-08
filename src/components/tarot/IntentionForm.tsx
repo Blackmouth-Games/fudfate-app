@@ -35,11 +35,11 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
   };
 
   return (
-    <Card className={`bg-black/30 border-purple-500/30 ${className}`}>
+    <Card className={`bg-black/30 border-amber-500/30 ${className}`}>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-center">
+            <h3 className="text-xl font-bold text-center text-amber-100">
               {t('tarot.yourIntention')}
             </h3>
             <p className="text-gray-300 text-sm text-center">
@@ -51,12 +51,12 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
             value={intention}
             onChange={(e) => setIntention(e.target.value)}
             placeholder={t('tarot.intentionPlaceholder')}
-            className="min-h-[100px] bg-black/20 border-purple-500/40 placeholder:text-gray-500"
+            className="min-h-[100px] bg-black/20 border-amber-500/40 placeholder:text-gray-500"
           />
           
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 transition-all"
+            className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 transition-all text-black font-bold"
             disabled={loading || !intention.trim()}
           >
             {loading ? (

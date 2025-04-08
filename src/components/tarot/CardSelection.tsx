@@ -3,14 +3,10 @@ import React from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { motion } from 'framer-motion';
 
 interface CardSelectionProps {
   className?: string;
 }
-
-// Note: We're not actually using framer-motion in this project, 
-// so we'll create a simple animation using CSS
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   const { availableCards, selectedCards, selectCard } = useTarot();
@@ -34,10 +30,10 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
             className="cursor-pointer hover-scale transition-transform duration-300"
             onClick={() => selectCard(card.id)}
           >
-            <div className="aspect-[2/3] bg-gradient-to-br from-indigo-900 to-purple-900 rounded-lg shadow-lg border border-purple-500/30 overflow-hidden flex items-center justify-center">
+            <div className="aspect-[2/3] bg-gradient-to-br from-black to-gray-900 rounded-lg shadow-lg border border-amber-500/30 overflow-hidden flex items-center justify-center">
               <div className="text-center p-2">
                 <div className="text-4xl mb-2">🃏</div>
-                <div className="text-xs text-purple-300">
+                <div className="text-xs text-amber-300">
                   {t('tarot.clickToSelect')}
                 </div>
               </div>
@@ -46,7 +42,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
         ))}
       </div>
       
-      <div className="pt-4 border-t border-purple-500/20">
+      <div className="pt-4 border-t border-amber-500/20">
         <h4 className="text-center font-medium mb-4">
           {t('tarot.selectedCards', { count: selectedCards.length })}
         </h4>
@@ -60,14 +56,14 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                 key={`slot-${i}`}
                 className={`w-16 h-24 sm:w-20 sm:h-28 rounded-md ${
                   selected 
-                    ? 'bg-gradient-to-br from-violet-800 to-purple-900 border border-purple-400/50' 
-                    : 'border border-dashed border-purple-500/30 bg-black/20'
+                    ? 'bg-gradient-to-br from-amber-800 to-amber-900 border border-amber-400/50' 
+                    : 'border border-dashed border-amber-500/30 bg-black/20'
                 } flex items-center justify-center`}
               >
                 {selected ? (
                   <div className="text-2xl">🃏</div>
                 ) : (
-                  <span className="text-xs text-purple-400/60">{i + 1}</span>
+                  <span className="text-xs text-amber-400/60">{i + 1}</span>
                 )}
               </div>
             );
