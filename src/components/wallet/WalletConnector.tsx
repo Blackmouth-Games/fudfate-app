@@ -26,7 +26,7 @@ const WalletConnector: React.FC = () => {
         <>
           <Button 
             onClick={() => handleConnect('phantom')}
-            className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium"
           >
             <img 
               src="https://phantom.app/img/logo.png" 
@@ -38,7 +38,7 @@ const WalletConnector: React.FC = () => {
           
           <Button 
             onClick={() => handleConnect('metamask')}
-            className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600"
+            className="w-full sm:w-auto bg-gradient-to-r from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500 text-black font-medium"
           >
             <img 
               src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
@@ -50,9 +50,9 @@ const WalletConnector: React.FC = () => {
         </>
       ) : (
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="flex items-center gap-2 bg-black/20 py-2 px-4 rounded-full">
-            <Wallet className="h-4 w-4" />
-            <span className="text-sm font-medium">
+          <div className="flex items-center gap-2 bg-gray-100 py-2 px-4 rounded-full border border-gray-200">
+            <Wallet className="h-4 w-4 text-amber-500" />
+            <span className="text-sm font-medium text-gray-800">
               {formatAddress(walletAddress)}
             </span>
             <div className="h-2 w-2 rounded-full bg-green-400"></div>

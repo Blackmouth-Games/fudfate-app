@@ -4,24 +4,24 @@
 @tailwind utilities;
 
 :root {
-  --background: 0 0% 0%;
-  --foreground: 45 100% 98%;
-  --card: 0 0% 4%;
-  --card-foreground: 45 100% 98%;
-  --popover: 0 0% 4%;
-  --popover-foreground: 45 100% 98%;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
   --primary: 45 100% 60%;
   --primary-foreground: 0 0% 0%;
   --secondary: 45 70% 50%;
   --secondary-foreground: 0 0% 0%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 45 20.2% 65.1%;
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 45%;
   --accent: 45 70% 55%;
   --accent-foreground: 0 0% 0%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 45 100% 98%;
-  --border: 45 30% 25%;
-  --input: 45 30% 25%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 80%;
+  --input: 0 0% 80%;
   --ring: 45 100% 60%;
   --radius: 0.5rem;
 }
@@ -62,23 +62,43 @@ body {
   animation: flip 0.6s ease forwards;
 }
 
-/* Mystic background animation */
-@keyframes mystical-bg {
+/* Glitch effect animation */
+@keyframes glitch {
   0% {
-    background-position: 0% 50%;
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  14% {
+    text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  15% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  49% {
+    text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
   }
   50% {
-    background-position: 100% 50%;
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                0.05em 0 0 rgba(0, 255, 0, 0.75),
+                0 -0.05em 0 rgba(0, 0, 255, 0.75);
+  }
+  99% {
+    text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                0.05em 0 0 rgba(0, 255, 0, 0.75),
+                0 -0.05em 0 rgba(0, 0, 255, 0.75);
   }
   100% {
-    background-position: 0% 50%;
+    text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
   }
-}
-
-.mystic-bg {
-  background: linear-gradient(45deg, #000000, #111111, #1a1500, #0a0a00);
-  background-size: 400% 400%;
-  animation: mystical-bg 15s ease infinite;
 }
 
 /* Custom scrollbar */
@@ -87,7 +107,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -97,4 +117,30 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(250, 209, 43, 0.7);
+}
+
+/* Gold text effect */
+.gold-text {
+  color: #FAD12B;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Button styles */
+.pixel-button {
+  background-color: #FAD12B;
+  color: #000;
+  border: 4px solid #000;
+  font-family: 'Press Start 2P', monospace;
+  box-shadow: 0px 4px 0px #000;
+  transition: all 0.2s;
+}
+
+.pixel-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 6px 0px #000;
+}
+
+.pixel-button:active {
+  transform: translateY(2px);
+  box-shadow: 0px 2px 0px #000;
 }

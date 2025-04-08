@@ -25,7 +25,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Router>
-            <Toaster richColors position="top-center" />
+            <Toaster position="top-center" />
           </TarotProvider>
         </WalletProvider>
       </I18nextProvider>

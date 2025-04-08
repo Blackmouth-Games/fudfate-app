@@ -4,6 +4,7 @@ import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import GlitchText from '@/components/GlitchText';
 
 interface CardReadingProps {
   className?: string;
@@ -16,12 +17,13 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="text-center space-y-2">
-        <h3 className="text-xl font-bold">
-          {finalMessage 
+        <h3 className="text-xl font-bold text-gray-800">
+          <GlitchText text={finalMessage 
             ? t('tarot.readingComplete') 
-            : t('tarot.revealCards')}
+            : t('tarot.revealCards')} 
+          />
         </h3>
-        <p className="text-gray-300 text-sm">
+        <p className="text-gray-600 text-sm">
           {finalMessage 
             ? t('tarot.readingCompleteDescription') 
             : t('tarot.revealCardsDescription')}
@@ -36,16 +38,16 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               className="flex flex-col items-center space-y-3"
             >
               <div 
-                className={`aspect-[2/3] w-full max-w-[200px] rounded-lg shadow-lg overflow-hidden 
+                className={`aspect-[2/3] w-full max-w-[200px] rounded-lg shadow-md overflow-hidden 
                   ${card.revealed 
-                    ? 'bg-gradient-to-br from-amber-800 to-black border border-amber-400/50' 
-                    : 'bg-gradient-to-br from-black to-gray-900 border border-amber-500/30 cursor-pointer hover:border-amber-400/50 transition-all'
+                    ? 'bg-gradient-to-br from-amber-100 to-white border border-amber-300' 
+                    : 'bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 cursor-pointer hover:border-amber-400 transition-all'
                   }`}
                 onClick={() => !card.revealed && !loading && revealCard(index)}
               >
                 {card.revealed ? (
                   <div className="p-3 h-full flex flex-col">
-                    <div className="text-center font-bold text-amber-200 mb-2">
+                    <div className="text-center font-bold text-amber-700 mb-2">
                       {card.name}
                     </div>
                     <div className="flex-1 flex items-center justify-center">
@@ -60,7 +62,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center p-2">
                       <div className="text-4xl mb-2">🃏</div>
-                      <div className="text-xs text-amber-300">
+                      <div className="text-xs text-amber-700">
                         {loading ? t('common.loading') : t('tarot.clickToReveal')}
                       </div>
                     </div>
@@ -69,8 +71,8 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               </div>
               
               {card.revealed && (
-                <div className="bg-black/30 p-3 rounded-lg border border-amber-500/20">
-                  <p className="text-sm italic text-gray-200">
+                <div className="bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
+                  <p className="text-sm italic text-gray-700">
                     "{card.interpretation}"
                   </p>
                 </div>
@@ -80,11 +82,11 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="bg-black/30 p-4 sm:p-6 rounded-lg border border-amber-500/20">
-            <h4 className="font-bold mb-3 text-center">
-              {t('tarot.finalMessage')}
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-amber-200 shadow-sm">
+            <h4 className="font-bold mb-3 text-center text-gray-800">
+              <GlitchText text={t('tarot.finalMessage')} />
             </h4>
-            <p className="italic text-gray-200 text-center">
+            <p className="italic text-gray-700 text-center">
               "{finalMessage}"
             </p>
           </div>
@@ -93,10 +95,10 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
             {selectedCards.map((card) => (
               <div 
                 key={card.id}
-                className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-800 to-black border border-amber-400/30"
+                className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-sm"
               >
                 <div className="p-2 h-full flex flex-col">
-                  <div className="text-center text-xs font-bold text-amber-200 mb-1">
+                  <div className="text-center text-xs font-bold text-amber-700 mb-1">
                     {card.name}
                   </div>
                   <div className="flex-1 flex items-center justify-center">
@@ -114,7 +116,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           <div className="flex justify-center pt-4">
             <Button
               onClick={resetReading}
-              className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-black font-bold"
+              className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium"
             >
               {t('tarot.newReading')}
             </Button>

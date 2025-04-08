@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Sparkles } from 'lucide-react';
+import GlitchText from '@/components/GlitchText';
 
 interface IntentionFormProps {
   className?: string;
@@ -35,14 +36,14 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
   };
 
   return (
-    <Card className={`bg-black/30 border-amber-500/30 ${className}`}>
+    <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <h3 className="text-xl font-bold text-center text-amber-100">
-              {t('tarot.yourIntention')}
+            <h3 className="text-xl font-bold text-center text-gray-800">
+              <GlitchText text={t('tarot.yourIntention')} />
             </h3>
-            <p className="text-gray-300 text-sm text-center">
+            <p className="text-gray-600 text-sm text-center">
               {t('tarot.intentionDescription')}
             </p>
           </div>
@@ -51,12 +52,12 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
             value={intention}
             onChange={(e) => setIntention(e.target.value)}
             placeholder={t('tarot.intentionPlaceholder')}
-            className="min-h-[100px] bg-black/20 border-amber-500/40 placeholder:text-gray-500"
+            className="min-h-[100px] border-amber-200 placeholder:text-gray-400"
           />
           
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-700 hover:to-yellow-700 transition-all text-black font-bold"
+            className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all"
             disabled={loading || !intention.trim()}
           >
             {loading ? (
