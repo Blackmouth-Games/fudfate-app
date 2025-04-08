@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -30,8 +29,10 @@ interface TarotContextType {
   phase: ReadingPhase;
   availableCards: Card[];
   selectedCards: ReadingCard[];
+  setSelectedCards: (cards: ReadingCard[]) => void;
   introMessage: string | null;
   finalMessage: string | null;
+  setFinalMessage: (message: string | null) => void;
   startReading: () => Promise<void>;
   selectCard: (cardId: string) => void;
   revealCard: (index: number) => Promise<void>;
@@ -53,23 +54,16 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [finalMessage, setFinalMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Function to shuffle and select random cards
   const getRandomCards = (count: number = 6): Card[] => {
     const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
     const shuffled = [...deckCards].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
 
-  // Function to simulate AI interaction for the initial intro message
   const generateIntroMessage = async (userIntention: string): Promise<string> => {
-    // In a real app, this would make an API call to your backend
-    // which would then call OpenAI or another AI service
-    
-    // For now, we'll simulate the response
     setLoading(true);
     
     try {
-      // Simulating an API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       return `Las energías cósmicas se alinean con tu intención: "${userIntention}". Estoy percibiendo vibraciones que guiarán tu lectura. Selecciona tres cartas para revelar los mensajes que el universo tiene para ti.`;
@@ -81,21 +75,15 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Function to simulate AI interpretation for a card
   const generateCardInterpretation = async (cardId: string, userIntention: string): Promise<string> => {
-    // In a real app, this would make an API call to your backend
-    // which would then call OpenAI or another AI service
-    
     setLoading(true);
     
     try {
-      // Simulating an API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const card = availableCards.find(c => c.id === cardId);
       if (!card) throw new Error("Card not found");
       
-      // Simple simulated response based on the card and intention
       return `Para tu intención "${userIntention}", la carta ${card.name} sugiere que estás en un momento de transformación. Esta energía te invita a confiar en tu intuición y seguir adelante con confianza en el camino que has elegido.`;
     } catch (error) {
       console.error("Error generating card interpretation:", error);
@@ -105,18 +93,12 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Function to simulate AI final message
   const generateFinalMessage = async (cards: ReadingCard[], userIntention: string): Promise<string> => {
-    // In a real app, this would make an API call to your backend
-    // which would then call OpenAI or another AI service
-    
     setLoading(true);
     
     try {
-      // Simulating an API call delay
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Simple simulated response based on all cards and intention
       return `La combinación de las cartas elegidas revela un patrón interesante para tu intención "${userIntention}". El mensaje general sugiere que estás en un momento de importantes decisiones que determinarán tu futuro cercano. Confía en tu intuición y mantén la mente abierta a nuevas posibilidades.`;
     } catch (error) {
       console.error("Error generating final message:", error);
@@ -126,7 +108,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Start a new reading
   const startReading = async () => {
     if (!connected) {
       toast.error("Debes conectar tu wallet para realizar una lectura");
@@ -138,8 +119,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
-    // Check if user has the required token (for a real app)
-    // This would query the blockchain to check token balance
     const hasRequiredToken = await checkUserToken();
     if (!hasRequiredToken) {
       toast.error("Necesitas tener el token requerido en tu wallet para realizar una lectura");
@@ -149,15 +128,12 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     try {
       setPhase('preparing');
       
-      // Generate intro message
       const intro = await generateIntroMessage(intention);
       setIntroMessage(intro);
       
-      // Get random cards for selection
       const randomCards = getRandomCards(6);
       setAvailableCards(randomCards);
       
-      // Move to selection phase
       setPhase('selection');
     } catch (error) {
       console.error("Error starting reading:", error);
@@ -166,7 +142,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Select a card during the selection phase
   const selectCard = (cardId: string) => {
     if (phase !== 'selection') return;
     
@@ -178,22 +153,18 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     const card = availableCards.find(c => c.id === cardId);
     if (!card) return;
     
-    // Remove card from available cards
     setAvailableCards(prev => prev.filter(c => c.id !== cardId));
     
-    // Add card to selected cards
     setSelectedCards(prev => [
       ...prev, 
       { ...card, revealed: false }
     ]);
     
-    // If 3 cards are selected, move to reading phase
-    if (selectedCards.length === 2) { // We're adding the 3rd card now
+    if (selectedCards.length === 2) {
       setPhase('reading');
     }
   };
 
-  // Reveal a card during the reading phase
   const revealCard = async (index: number) => {
     if (phase !== 'reading') return;
     
@@ -201,10 +172,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     if (!card || card.revealed) return;
     
     try {
-      // Generate interpretation for this card
       const interpretation = await generateCardInterpretation(card.id, intention);
       
-      // Update the card
       const updatedCards = [...selectedCards];
       updatedCards[index] = {
         ...card,
@@ -214,10 +183,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       
       setSelectedCards(updatedCards);
       
-      // Check if all cards are revealed
       const allRevealed = updatedCards.every(c => c.revealed);
       if (allRevealed) {
-        // Generate final message
         const finalMsg = await generateFinalMessage(updatedCards, intention);
         setFinalMessage(finalMsg);
         setPhase('complete');
@@ -228,7 +195,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Reset the reading to start a new one
   const resetReading = () => {
     setIntention('');
     setPhase('intention');
@@ -237,16 +203,11 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setIntroMessage(null);
     setFinalMessage(null);
   };
-  
-  // Mock function to check if user has required token
-  // In a real app, this would query the blockchain
+
   const checkUserToken = async (): Promise<boolean> => {
     try {
       setLoading(true);
-      // Simulate checking token balance
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For now, always return true in our simulation
       return true;
     } catch (error) {
       console.error("Error checking user token:", error);
@@ -264,8 +225,10 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     phase,
     availableCards,
     selectedCards,
+    setSelectedCards,
     introMessage,
     finalMessage,
+    setFinalMessage,
     startReading,
     selectCard,
     revealCard,

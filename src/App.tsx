@@ -12,8 +12,15 @@ import { WalletProvider } from './contexts/WalletContext';
 import { TarotProvider } from './contexts/TarotContext';
 import DevTool from './components/DevTool';
 
-// Create React Query client
-const queryClient = new QueryClient();
+// Create React Query client with appropriate settings
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 // Routes configuration for DevTool
 const routes = [
@@ -23,23 +30,25 @@ const routes = [
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <I18nextProvider i18n={i18n}>
-        <WalletProvider>
-          <TarotProvider>
-            <Router>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/app" element={<TarotApp />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <DevTool routes={routes} />
-            </Router>
-            <Toaster position="top-center" />
-          </TarotProvider>
-        </WalletProvider>
-      </I18nextProvider>
-    </QueryClientProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <I18nextProvider i18n={i18n}>
+          <WalletProvider>
+            <TarotProvider>
+              <Router>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/app" element={<TarotApp />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <DevTool routes={routes} />
+              </Router>
+              <Toaster position="top-center" />
+            </TarotProvider>
+          </WalletProvider>
+        </I18nextProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 }
 

@@ -10,7 +10,5 @@ import './styles/cards.css';
 import './styles/themes/crypto.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <App />
 );
