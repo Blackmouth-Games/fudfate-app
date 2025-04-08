@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -113,15 +112,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const response = await window.solana.connect();
         address = response.publicKey.toString();
         
-        // Check if connected to Solana
-        const solanaConnection = await window.solana.connection;
-        if (solanaConnection) {
-          currentNetwork = 'solana';
-        } else {
-          toast.error("Por favor conecta tu wallet a la red Solana");
-          await window.solana.disconnect();
-          return false;
-        }
+        // For Phantom, we assume it's always connected to Solana network
+        // This is the fix: Remove the network check for Phantom as it's always on Solana
+        currentNetwork = 'solana';
       } else if (type === 'metamask') {
         // Connect to MetaMask (Ethereum)
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
