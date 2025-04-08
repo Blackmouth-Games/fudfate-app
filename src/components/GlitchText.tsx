@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { cn } from '../lib/utils';
+import GlitchEffect from './core/GlitchEffect';
 import '../styles/animations.css';
 
 interface GlitchTextProps {
@@ -11,9 +12,13 @@ interface GlitchTextProps {
 
 const GlitchText = ({ text, className, goldEffect = false }: GlitchTextProps) => {
   return (
-    <div className={cn("glitch relative", goldEffect && "gold-text", className)}>
-      {text}      
-    </div>
+    <GlitchEffect 
+      type="text" 
+      goldEffect={goldEffect} 
+      className={className}
+    >
+      {text}
+    </GlitchEffect>
   );
 };
 

@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
 import AnimatedSection from '@/components/AnimatedSection';
 import TarotCard from '@/components/TarotCard';
-import { tarotCards } from '@/data/tarotCards';
+import { getCardsByDeck, tarotDecks } from '@/data/tarotCards';
 import { 
   Carousel,
   CarouselContent,
@@ -13,8 +13,13 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
-const TarotCardSection = () => {
+interface TarotCardSectionProps {
+  deckId?: string;
+}
+
+const TarotCardSection = ({ deckId = 'crypto' }: TarotCardSectionProps) => {
   const { t } = useTranslation();
+  const cards = getCardsByDeck(deckId);
 
   return (
     <section id="cards" className="py-20 px-4 md:px-8 lg:px-16 relative">
@@ -34,8 +39,8 @@ const TarotCardSection = () => {
           }}
         >
           <CarouselContent className="py-10">
-            {tarotCards.map((card, index) => (
-              <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 px-6">
+            {cards.map((card, index) => (
+              <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3 px-6">
                 <div className="floating" style={{ animationDelay: `${0.2 * index}s` }}>
                   <TarotCard 
                     imageUrl={card.imageUrl}

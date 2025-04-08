@@ -4,6 +4,7 @@
 @import './styles/buttons.css';
 @import './styles/cards.css';
 @import './styles/animations.css';
+@import './styles/themes/crypto.css'; /* Theme-specific styles */
 
 /* Root styles */
 #root {
