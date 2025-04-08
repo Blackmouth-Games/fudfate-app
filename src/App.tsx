@@ -1,56 +1,36 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import i18n from './i18n';
+import TarotApp from './pages/TarotApp';
+import NotFound from './pages/NotFound';
+import { WalletProvider } from './contexts/WalletContext';
+import { TarotProvider } from './contexts/TarotContext';
 
-// Import pages
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import CookiesPolicy from "./pages/CookiesPolicy";
-
-// Import components
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import CookieConsent from "@/components/CookieConsent";
-
-// Import i18n
-import "./i18n";
-
+// Create React Query client
 const queryClient = new QueryClient();
 
-// Move useEffect inside the functional component
-const App = () => {
-  // Set the title inside the component
-  useEffect(() => {
-    document.title = "Fudfate";
-  }, []);
-
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="flex flex-col min-h-screen bg-white">
-            <Navbar />
-            <main className="flex-grow">
+      <I18nextProvider i18n={i18n}>
+        <WalletProvider>
+          <TarotProvider>
+            <Router>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/cookies" element={<CookiesPolicy />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="/" element={<TarotApp />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
-            <Footer />
-            <CookieConsent />
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
+            </Router>
+            <Toaster richColors position="top-center" />
+          </TarotProvider>
+        </WalletProvider>
+      </I18nextProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

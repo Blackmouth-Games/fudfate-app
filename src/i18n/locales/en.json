@@ -1,68 +1,74 @@
 
 {
-  "seo": {
-    "title": "FudFate - Web3 Tarot Experience",
-    "description": "Discover your crypto destiny with FudFate, the ultimate Web3 tarot experience with pixel art style and crypto memes"
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm"
   },
-  "nav": {
+  "navbar": {
     "home": "Home",
     "about": "About",
-    "cards": "Cards",
-    "app": "Launch App"
+    "contact": "Contact"
   },
-  "hero": {
-    "title": "FudFate",
-    "subtitle": "The Web3 Tarot Experience",
-    "description": "Discover your crypto destiny through our digital tarot experience",
-    "cta": "Reveal Your Destiny"
+  "wallet": {
+    "connect": "Connect Wallet",
+    "connectPhantom": "Connect Phantom",
+    "connectMetamask": "Connect Metamask",
+    "disconnect": "Disconnect",
+    "connected": "Connected",
+    "connectionRequired": "Wallet connection required",
+    "wrongNetwork": "Please connect to Solana network"
   },
-  "about": {
-    "title": "What is FudFate?",
-    "description": "FudFate combines the mystical world of tarot with the unpredictable nature of Web3. Our pixel art cards feature crypto memes and Web3 archetypes that will guide you through your blockchain journey.",
-    "feature1": "Pixel Art Tarot Cards",
-    "feature2": "Web3 & Crypto Memes",
-    "feature3": "Digital Fortune Telling"
-  },
-  "cards": {
-    "title": "Featured Cards",
-    "description": "Each card represents an archetype in the Web3 universe",
-    "card1": "The Launchpad",
-    "card2": "The Hacker",
-    "card3": "The Memecoin",
-    "card4": "The Degen",
-    "viewMore": "View More Cards"
-  },
-  "cta": {
-    "title": "Ready to Know Your Crypto Fate?",
-    "subtitle": "The cards are waiting to be revealed",
-    "button": "Launch App"
+  "tarot": {
+    "appTitle": "FUDFATE Web3 Tarot",
+    "appDescription": "Discover your mystical insights with our AI-powered Web3 tarot reading experience. Connect your wallet to begin your cosmic journey.",
+    "connectWalletMessage": "Connect your Phantom (Solana) or Metamask wallet to start your mystical journey",
+    "selectDeck": "Select Your Deck",
+    "deck1Name": "Crypto Tarot",
+    "deck1Description": "The original mystical crypto-themed tarot deck",
+    "deck2Name": "Celestial Deck",
+    "deck2Description": "Coming soon: A cosmic journey through the stars",
+    "comingSoon": "Coming Soon",
+    "yourIntention": "Your Intention",
+    "intentionDescription": "Enter a question or focus for your reading. Be specific for more meaningful insights.",
+    "intentionPlaceholder": "What would you like to know about your journey?",
+    "readCards": "Begin Reading",
+    "invokingEnergies": "Invoking Cosmic Energies",
+    "preparingYourReading": "The universe is aligning to reveal your path...",
+    "cosmicMessageReceived": "Cosmic Message Received",
+    "selectCards": "Select Your Cards",
+    "selectCardsDescription": "Choose 3 cards that call to your energy. You've selected {{selected}} of {{total}}.",
+    "clickToSelect": "Click to select",
+    "selectedCards": "Selected Cards: {{count}}/3",
+    "revealCards": "Reveal Your Cards",
+    "revealCardsDescription": "Click on each card to reveal its mystical meaning for your journey.",
+    "clickToReveal": "Click to reveal",
+    "readingComplete": "Your Reading is Complete",
+    "readingCompleteDescription": "The cosmic energies have revealed these insights for your journey.",
+    "finalMessage": "Cosmic Interpretation",
+    "newReading": "Start New Reading",
+    "connectWalletFirst": "Please connect your wallet first",
+    "enterIntention": "Please enter your intention or question"
   },
   "footer": {
-    "rights": "All rights reserved",
-    "cookiePolicy": "Cookie Policy",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "language": "Language"
+    "allRightsReserved": "All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
   },
-  "cookies": {
-    "title": "We Use Cookies",
-    "description": "This website uses cookies to enhance user experience and analyze website traffic.",
-    "accept": "Accept All",
-    "decline": "Decline",
-    "settings": "Cookie Settings"
+  "languageSwitcher": {
+    "language": "Language",
+    "english": "English",
+    "spanish": "Spanish"
   },
-  "cookiePage": {
-    "title": "Cookie Policy",
-    "lastUpdated": "Last Updated",
-    "introduction": "This Cookie Policy explains how FudFate uses cookies and similar technologies to recognize you when you visit our website. It explains what these technologies are and why we use them, as well as your rights to control our use of them.",
-    "whatAreCookies": "What are cookies?",
-    "cookiesDefinition": "Cookies are small data files that are placed on your computer or mobile device when you visit a website. Cookies are widely used by website owners in order to make their websites work, or to work more efficiently, as well as to provide reporting information.",
-    "whyWeUse": "Why do we use cookies?",
-    "cookiesUsage": "We use first-party and third-party cookies for several reasons. Some cookies are required for technical reasons in order for our Website to operate, and we refer to these as 'essential' or 'strictly necessary' cookies. Other cookies enable us to track and target the interests of our users to enhance the experience on our Website. Third parties serve cookies through our Website for advertising, analytics and other purposes.",
-    "typesOfCookies": "Types of cookies we use",
-    "essentialCookies": "Essential Cookies: These cookies are strictly necessary to provide you with services available through our Website and to use some of its features, such as access to secure areas.",
-    "analyticsCookies": "Analytics Cookies: These cookies help us understand how visitors interact with our Website, helping us improve our services and providing related statistics.",
-    "advertisingCookies": "Advertising Cookies: These cookies are used to make advertising messages more relevant to you. They perform functions like preventing the same ad from continuously reappearing, ensuring that ads are properly displayed, and in some cases selecting advertisements that are based on your interests.",
-    "back": "Back to Homepage"
+  "errors": {
+    "walletNotInstalled": "Wallet not installed",
+    "connectionFailed": "Connection failed",
+    "signatureFailed": "Signature failed",
+    "tokenRequired": "Token required for this reading"
   }
 }

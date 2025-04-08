@@ -1,7 +1,16 @@
 
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
 import './index.css';
-import './i18n';
+import './styles/tarot.css';
+import './styles/animations.css';
+import './styles/buttons.css';
+import './styles/cards.css';
+import './styles/themes/crypto.css';
 
-createRoot(document.getElementById("root")!).render(<App />);
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);

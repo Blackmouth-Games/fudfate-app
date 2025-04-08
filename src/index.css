@@ -1,341 +1,100 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-
-    --primary: 266 57% 64%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 192 79% 65%;
-    --secondary-foreground: 222 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
-
-    --accent: 48 96% 53%;
-    --accent-foreground: 222 47.4% 11.2%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 20% 98%;
-
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 263 69.8% 42%;
-
-    --radius: 0.5rem;
-  }
-
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-white text-foreground font-pixel;
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-  }
+:root {
+  --background: 220 22% 8%;
+  --foreground: 0 0% 98%;
+  --card: 218 50% 4%;
+  --card-foreground: 0 0% 98%;
+  --popover: 218 50% 4%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 272 60% 64%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 35% 60%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 250 30% 60%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;
+  --input: 214 32% 91%;
+  --ring: 272 60% 64%;
+  --radius: 0.5rem;
 }
 
-@layer components {
-  .pixel-borders {
-    box-shadow: 0 -4px 0 0 #000, 0 4px 0 0 #000, -4px 0 0 0 #000, 4px 0 0 0 #000;
-    border: 4px solid #000;
-    image-rendering: pixelated;
-  }
-
-  .gold-frame {
-    @apply border-4 border-accent/80 bg-white shadow-[0_0_15px_rgba(234,179,8,0.5)];
-  }
-
-  .card-container {
-    perspective: 1000px;
-    transform-style: preserve-3d;
-  }
-
-  .card-3d {
-    transition: transform 0.6s;
-  }
-
-  .card-container:hover .card-3d {
-    transform: rotateY(10deg) rotateX(5deg);
-  }
-  
-  .pixel-btn {
-    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-bold rounded-md transition-all duration-300 ease-out;
-    image-rendering: pixelated;
-    box-shadow: 0 -4px 0 0 #000, 0 4px 0 0 #000, -4px 0 0 0 #000, 4px 0 0 0 #000;
-    border: 4px solid #000;
-  }
-
-  .pixel-btn-primary {
-    @apply bg-primary text-white hover:bg-primary/90;
-  }
-
-  .pixel-btn-accent {
-    @apply bg-accent text-black hover:bg-accent/90;
-  }
-
-  .glitch {
-    position: relative;
-    animation: glitch 1s infinite;
-  }
-
-  .glitch span {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  .glitch span:first-child {
-    animation: glitch 650ms infinite;
-    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-    transform: translate(-0.025em, -0.0125em);
-    opacity: 0.8;
-  }
-
-  .glitch span:last-child {
-    animation: glitch 375ms infinite;
-    clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
-    transform: translate(0.0125em, 0.025em);
-    opacity: 0.8;
-  }
-
-  .gold-text {
-    @apply text-accent;
-    text-shadow: 0 0 5px rgba(234, 179, 8, 0.7);
-  }
-
-  .pixelated {
-    image-rendering: pixelated;
-  }
-
-  .fade-in {
-    animation: fadeIn 0.5s ease-in;
-    opacity: 0;
-    animation-fill-mode: forwards;
-  }
-
-  .slide-in-right {
-    animation: slideInRight 0.5s ease-out forwards;
-    opacity: 0;
-  }
-
-  .slide-in-left {
-    animation: slideInLeft 0.5s ease-out forwards;
-    opacity: 0;
-  }
-
-  .slide-in-up {
-    animation: slideInUp 0.5s ease-out forwards;
-    opacity: 0;
-  }
-
-  .glitch-logo {
-    position: relative;
-    display: inline-block;
-    font-size: 3rem;
-  }
-
-  .glitch-logo span {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
-
-  .glitch-logo span:first-child {
-    animation: glitch-logo 1.5s infinite;
-    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-    opacity: 0.8;
-  }
-
-  .glitch-logo span:last-child {
-    animation: glitch-logo 2s infinite;
-    clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
-    opacity: 0.8;
-  }
-
-  @keyframes glitch-logo {
-    0% {
-      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                  -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
-                  -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-    50% {
-      text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                  0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                  -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-    100% {
-      text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                  -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
-                  -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-  }
-
-  .glitch-button {
-    position: relative;
-    overflow: hidden;
-    background-color: #FAD12B;
-    color: transparent;
-    border: 2px solid black;
-    padding: 10px 20px;
-    text-align: center;
-  }
-
-  .glitch-button span {
-    visibility: hidden;
-  }
-
-
-  .glitch-button:after {
-    content: attr(data-text);
-    position: absolute;
-    top: 15%;
-    left: 15%;
-    margin-left: 7%;
-    margin-top: 0%;
-    opacity: 0.9;
-    animation: glitch 1.5s infinite;
-  }
-
-  .glitch-button:after {
-    left: 2px;
-    text-shadow: 1px 0 red, -1px 0 blue;
-  }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+/* Glowing text effects */
+.glow-text {
+  text-shadow: 0 0 10px rgba(147, 112, 219, 0.5), 0 0 20px rgba(147, 112, 219, 0.3);
 }
 
-@keyframes slideInRight {
-  from {
-    transform: translateX(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+/* Card hover effects */
+.hover-scale {
+  transition: transform 0.3s ease;
 }
 
-@keyframes slideInLeft {
-  from {
-    transform: translateX(-50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.hover-scale:hover {
+  transform: scale(1.05);
 }
 
-@keyframes slideInUp {
-  from {
-    transform: translateY(50px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes glitch {
-    0% {
-        text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                    -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-    14% {
-        text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                    -0.05em -0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-    15% {
-        text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                    0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-    20% {
-        text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                    0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-        transform: translate(-2px, -2px);
-    }
-    49% {
-        text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                    0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-
-        transform: translate(2px, 2px);
-    }
-    50% {
-        text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
-                    0.05em 0 0 rgba(0, 255, 0, 0.75),
-                    0 -0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-    60% {
-        text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                    0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-
-        transform: translate(-2px, 2px);
-    }
-    99% {
-        text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
-                    0.05em 0 0 rgba(0, 255, 0, 0.75),
-                    0 -0.05em 0 rgba(0, 0, 255, 0.75);
-
-        transform: translate(0);
-    }
-    100% {
-        text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
-                    -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
-                    -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
-    }
-}
-
-.floating {
-  animation: floating 3s ease-in-out infinite;
-}
-
-@keyframes floating {
+/* Animations for card reveal */
+@keyframes flip {
   0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
+    transform: rotateY(0deg);
   }
   100% {
-    transform: translateY(0px);
+    transform: rotateY(180deg);
   }
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+.card-flip {
+  animation: flip 0.6s ease forwards;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 -4px 0 0 #000, 0 4px 0 0 #000, -4px 0 0 0 #000, 4px 0 0 0 #000, 0 0 0 rgba(234, 179, 8, 0);
+/* Mystic background animation */
+@keyframes mystical-bg {
+  0% {
+    background-position: 0% 50%;
   }
   50% {
-    box-shadow: 0 -4px 0 0 #000, 0 4px 0 0 #000, -4px 0 0 0 #000, 4px 0 0 0 #000, 0 0 15px rgba(0, 0, 0, 0.7);
+    background-position: 100% 50%;
   }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.mystic-bg {
+  background: linear-gradient(45deg, #131822, #0a0a16, #1a1535, #0a0a16);
+  background-size: 400% 400%;
+  animation: mystical-bg 15s ease infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(12, 10, 29, 0.8);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(111, 76, 255, 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(111, 76, 255, 0.7);
 }

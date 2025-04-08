@@ -1,68 +1,74 @@
 
 {
-  "seo": {
-    "title": "FudFate - Experiencia de Tarot Web3",
-    "description": "Descubre tu destino cripto con FudFate, la experiencia definitiva de tarot Web3 con estilo pixel art y memes cripto"
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "confirm": "Confirmar"
   },
-  "nav": {
+  "navbar": {
     "home": "Inicio",
-    "about": "Acerca de",
-    "cards": "Cartas",
-    "app": "Iniciar App"
+    "about": "Nosotros",
+    "contact": "Contacto"
   },
-  "hero": {
-    "title": "FudFate",
-    "subtitle": "La Experiencia de Tarot Web3",
-    "description": "Descubre tu destino cripto a través de nuestra experiencia de tarot digital",
-    "cta": "Revela Tu Destino"
+  "wallet": {
+    "connect": "Conectar Wallet",
+    "connectPhantom": "Conectar Phantom",
+    "connectMetamask": "Conectar Metamask",
+    "disconnect": "Desconectar",
+    "connected": "Conectado",
+    "connectionRequired": "Conexión de wallet requerida",
+    "wrongNetwork": "Por favor conecta a la red Solana"
   },
-  "about": {
-    "title": "¿Qué es FudFate?",
-    "description": "FudFate combina el mundo místico del tarot con la naturaleza impredecible de Web3. Nuestras cartas pixel art presentan memes cripto y arquetipos Web3 que te guiarán a través de tu viaje blockchain.",
-    "feature1": "Cartas de Tarot Pixel Art",
-    "feature2": "Memes Web3 y Cripto",
-    "feature3": "Adivinación de Fortuna Digital"
-  },
-  "cards": {
-    "title": "Cartas Destacadas",
-    "description": "Cada carta representa un arquetipo en el universo Web3",
-    "card1": "El Lanzamiento",
-    "card2": "El Hacker",
-    "card3": "La Memecoin",
-    "card4": "El Degen",
-    "viewMore": "Ver Más Cartas"
-  },
-  "cta": {
-    "title": "¿Listo para Conocer tu Destino Cripto?",
-    "subtitle": "Las cartas esperan ser reveladas",
-    "button": "Iniciar App"
+  "tarot": {
+    "appTitle": "FUDFATE Tarot Web3",
+    "appDescription": "Descubre tus revelaciones místicas con nuestra experiencia de tarot Web3 potenciada por IA. Conecta tu wallet para comenzar tu viaje cósmico.",
+    "connectWalletMessage": "Conecta tu wallet Phantom (Solana) o Metamask para iniciar tu viaje místico",
+    "selectDeck": "Selecciona Tu Mazo",
+    "deck1Name": "Tarot Crypto",
+    "deck1Description": "El mazo original de tarot con temática crypto",
+    "deck2Name": "Mazo Celestial",
+    "deck2Description": "Próximamente: Un viaje cósmico a través de las estrellas",
+    "comingSoon": "Próximamente",
+    "yourIntention": "Tu Intención",
+    "intentionDescription": "Ingresa una pregunta o enfoque para tu lectura. Sé específico para obtener revelaciones más significativas.",
+    "intentionPlaceholder": "¿Qué te gustaría saber sobre tu camino?",
+    "readCards": "Comenzar Lectura",
+    "invokingEnergies": "Invocando Energías Cósmicas",
+    "preparingYourReading": "El universo se está alineando para revelar tu camino...",
+    "cosmicMessageReceived": "Mensaje Cósmico Recibido",
+    "selectCards": "Selecciona Tus Cartas",
+    "selectCardsDescription": "Elige 3 cartas que llamen a tu energía. Has seleccionado {{selected}} de {{total}}.",
+    "clickToSelect": "Clic para seleccionar",
+    "selectedCards": "Cartas Seleccionadas: {{count}}/3",
+    "revealCards": "Revela Tus Cartas",
+    "revealCardsDescription": "Haz clic en cada carta para revelar su significado místico para tu viaje.",
+    "clickToReveal": "Clic para revelar",
+    "readingComplete": "Tu Lectura está Completa",
+    "readingCompleteDescription": "Las energías cósmicas han revelado estas intuiciones para tu viaje.",
+    "finalMessage": "Interpretación Cósmica",
+    "newReading": "Iniciar Nueva Lectura",
+    "connectWalletFirst": "Por favor conecta tu wallet primero",
+    "enterIntention": "Por favor ingresa tu intención o pregunta"
   },
   "footer": {
-    "rights": "Todos los derechos reservados",
-    "cookiePolicy": "Política de Cookies",
-    "privacy": "Política de Privacidad",
-    "terms": "Términos de Servicio",
-    "language": "Idioma"
+    "allRightsReserved": "Todos los derechos reservados.",
+    "privacyPolicy": "Política de Privacidad",
+    "termsOfService": "Términos de Servicio"
   },
-  "cookies": {
-    "title": "Utilizamos Cookies",
-    "description": "Este sitio web utiliza cookies para mejorar la experiencia del usuario y analizar el tráfico del sitio web.",
-    "accept": "Aceptar Todo",
-    "decline": "Rechazar",
-    "settings": "Configuración de Cookies"
+  "languageSwitcher": {
+    "language": "Idioma",
+    "english": "Inglés",
+    "spanish": "Español"
   },
-  "cookiePage": {
-    "title": "Política de Cookies",
-    "lastUpdated": "Última Actualización",
-    "introduction": "Esta Política de Cookies explica cómo FudFate utiliza cookies y tecnologías similares para reconocerte cuando visitas nuestro sitio web. Explica qué son estas tecnologías y por qué las usamos, así como tus derechos para controlar nuestro uso de ellas.",
-    "whatAreCookies": "¿Qué son las cookies?",
-    "cookiesDefinition": "Las cookies son pequeños archivos de datos que se colocan en tu computadora o dispositivo móvil cuando visitas un sitio web. Las cookies son ampliamente utilizadas por los propietarios de sitios web para hacer que sus sitios web funcionen, o para que funcionen de manera más eficiente, así como para proporcionar información de informes.",
-    "whyWeUse": "¿Por qué usamos cookies?",
-    "cookiesUsage": "Utilizamos cookies propias y de terceros por varias razones. Algunas cookies son necesarias por razones técnicas para que nuestro sitio web funcione, y nos referimos a ellas como cookies 'esenciales' o 'estrictamente necesarias'. Otras cookies nos permiten rastrear y orientar los intereses de nuestros usuarios para mejorar la experiencia en nuestro sitio web. Terceros sirven cookies a través de nuestro sitio web para publicidad, análisis y otros propósitos.",
-    "typesOfCookies": "Tipos de cookies que utilizamos",
-    "essentialCookies": "Cookies Esenciales: Estas cookies son estrictamente necesarias para proporcionarte servicios disponibles a través de nuestro sitio web y para usar algunas de sus funciones, como el acceso a áreas seguras.",
-    "analyticsCookies": "Cookies de Análisis: Estas cookies nos ayudan a entender cómo los visitantes interactúan con nuestro sitio web, ayudándonos a mejorar nuestros servicios y proporcionando estadísticas relacionadas.",
-    "advertisingCookies": "Cookies de Publicidad: Estas cookies se utilizan para hacer que los mensajes publicitarios sean más relevantes para ti. Realizan funciones como evitar que el mismo anuncio aparezca continuamente, asegurando que los anuncios se muestren correctamente y, en algunos casos, seleccionando anuncios que se basan en tus intereses.",
-    "back": "Volver a la Página Principal"
+  "errors": {
+    "walletNotInstalled": "Wallet no instalada",
+    "connectionFailed": "Conexión fallida",
+    "signatureFailed": "Firma fallida",
+    "tokenRequired": "Token requerido para esta lectura"
   }
 }
