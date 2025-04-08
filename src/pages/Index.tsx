@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import BackToTop from '@/components/BackToTop';
 import GlitchLogo from '@/components/GlitchLogo';
 import TarotCardSection from '@/components/TarotCardSection';
+import Navbar from '@/components/Navbar';
 
 const Index = () => {
   const { t } = useTranslation();
@@ -21,10 +22,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <Navbar />
       <BackToTop />
       
       {/* Hero Section */}
-      <section id="hero" className="min-h-screen relative flex items-center justify-center py-16 px-4 md:px-8 lg:px-16 overflow-hidden">
+      <section id="hero" className="min-h-screen relative flex items-center justify-center py-16 px-4 md:px-8 lg:px-16 overflow-hidden mt-16">
         <div className="max-w-6xl w-full mx-auto text-center relative z-10">
           <AnimatedSection animation="fade-in" className="mb-6">
             <GlitchLogo 

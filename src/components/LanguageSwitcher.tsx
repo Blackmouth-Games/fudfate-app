@@ -2,28 +2,27 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { LanguagesIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LanguageSwitcherProps {
   className?: string;
 }
 
-const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ className = '' }) => {
+const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
   const { i18n } = useTranslation();
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'es' : 'en';
-    i18n.changeLanguage(newLang);
+    const newLanguage = i18n.language === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(newLanguage);
   };
 
   return (
-    <Button
-      variant="outline"
+    <Button 
+      onClick={toggleLanguage} 
+      variant="outline" 
       size="sm"
-      onClick={toggleLanguage}
-      className={className}
+      className={cn("font-pixel text-xs", className)}
     >
-      <LanguagesIcon className="w-4 h-4 mr-2" />
       {i18n.language === 'en' ? 'ES' : 'EN'}
     </Button>
   );

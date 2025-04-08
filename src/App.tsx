@@ -6,12 +6,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import i18n from './i18n';
 import TarotApp from './pages/TarotApp';
+import Index from './pages/Index';
 import NotFound from './pages/NotFound';
 import { WalletProvider } from './contexts/WalletContext';
 import { TarotProvider } from './contexts/TarotContext';
+import DevTool from './components/DevTool';
 
 // Create React Query client
 const queryClient = new QueryClient();
+
+// Routes configuration for DevTool
+const routes = [
+  { path: '/', name: 'Home' },
+  { path: '/app', name: 'Tarot App' },
+];
 
 function App() {
   return (
@@ -21,9 +29,11 @@ function App() {
           <TarotProvider>
             <Router>
               <Routes>
-                <Route path="/" element={<TarotApp />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/app" element={<TarotApp />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <DevTool routes={routes} />
             </Router>
             <Toaster position="top-center" />
           </TarotProvider>
