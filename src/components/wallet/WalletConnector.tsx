@@ -26,10 +26,11 @@ const WalletConnector: React.FC = () => {
         <>
           <Button 
             onClick={() => handleConnect('phantom')}
-            className="w-full sm:w-auto bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium"
+            className="w-full sm:w-auto font-medium text-white"
+            style={{ backgroundColor: '#AB9FF2', borderColor: '#9887E0' }}
           >
             <img 
-              src="https://phantom.app/img/logo.png" 
+              src="/img/icons/Phantom-Icon_Transparent_White.svg" 
               alt="Phantom" 
               className="w-5 h-5 mr-2"
             />
@@ -38,10 +39,11 @@ const WalletConnector: React.FC = () => {
           
           <Button 
             onClick={() => handleConnect('metamask')}
-            className="w-full sm:w-auto bg-gradient-to-r from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500 text-black font-medium"
+            className="w-full sm:w-auto font-medium text-black"
+            style={{ backgroundColor: '#FFA680', borderColor: '#FF8A57' }}
           >
             <img 
-              src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" 
+              src="/img/icons/MetaMask-icon-fox.svg" 
               alt="Metamask" 
               className="w-5 h-5 mr-2"
             />

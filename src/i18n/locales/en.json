@@ -27,7 +27,9 @@
   "tarot": {
     "appTitle": "FUDFATE Web3 Tarot",
     "appDescription": "Discover your mystical insights with our AI-powered Web3 tarot reading experience. Connect your wallet to begin your cosmic journey.",
-    "connectWalletMessage": "Connect your Phantom (Solana) or Metamask wallet to start your mystical journey",
+    "connectWalletToStart": "CONNECT YOUR WALLET",
+    "connectWalletMessage": "Begin Your Mystical Journey",
+    "connectWalletDescription": "Connect your Phantom (Solana) or Metamask wallet to explore the mysteries of the cosmos through our Web3 tarot experience",
     "selectDeck": "Select Your Deck",
     "deck1Name": "Crypto Tarot",
     "deck1Description": "The original mystical crypto-themed tarot deck",

@@ -44,12 +44,12 @@ const TarotApp: React.FC = () => {
         {/* Connect Wallet Message */}
         <div className="text-center max-w-2xl mx-auto my-8">
           <GlitchText
-            text={t('tarot.connectWalletToStart')}
-            className="text-2xl font-bold mb-6 text-gray-800"
+            text={t('tarot.connectWalletMessage')}
+            className="text-3xl font-bold mb-6 text-gray-800 font-pixel"
             goldEffect={true}
           />
-          <p className="text-gray-600 max-w-md mx-auto text-center mb-8">
-            {t('tarot.connectWalletDescription')}
+          <p className="text-lg text-gray-600 max-w-md mx-auto text-center mb-8 font-pixel">
+            {t('tarot.connectWalletMessage')}
           </p>
           <WalletConnector />
         </div>
