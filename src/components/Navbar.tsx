@@ -43,7 +43,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0">
               <img 
-                src="/lovable-uploads/e983f33c-e21f-4a11-90f5-0d73db998e39.png" 
+                src="/img/logos/FUDFATE_logo.png" 
                 alt="FUDfate Logo" 
                 className="h-10 w-auto"
               />

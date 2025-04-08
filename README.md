@@ -2,17 +2,12 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/6cf7dd95-1290-45e4-a87a-9426d819a69c
+**URL**: 
 
 ## How can I edit this code?
 
 There are several ways of editing your application.
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/6cf7dd95-1290-45e4-a87a-9426d819a69c) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
@@ -24,10 +19,10 @@ Follow these steps:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone https://github.com/Blackmouth-Games/fudfate-app
 
 # Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+cd fudfate-app
 
 # Step 3: Install the necessary dependencies.
 npm i
@@ -62,12 +57,15 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/6cf7dd95-1290-45e4-a87a-9426d819a69c) and click on Share -> Publish.
 
-## Can I connect a custom domain to my Lovable project?
+Automated deploy in netlify on DEV enviroment to: https://dev-app-fudfate.blackmouthgames.com/
+[![Netlify Status - DEV ENVIROMENT](https://api.netlify.com/api/v1/badges/4d38a76f-3c69-4210-b04e-eee5257b427a/deploy-status)](https://app.netlify.com/sites/dev-app-fudfate/deploys)
 
-Yes it is!
+Automated deploy in netlify on PROD enviroment to:https://app-fudfate.blackmouthgames.com/
+[![Netlify Status - PROD ENVIROMENT](https://api.netlify.com/api/v1/badges/5be370ed-bf76-4e36-a665-e56f992db437/deploy-status)](https://app.netlify.com/sites/app-fudfate/deploys)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+**Use Lovable**
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Simply visit the [Lovable Project](https://lovable.dev/projects/6cf7dd95-1290-45e4-a87a-9426d819a69c) and start prompting.
+
+Changes made via Lovable will be committed automatically to this repo.

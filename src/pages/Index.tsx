@@ -28,7 +28,7 @@ const Index = () => {
         <div className="max-w-6xl w-full mx-auto text-center relative z-10">
           <AnimatedSection animation="fade-in" className="mb-6">
             <GlitchLogo 
-              imageUrl="/lovable-uploads/e983f33c-e21f-4a11-90f5-0d73db998e39.png" 
+              imageUrl="/img/logos/FUDFATE_logo.png" 
             />
             <p className="text-xl md:text-2xl text-secondary font-pixel mb-8">
               {t('hero.subtitle')}

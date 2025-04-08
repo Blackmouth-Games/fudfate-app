@@ -15,7 +15,7 @@ const Footer = () => {
           <div className="flex flex-col items-center md:items-start">
             <Link to="/" className="mb-4">
               <img 
-                src="/lovable-uploads/e983f33c-e21f-4a11-90f5-0d73db998e39.png" 
+                src="/img/logos/FUDFATE_logo.png" 
                 alt="FUDfate Logo" 
                 className="h-14 w-auto"
               />

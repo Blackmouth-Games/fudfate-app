@@ -24,7 +24,7 @@ const TarotApp: React.FC = () => {
       return (
         <div className="flex flex-col items-center justify-center py-16">
           <img 
-            src="/lovable-uploads/883079be-f153-495c-a79e-7d1b25786a25.png" 
+            src="/img/logos/FUDFATE_logo.png" 
             alt="Tarot Card" 
             className="w-40 h-auto mb-8"
           />
@@ -68,7 +68,7 @@ const TarotApp: React.FC = () => {
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center">
             <img 
-              src="/lovable-uploads/57f2c984-3c67-4d32-9e32-2e326ad6a137.png" 
+              src="/img/logos/FUDFATE_logo.png" 
               alt="FUDFATE" 
               className="h-12"
             />
