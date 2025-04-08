@@ -76,7 +76,7 @@ const TarotApp: React.FC = () => {
           
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <WalletConnector />
-            <LanguageSwitcher className="text-sm" />
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
