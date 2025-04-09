@@ -15,7 +15,14 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   
   // Card back image
   const cardBackImage = "/img/cards/carddeck1/card_back.jpg";
-  const [cardPositions, setCardPositions] = useState<{[key: string]: {left: number, top: number, rotation: number, zIndex: number}>>({}); 
+  const [cardPositions, setCardPositions] = useState<{
+    [key: string]: {
+      left: number;
+      top: number;
+      rotation: number;
+      zIndex: number;
+    };
+  }>({});
 
   // Generate random positions for cards that remain consistent
   useEffect(() => {
