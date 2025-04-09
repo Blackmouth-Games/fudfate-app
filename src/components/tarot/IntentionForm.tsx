@@ -5,9 +5,9 @@ import { useWallet } from '@/contexts/WalletContext';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2, AlertTriangle } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
 import { useEnvironment } from '@/hooks/useEnvironment';
 
@@ -129,19 +129,29 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-center text-gray-800">
-              <GlitchText text={t('tarot.yourIntention')} />
+              <GlitchText text={t('tarot.askTheTarot')} />
             </h3>
             <p className="text-gray-600 text-sm text-center">
-              {t('tarot.intentionDescription')}
+              {t('tarot.focusOnQuestion')}
             </p>
           </div>
           
-          <Textarea
+          <Input
             value={intention}
-            onChange={(e) => setIntention(e.target.value)}
-            placeholder={t('tarot.intentionPlaceholder')}
-            className="min-h-[100px] border-amber-200 placeholder:text-gray-400"
+            onChange={(e) => {
+              // Limit to 160 characters
+              if (e.target.value.length <= 160) {
+                setIntention(e.target.value);
+              }
+            }}
+            placeholder={t('tarot.questionPlaceholder')}
+            className="border-amber-200 placeholder:text-gray-400"
+            maxLength={160}
           />
+          
+          <div className="text-xs text-right text-gray-500">
+            {intention.length}/160 {t('tarot.characters')}
+          </div>
           
           {userData && userData.runsToday === false && (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">

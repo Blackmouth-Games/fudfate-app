@@ -39,27 +39,6 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       }))
     : [];
 
-  // If there are no readings and we're not loading, show mock data
-  const showMockData = formattedReadings.length === 0 && !isLoading;
-  const mockReadings = [
-    {
-      id: '1',
-      date: '2025-04-09',
-      question: t('tarot.mockQuestion1'),
-      cards: [t('tarot.mockCard1'), t('tarot.mockCard2'), t('tarot.mockCard3')],
-      result: t('tarot.mockResult1')
-    },
-    {
-      id: '2',
-      date: '2025-04-08',
-      question: t('tarot.mockQuestion2'),
-      cards: [t('tarot.mockCard4'), t('tarot.mockCard5'), t('tarot.mockCard6')],
-      result: t('tarot.mockResult2')
-    }
-  ];
-
-  const displayReadings = showMockData ? mockReadings : formattedReadings;
-
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="p-6">
@@ -70,7 +49,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-full" />
           </div>
-        ) : displayReadings.length > 0 ? (
+        ) : formattedReadings.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -82,7 +61,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayReadings.map((reading) => (
+                {formattedReadings.map((reading) => (
                   <TableRow key={reading.id}>
                     <TableCell className="font-medium">{reading.date}</TableCell>
                     <TableCell>{reading.question}</TableCell>
@@ -98,7 +77,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
             <Alert>
               <InfoIcon className="h-4 w-4" />
               <AlertTitle>{t('tarot.noReadingsTitle')}</AlertTitle>
-              <AlertDescription>{t('tarot.noReadings')}</AlertDescription>
+              <AlertDescription>{t('tarot.noReadingsAvailable')}</AlertDescription>
             </Alert>
           </div>
         )}
