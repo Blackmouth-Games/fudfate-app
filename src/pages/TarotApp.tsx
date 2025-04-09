@@ -13,6 +13,7 @@ import ReadingHistory from '@/components/tarot/ReadingHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, History, Layers } from 'lucide-react';
 import { toast } from 'sonner';
+import GlitchLogo from '@/components/GlitchLogo';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
@@ -99,16 +100,14 @@ const TarotApp: React.FC = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          {/* Always show the logo when wallet is disconnected */}
-          {!connected && (
-            <div className="flex items-center">
-              <img 
-                src="/img/logos/FUDFATE_logo.png" 
-                alt="FUDFATE" 
-                className="h-12"
-              />
-            </div>
-          )}
+          {/* Always show the logo */}
+          <div className="flex items-center">
+            <img 
+              src="/img/logos/FUDFATE_logo.png" 
+              alt="FUDFATE" 
+              className="h-12"
+            />
+          </div>
           
           {connected && (
             <div className="flex-grow flex justify-center">
@@ -148,14 +147,21 @@ const TarotApp: React.FC = () => {
         {/* Connect Wallet Message */}
         {!connected ? (
           <div className="text-center max-w-2xl mx-auto my-8">
+            <GlitchLogo 
+              imageUrl="/img/logos/FUDFATE_logo.png" 
+              className="mb-8"
+            />
+            
             <GlitchText
               text={t('tarot.connectWalletTitle')}
-              className="text-3xl font-bold mb-6 text-gray-800 font-pixel"
+              className="text-3xl md:text-4xl font-bold mb-6 text-gray-800 font-pixel tracking-wider uppercase"
               goldEffect={true}
             />
+            
             <p className="text-lg text-gray-600 max-w-md mx-auto text-center mb-8 font-pixel">
               {t('tarot.connectWalletMessage')}
             </p>
+            
             <WalletConnector />
           </div>
         ) : (

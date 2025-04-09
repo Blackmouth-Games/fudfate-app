@@ -26,8 +26,13 @@ const WalletConnector: React.FC = () => {
   const handleConnect = async (type: WalletType) => {
     setIsConnecting(type);
     try {
-      await connectWallet(type);
-    } finally {
+      const success = await connectWallet(type);
+      // Only clear the connecting state if we successfully connected or an error occurred
+      if (!success) {
+        setIsConnecting(null);
+      }
+    } catch (error) {
+      console.error("Error in handleConnect:", error);
       setIsConnecting(null);
     }
   };

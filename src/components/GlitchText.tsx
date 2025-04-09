@@ -12,19 +12,19 @@ interface GlitchTextProps {
 
 const GlitchText = ({ text, className, goldEffect = false }: GlitchTextProps) => {
   return (
-    <div className={cn(
+    <GlitchEffect type="text" className={cn(
       "relative glitch", 
       goldEffect && "text-amber-500 font-bold",
       className
     )}>
-      {text}
+      <span className="inline-block">{text}</span>
       {goldEffect && (
         <>
           <span className="absolute top-0 left-0 opacity-80 text-amber-600">{text}</span>
           <span className="absolute top-0 left-0 opacity-80 text-amber-400">{text}</span>
         </>
       )}
-    </div>
+    </GlitchEffect>
   );
 };
 

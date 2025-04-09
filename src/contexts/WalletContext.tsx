@@ -140,6 +140,10 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log(`Calling login webhook with ${walletType}, ${walletAddress}`);
       
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(webhooks.login, {
         method: 'POST',
         headers: {
@@ -150,7 +154,10 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           wallet: walletAddress,
           walletType: walletType
         }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -159,20 +166,30 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
       console.log("Login webhook response:", data);
       
-      if (!data || !Array.isArray(data) || data.length === 0) {
+      if (!data) {
+        throw new Error('Empty response from login webhook');
+      }
+      
+      if (Array.isArray(data) && data.length > 0) {
+        const userInfo = data[0];
+        
+        if (!userInfo || !userInfo.userid) {
+          throw new Error('User ID not found in response');
+        }
+        
+        return {
+          userId: userInfo.userid || 'unknown',
+          runsToday: userInfo.runs_today === true || userInfo.runs_today === 'true'
+        };
+      } else if (data.userid) {
+        // Handle non-array response format
+        return {
+          userId: data.userid || 'unknown',
+          runsToday: data.runs_today === true || data.runs_today === 'true'
+        };
+      } else {
         throw new Error('Invalid response format from login webhook');
       }
-      
-      const userInfo = data[0];
-      
-      if (!userInfo || !userInfo.userid) {
-        throw new Error('User ID not found in response');
-      }
-      
-      return {
-        userId: userInfo.userid || 'unknown',
-        runsToday: userInfo.runs_today === true || userInfo.runs_today === 'true'
-      };
     } catch (error) {
       console.error('Error calling login webhook:', error);
       toast.error('Error registering wallet session');
@@ -258,6 +275,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       
       // If the webhook call failed, don't proceed with connection
       if (!userDataResponse) {
+        // Reset the connection state to ensure UI shows disconnected
+        setConnected(false);
+        setWalletType(null);
+        setWalletAddress(null);
+        setNetwork(null);
+        setUserData(null);
         return false;
       }
       
@@ -294,6 +317,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error(`Error connecting to ${type}:`, error);
       toast.error(t('errors.connectionFailed'));
+      
+      // Reset the connection state to ensure UI shows disconnected
+      setConnected(false);
+      setWalletType(null);
+      setWalletAddress(null);
+      setNetwork(null);
+      setUserData(null);
+      
       return false;
     }
   };
