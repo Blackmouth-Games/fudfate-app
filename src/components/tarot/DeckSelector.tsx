@@ -18,7 +18,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
   // Card back image
-  const cardBackImage = "/lovable-uploads/c2b7a0ee-e304-442a-94a9-dad07ede9c24.png";
+  const cardBackImage = "/img/cards/carddeck1/deck1_back.png";
 
   // Mock decks - in a real app, this would come from your backend
   const decks = [

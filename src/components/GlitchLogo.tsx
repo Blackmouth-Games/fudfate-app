@@ -1,4 +1,3 @@
-
 import React from 'react';
 import GlitchEffect from './core/GlitchEffect';
 import '../styles/logo.css';
@@ -31,17 +30,17 @@ const GlitchLogo = ({
                 <img 
                     src={imageUrl} 
                     alt={alt} 
-                    className={`${imageClass} mx-auto mb-8 logo-glitch`} 
+                    className={`${imageClass} mx-auto logo-glitch`} 
                 />
                 <img 
                     src={imageUrl} 
                     alt={`${alt} Glitch 1`} 
-                    className={`absolute top-0 left-0 ${imageClass} mx-auto mb-8 glitch-effect-1`} 
+                    className={`absolute top-0 left-0 ${imageClass} mx-auto glitch-effect-1`} 
                 />
                 <img 
                     src={imageUrl} 
                     alt={`${alt} Glitch 2`} 
-                    className={`absolute top-0 left-0 ${imageClass} mx-auto mb-8 glitch-effect-2`} 
+                    className={`absolute top-0 left-0 ${imageClass} mx-auto glitch-effect-2`} 
                 />
             </div>
         </GlitchEffect>

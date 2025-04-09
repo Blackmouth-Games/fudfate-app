@@ -13,7 +13,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   const { t } = useTranslation();
   
   // Card back image
-  const cardBackImage = "/lovable-uploads/c2b7a0ee-e304-442a-94a9-dad07ede9c24.png";
+  const cardBackImage = "/img/cards/carddeck1/deck1_back.png";
 
   return (
     <div className={`space-y-6 ${className}`}>

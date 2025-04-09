@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
@@ -13,8 +12,9 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   const { selectedCards, revealCard, loading, finalMessage, resetReading } = useTarot();
   const { t } = useTranslation();
   
-  // Card back image
-  const cardBackImage = "/lovable-uploads/c2b7a0ee-e304-442a-94a9-dad07ede9c24.png";
+  // Card back images
+  const cardBackImage = "/img/cards/carddeck1/deck1_back.png";
+  const selectedCardBackImage = "/img/cards/carddeck1/deck1_back.png";
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -62,11 +62,16 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full w-full overflow-hidden">
+                  <div className="h-full w-full overflow-hidden relative">
                     <img 
                       src={cardBackImage} 
                       alt="Card Back" 
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain absolute inset-0"
+                      style={{ maxWidth: '100%' }}
+                      onError={(e) => {
+                        console.error('Error loading image:', cardBackImage);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
@@ -94,23 +99,33 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           </div>
           
           <div className="grid grid-cols-3 gap-4">
-            {selectedCards.map((card) => (
+            {selectedCards.map((card, index) => (
               <div 
                 key={card.id}
                 className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-md hover:shadow-lg transition-shadow"
               >
-                <div className="p-2 h-full flex flex-col">
-                  <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded">
-                    {card.name}
+                {card.revealed ? (
+                  <div className="p-2 h-full flex flex-col">
+                    <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded">
+                      {card.name}
+                    </div>
+                    <div className="flex-1 flex items-center justify-center p-1">
+                      <img 
+                        src={card.image} 
+                        alt={card.name} 
+                        className="max-h-full object-contain drop-shadow-sm"
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1 flex items-center justify-center p-1">
+                ) : (
+                  <div className="h-full w-full overflow-hidden">
                     <img 
-                      src={card.image} 
-                      alt={card.name} 
-                      className="max-h-full object-contain drop-shadow-sm"
+                      src={selectedCardBackImage} 
+                      alt="Card Back" 
+                      className="h-full w-full object-contain"
                     />
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

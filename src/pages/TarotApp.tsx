@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -162,22 +161,24 @@ const TarotApp: React.FC = () => {
       <main className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
         {/* Connect Wallet Message */}
         {!connected ? (
-          <div className="text-center max-w-2xl mx-auto my-8">
+          <div className="flex flex-col items-center max-w-2xl w-full mx-auto">
             <GlitchLogo 
               imageUrl="/img/logos/FUDFATE_logo.png" 
-              className="mb-8"
               size="large"
+              className="mb-8"
             />
             
-            <div className="flex justify-center w-full mb-12">
-              <GlitchText
-                text="CRYPTO FORTUNE AWAITS"
-                className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase"
-                goldEffect={true}
-              />
+            <div className="container flex items-center justify-center mb-8">
+              <div className="flex-1 flex justify-center">
+                <GlitchText
+                  text="CRYPTO FORTUNE AWAITS"
+                  className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase mx-auto"
+                  goldEffect={true}
+                />
+              </div>
             </div>
             
-            <div className="flex flex-col gap-4 items-center max-w-sm mx-auto">
+            <div className="flex flex-col gap-4 items-center max-w-sm w-full">
               <WalletConnector showButtons={true} />
             </div>
           </div>
@@ -185,11 +186,6 @@ const TarotApp: React.FC = () => {
           <div className="max-w-4xl mx-auto my-8 w-full">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsContent value="reading" className="mt-0">
-                {userData && !userData.runsToday && (
-                  <div className="mb-4 p-2 text-sm text-amber-700 bg-amber-50 rounded-md border border-amber-200">
-                    {t('tarot.noReadingsAvailable')}
-                  </div>
-                )}
                 <IntentionForm className="w-full" />
               </TabsContent>
               

@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +10,7 @@ interface GlitchEffectProps {
 
 const GlitchEffect = ({ children, className, goldEffect = false, type = 'text' }: GlitchEffectProps) => {
   const baseClasses = cn(
-    "relative inline-block overflow-visible whitespace-nowrap",
+    "relative inline-block text-center",
     type === 'text' && "glitch",
     type === 'image' && "glitch-logo",
     type === 'button' && "glitch-button",
