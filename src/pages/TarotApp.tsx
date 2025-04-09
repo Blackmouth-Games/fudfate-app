@@ -47,7 +47,7 @@ const TarotApp: React.FC = () => {
         console.log('Deck webhook called successfully');
       } catch (error) {
         console.error('Error calling deck webhook:', error);
-        toast.error('Error loading decks data');
+        toast.error(t('errors.deckLoadFailed'));
       }
     } else if (value === 'history' && userData?.userId) {
       setIsLoadingHistory(true);
@@ -77,7 +77,7 @@ const TarotApp: React.FC = () => {
         }
       } catch (error) {
         console.error('Error calling history webhook:', error);
-        toast.error('Error loading history data');
+        toast.error(t('errors.historyLoadFailed'));
         setHistoryData([]);
       } finally {
         setIsLoadingHistory(false);
@@ -90,6 +90,7 @@ const TarotApp: React.FC = () => {
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+          {/* Always show the logo when wallet is disconnected */}
           {!connected && (
             <div className="flex items-center">
               <img 
@@ -155,12 +156,12 @@ const TarotApp: React.FC = () => {
                 <div className="flex flex-col md:flex-row justify-between items-center">
                   <div>
                     <p className="text-sm text-gray-600">
-                      User ID: <span className="font-mono text-gray-800">{userData.userId}</span>
+                      {t('wallet.userId')}: <span className="font-mono text-gray-800">{userData.userId || t('wallet.notAvailable')}</span>
                     </p>
                     <p className="text-sm text-gray-600">
-                      Readings Available: 
+                      {t('tarot.readingsAvailable')}: 
                       <span className={`font-bold ml-1 ${userData.runsToday ? 'text-green-600' : 'text-red-600'}`}>
-                        {userData.runsToday ? 'Yes' : 'No'}
+                        {userData.runsToday ? t('common.yes') : t('common.no')}
                       </span>
                     </p>
                   </div>
@@ -193,7 +194,7 @@ const TarotApp: React.FC = () => {
       <footer className="mt-auto py-6 border-t border-gray-200">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-500">
-            FUDFATE © 2025. {t('footer.allRightsReserved')}
+            FUDFATE © {new Date().getFullYear()}. {t('footer.allRightsReserved')}
           </p>
         </div>
       </footer>

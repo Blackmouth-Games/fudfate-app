@@ -43,16 +43,16 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     {
       id: '1',
       date: '2025-04-09',
-      question: 'Will crypto prices rise?',
-      cards: ['The Degen', 'The Whale', 'The Moon'],
-      result: 'Positive outlook with potential volatility'
+      question: t('tarot.mockQuestion1'),
+      cards: [t('tarot.mockCard1'), t('tarot.mockCard2'), t('tarot.mockCard3')],
+      result: t('tarot.mockResult1')
     },
     {
       id: '2',
       date: '2025-04-08',
-      question: 'Should I invest in NFTs?',
-      cards: ['The NFT', 'The Smart Contract', 'The DAO'],
-      result: 'Consider carefully, mixed signals'
+      question: t('tarot.mockQuestion2'),
+      cards: [t('tarot.mockCard4'), t('tarot.mockCard5'), t('tarot.mockCard6')],
+      result: t('tarot.mockResult2')
     }
   ];
 

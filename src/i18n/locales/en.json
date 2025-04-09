@@ -8,7 +8,9 @@
     "save": "Save",
     "back": "Back",
     "next": "Next",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
   },
   "navbar": {
     "home": "Home",
@@ -21,6 +23,9 @@
     "connectMetamask": "Connect Metamask",
     "disconnect": "Disconnect",
     "connected": "Connected",
+    "userId": "User ID",
+    "notAvailable": "Not available",
+    "disconnectSuccess": "Wallet disconnected successfully",
     "connectionRequired": "Wallet connection required",
     "wrongNetwork": "Please connect to Solana network"
   },
@@ -28,6 +33,7 @@
     "appTitle": "FUDFATE Web3 Tarot",
     "appDescription": "Discover your mystical insights with our AI-powered Web3 tarot reading experience. Connect your wallet to begin your cosmic journey.",
     "connectWalletToStart": "CONNECT YOUR WALLET",
+    "connectWalletTitle": "CRYPTO FORTUNE AWAITS",
     "connectWalletMessage": "Begin Your Mystical Journey",
     "connectWalletDescription": "Connect your Phantom (Solana) or Metamask wallet to explore the mysteries of the cosmos through our Web3 tarot experience",
     "selectDeck": "Select Your Deck",
@@ -55,7 +61,26 @@
     "finalMessage": "Cosmic Interpretation",
     "newReading": "Start New Reading",
     "connectWalletFirst": "Please connect your wallet first",
-    "enterIntention": "Please enter your intention or question"
+    "enterIntention": "Please enter your intention or question",
+    "reading": "Reading",
+    "history": "History",
+    "decks": "Decks",
+    "date": "Date",
+    "question": "Question",
+    "cards": "Cards",
+    "result": "Result",
+    "noReadings": "No readings found",
+    "readingsAvailable": "Readings Available",
+    "mockQuestion1": "Will crypto prices rise?",
+    "mockQuestion2": "Should I invest in NFTs?",
+    "mockCard1": "The Degen",
+    "mockCard2": "The Whale",
+    "mockCard3": "The Moon",
+    "mockCard4": "The NFT",
+    "mockCard5": "The Smart Contract",
+    "mockCard6": "The DAO",
+    "mockResult1": "Positive outlook with potential volatility",
+    "mockResult2": "Consider carefully, mixed signals"
   },
   "footer": {
     "allRightsReserved": "All rights reserved.",
@@ -68,9 +93,15 @@
     "spanish": "Spanish"
   },
   "errors": {
-    "walletNotInstalled": "Wallet not installed",
-    "connectionFailed": "Connection failed",
+    "walletNotInstalled": "wallet is not installed. Please install it to continue.",
+    "connectionFailed": "Connection failed. Please try again.",
+    "connectionRejected": "Connection rejected by user",
+    "phantomConnectionFailed": "Error connecting to Phantom. Verify your wallet is open.",
+    "metamaskConnectionFailed": "Error connecting to MetaMask. Verify your wallet is open.",
     "signatureFailed": "Signature failed",
-    "tokenRequired": "Token required for this reading"
+    "walletNotConnected": "Wallet not connected",
+    "tokenRequired": "Token required for this reading",
+    "deckLoadFailed": "Error loading decks data",
+    "historyLoadFailed": "Error loading history data"
   }
 }

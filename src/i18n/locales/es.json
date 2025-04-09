@@ -8,7 +8,9 @@
     "save": "Guardar",
     "back": "Atrás",
     "next": "Siguiente",
-    "confirm": "Confirmar"
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No"
   },
   "navbar": {
     "home": "Inicio",
@@ -21,6 +23,9 @@
     "connectMetamask": "Conectar Metamask",
     "disconnect": "Desconectar",
     "connected": "Conectado",
+    "userId": "ID de Usuario",
+    "notAvailable": "No disponible",
+    "disconnectSuccess": "Wallet desconectada correctamente",
     "connectionRequired": "Conexión de wallet requerida",
     "wrongNetwork": "Por favor conecta a la red Solana"
   },
@@ -28,6 +33,7 @@
     "appTitle": "FUDFATE Tarot Web3",
     "appDescription": "Descubre tus revelaciones místicas con nuestra experiencia de tarot Web3 potenciada por IA. Conecta tu wallet para comenzar tu viaje cósmico.",
     "connectWalletToStart": "CONECTA TU WALLET",
+    "connectWalletTitle": "LA FORTUNA CRYPTO TE ESPERA",
     "connectWalletMessage": "Comienza Tu Viaje Místico",
     "connectWalletDescription": "Conecta tu wallet Phantom (Solana) o Metamask para explorar los misterios del cosmos a través de nuestra experiencia de tarot Web3",
     "selectDeck": "Selecciona Tu Mazo",
@@ -55,7 +61,26 @@
     "finalMessage": "Interpretación Cósmica",
     "newReading": "Iniciar Nueva Lectura",
     "connectWalletFirst": "Por favor conecta tu wallet primero",
-    "enterIntention": "Por favor ingresa tu intención o pregunta"
+    "enterIntention": "Por favor ingresa tu intención o pregunta",
+    "reading": "Lectura",
+    "history": "Historial",
+    "decks": "Mazos",
+    "date": "Fecha",
+    "question": "Pregunta",
+    "cards": "Cartas",
+    "result": "Resultado",
+    "noReadings": "No se encontraron lecturas",
+    "readingsAvailable": "Lecturas Disponibles",
+    "mockQuestion1": "¿Subirán los precios de las criptomonedas?",
+    "mockQuestion2": "¿Debería invertir en NFTs?",
+    "mockCard1": "El Degen",
+    "mockCard2": "La Ballena",
+    "mockCard3": "La Luna",
+    "mockCard4": "El NFT",
+    "mockCard5": "El Contrato Inteligente",
+    "mockCard6": "El DAO",
+    "mockResult1": "Perspectiva positiva con volatilidad potencial",
+    "mockResult2": "Considera cuidadosamente, señales mixtas"
   },
   "footer": {
     "allRightsReserved": "Todos los derechos reservados.",
@@ -68,9 +93,15 @@
     "spanish": "Español"
   },
   "errors": {
-    "walletNotInstalled": "Wallet no instalada",
-    "connectionFailed": "Conexión fallida",
+    "walletNotInstalled": "no está instalado. Por favor instálalo para continuar.",
+    "connectionFailed": "Conexión fallida. Inténtalo de nuevo.",
+    "connectionRejected": "Conexión rechazada por el usuario",
+    "phantomConnectionFailed": "Error al conectar con Phantom. Verifica que tengas la wallet abierta.",
+    "metamaskConnectionFailed": "Error al conectar con MetaMask. Verifica que tengas la wallet abierta.",
     "signatureFailed": "Firma fallida",
-    "tokenRequired": "Token requerido para esta lectura"
+    "walletNotConnected": "Wallet no conectada",
+    "tokenRequired": "Token requerido para esta lectura",
+    "deckLoadFailed": "Error al cargar datos de mazos",
+    "historyLoadFailed": "Error al cargar el historial"
   }
 }
