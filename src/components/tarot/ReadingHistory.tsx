@@ -1,19 +1,44 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWallet } from '@/contexts/WalletContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface Reading {
+  id: string;
+  date: string;
+  question: string;
+  cards: string[];
+  result: string;
+}
 
 interface ReadingHistoryProps {
   className?: string;
+  readings?: any[];
+  isLoading?: boolean;
 }
 
-const ReadingHistory: React.FC<ReadingHistoryProps> = ({ className = '' }) => {
+const ReadingHistory: React.FC<ReadingHistoryProps> = ({ 
+  className = '', 
+  readings = [], 
+  isLoading = false 
+}) => {
   const { t } = useTranslation();
-  const { userData } = useWallet();
   
-  // This would ideally come from an API or context
+  // Format the readings data to match our expected format
+  const formattedReadings: Reading[] = readings.length > 0 
+    ? readings.map((reading: any) => ({
+        id: reading.id || String(Math.random()),
+        date: reading.date || new Date().toISOString().split('T')[0],
+        question: reading.question || '',
+        cards: Array.isArray(reading.cards) ? reading.cards : [],
+        result: reading.result || ''
+      }))
+    : [];
+
+  // If there are no readings and we're not loading, show mock data
+  const showMockData = formattedReadings.length === 0 && !isLoading;
   const mockReadings = [
     {
       id: '1',
@@ -31,10 +56,19 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({ className = '' }) => {
     }
   ];
 
+  const displayReadings = showMockData ? mockReadings : formattedReadings;
+
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="p-6">
-        {mockReadings.length > 0 ? (
+        {isLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+            <Skeleton className="h-6 w-full" />
+          </div>
+        ) : displayReadings.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -46,11 +80,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({ className = '' }) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockReadings.map((reading) => (
+                {displayReadings.map((reading) => (
                   <TableRow key={reading.id}>
                     <TableCell className="font-medium">{reading.date}</TableCell>
                     <TableCell>{reading.question}</TableCell>
-                    <TableCell>{reading.cards.join(', ')}</TableCell>
+                    <TableCell>{Array.isArray(reading.cards) ? reading.cards.join(', ') : ''}</TableCell>
                     <TableCell>{reading.result}</TableCell>
                   </TableRow>
                 ))}

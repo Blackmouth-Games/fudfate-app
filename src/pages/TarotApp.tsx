@@ -1,8 +1,9 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
+import { useEnvironment } from '@/hooks/useEnvironment';
 import WalletConnector from '@/components/wallet/WalletConnector';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import GlitchText from '@/components/GlitchText';
@@ -11,27 +12,102 @@ import DeckSelector from '@/components/tarot/DeckSelector';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, History, Layers } from 'lucide-react';
+import { toast } from 'sonner';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
   const { t } = useTranslation();
+  const { webhooks } = useEnvironment();
+  const [activeTab, setActiveTab] = useState('reading');
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+
+  const handleTabChange = async (value: string) => {
+    setActiveTab(value);
+    
+    if (value === 'decks' && userData?.userId) {
+      try {
+        // Call the deck webhook when the decks tab is selected
+        const response = await fetch(webhooks.deck, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: new Date().toISOString(),
+            userid: userData.userId
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Process response if needed
+        console.log('Deck webhook called successfully');
+      } catch (error) {
+        console.error('Error calling deck webhook:', error);
+        toast.error('Error loading decks data');
+      }
+    } else if (value === 'history' && userData?.userId) {
+      setIsLoadingHistory(true);
+      try {
+        // Call the history webhook when the history tab is selected
+        const response = await fetch(webhooks.history, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: new Date().toISOString(),
+            userid: userData.userId
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Process the history data from the response
+        const data = await response.json();
+        if (data && Array.isArray(data.readings)) {
+          setHistoryData(data.readings);
+        } else {
+          setHistoryData([]);
+        }
+      } catch (error) {
+        console.error('Error calling history webhook:', error);
+        toast.error('Error loading history data');
+        setHistoryData([]);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-gray-800">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center">
-            <img 
-              src="/img/logos/FUDFATE_logo.png" 
-              alt="FUDFATE" 
-              className="h-12"
-            />
-          </div>
+          {!connected && (
+            <div className="flex items-center">
+              <img 
+                src="/img/logos/FUDFATE_logo.png" 
+                alt="FUDFATE" 
+                className="h-12"
+              />
+            </div>
+          )}
           
           {connected && (
             <div className="flex-grow flex justify-center">
-              <Tabs defaultValue="reading" className="max-w-xs">
+              <Tabs 
+                defaultValue="reading" 
+                value={activeTab}
+                onValueChange={handleTabChange}
+                className="max-w-xs"
+              >
                 <TabsList className="grid grid-cols-3">
                   <TabsTrigger value="reading" className="flex items-center">
                     <Sparkles className="mr-2 h-4 w-4" />
@@ -92,13 +168,17 @@ const TarotApp: React.FC = () => {
               </div>
             )}
             
-            <Tabs defaultValue="reading" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsContent value="reading" className="mt-0">
                 <IntentionForm className="w-full" />
               </TabsContent>
               
               <TabsContent value="history" className="mt-0">
-                <ReadingHistory className="w-full" />
+                <ReadingHistory 
+                  className="w-full" 
+                  readings={historyData} 
+                  isLoading={isLoadingHistory} 
+                />
               </TabsContent>
               
               <TabsContent value="decks" className="mt-0">
