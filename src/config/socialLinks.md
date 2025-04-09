@@ -19,20 +19,22 @@ There are two ways to configure the social media links:
 You can set the following environment variables:
 
 ```
-SOCIAL_X_URL=https://twitter.com/yourusername
-SOCIAL_TELEGRAM_URL=https://t.me/yourchannel
-SOCIAL_GITHUB_URL=https://github.com/yourusername
+VITE_SOCIAL_X_URL=https://twitter.com/yourusername
+VITE_SOCIAL_TELEGRAM_URL=https://t.me/yourchannel
+VITE_SOCIAL_GITHUB_URL=https://github.com/yourusername
 ```
+
+Note: With Vite, all environment variables must be prefixed with `VITE_` to be accessible in the client-side code.
 
 ### 2. Direct Editing
 
-If you don't want to use environment variables, you can edit the links directly in the `Footer.tsx` file:
+If you don't want to use environment variables, you can edit the links directly in the `socialConfig.ts` file:
 
-```jsx
-const socialLinks = {
-  x: process.env.SOCIAL_X_URL || 'https://twitter.com/yourusername',
-  telegram: process.env.SOCIAL_TELEGRAM_URL || 'https://t.me/yourchannel',
-  github: process.env.SOCIAL_GITHUB_URL || 'https://github.com/yourusername'
+```typescript
+export const socialLinks = {
+  x: import.meta.env.VITE_SOCIAL_X_URL || 'https://twitter.com/yourusername',
+  telegram: import.meta.env.VITE_SOCIAL_TELEGRAM_URL || 'https://t.me/yourchannel',
+  github: import.meta.env.VITE_SOCIAL_GITHUB_URL || 'https://github.com/yourusername'
 };
 ```
 
@@ -41,5 +43,5 @@ const socialLinks = {
 To add a new social media platform:
 
 1. Import the icon from lucide-react in `Footer.tsx`
-2. Add a new property to the `socialLinks` object
+2. Add a new property to the `socialLinks` object in `socialConfig.ts`
 3. Add a new link element in the social links section of the Footer component

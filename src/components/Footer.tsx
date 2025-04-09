@@ -4,17 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from './LanguageSwitcher';
 import { X, MessageCircle, Github } from 'lucide-react';
+import { socialLinks } from '@/config/socialConfig';
 
 const Footer = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
-
-  // Get social links from environment variable or config
-  const socialLinks = {
-    x: process.env.SOCIAL_X_URL || 'https://twitter.com',
-    telegram: process.env.SOCIAL_TELEGRAM_URL || 'https://t.me',
-    github: process.env.SOCIAL_GITHUB_URL || 'https://github.com/blackmouthgames'
-  };
 
   return (
     <footer className="bg-white border-t border-gray-200 mt-auto">
