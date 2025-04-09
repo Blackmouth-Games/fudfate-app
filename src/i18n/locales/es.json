@@ -1,117 +1,105 @@
 
 {
   "common": {
-    "loading": "Cargando...",
-    "submit": "Enviar",
+    "close": "Cerrar",
     "cancel": "Cancelar",
-    "save": "Guardar",
-    "delete": "Eliminar",
-    "edit": "Editar",
-    "search": "Buscar",
-    "yes": "Sí",
-    "no": "No"
+    "confirm": "Confirmar",
+    "submit": "Enviar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información"
   },
-  "routes": {
+  "nav": {
     "home": "Inicio",
     "app": "Aplicación",
     "about": "Acerca de",
-    "privacy": "Política de Privacidad",
-    "cookies": "Política de Cookies",
-    "contact": "Contacto",
-    "notFound": "No Encontrado"
-  },
-  "meta": {
-    "title": "FUDFATE - Tarot Cripto",
-    "description": "Descubre tu fortuna cripto con FUDFATE, la app de lectura de tarot cripto."
-  },
-  "home": {
-    "hero": {
-      "title": "FUDFATE",
-      "subtitle": "TU FORTUNA CRIPTO TE ESPERA",
-      "connectButton": "Conectar Wallet",
-      "enterAppButton": "Entrar a la App"
-    },
-    "about": {
-      "title": "Acerca de FUDFATE",
-      "description": "FUDFATE es una app de tarot cripto que utiliza el poder de la blockchain para predecir tu futuro cripto."
-    }
-  },
-  "cards": {
-    "title": "CARTAS DEL TAROT CRIPTO",
-    "description": "Nuestro mazo personalizado de cartas de tarot con tema cripto revelará información sobre tu viaje cripto.",
-    "cta": "Obtén tu Lectura"
+    "cookies": "Cookies",
+    "privacy": "Privacidad"
   },
   "wallet": {
     "connect": "Conectar Wallet",
-    "disconnect": "Desconectar",
-    "connectWith": "Conectar con {{wallet}}",
+    "connecting": "Conectando...",
     "connected": "Conectado",
-    "userId": "ID de Usuario",
-    "notAvailable": "No disponible"
-  },
-  "errors": {
-    "walletNotConnected": "Wallet no conectada",
-    "walletNotSupported": "Wallet no soportada",
-    "readingFailed": "La lectura falló",
-    "historyLoadFailed": "Error al cargar el historial de lecturas",
-    "deckLoadFailed": "Error al cargar los mazos",
-    "deckLoadFailedTitle": "Error al Cargar Mazos",
-    "deckLoadFailedDescription": "No pudimos cargar tus mazos, así que hemos seleccionado el mazo predeterminado para ti. Por favor, inténtalo de nuevo más tarde."
+    "disconnect": "Desconectar",
+    "changeWallet": "Cambiar Wallet",
+    "walletNotDetected": "Wallet no detectada",
+    "installWallet": "Por favor instala una wallet",
+    "metamask": "MetaMask",
+    "phantom": "Phantom",
+    "coinbase": "Coinbase Wallet",
+    "walletConnect": "WalletConnect",
+    "connectionFailed": "Conexión de wallet fallida",
+    "tryAgain": "Por favor intenta de nuevo",
+    "wrongNetwork": "Red incorrecta",
+    "switchNetwork": "Por favor cambia a la red correcta"
   },
   "tarot": {
+    "askTheTarot": "Pregunta al Tarot",
+    "cosmicMessageReceived": "Mensaje Cósmico Recibido",
+    "focusOnYourQuestion": "Concéntrate en tu pregunta y deja que las cartas te guíen",
+    "enterYourQuestion": "Ingresa tu pregunta o intención...",
+    "seekGuidance": "Buscar Guía",
+    "selectCards": "Selecciona Tus Cartas",
+    "selectCardsDescription": "Elige 3 cartas que te llamen (seleccionadas: {{selected}}/{{total}})",
+    "clickToSelect": "Clic para seleccionar",
+    "selectedCards": "Cartas seleccionadas: {{count}}/3",
+    "revealYourDestiny": "Revela Tu Destino",
+    "selectDeck": "Selecciona Mazo de Tarot",
+    "additionalDecksComingSoon": "Más mazos se desbloquearán a medida que avances en tu viaje",
+    "locked": "Bloqueado",
+    "selected": "Seleccionado",
+    "comingSoon": "Próximamente",
+    "cardInterpretation": "Interpretación de la Carta",
+    "finalMessage": "Lectura Final",
+    "readingComplete": "Lectura Completa",
+    "startNewReading": "Iniciar Nueva Lectura",
+    "tapToReveal": "Toca para Revelar",
+    "soulJourney": "El Viaje de Tu Alma",
+    "cardReading": "Lectura de Cartas",
+    "invokingEnergies": "Invocando Energías Cósmicas",
+    "preparingYourReading": "Preparando tu lectura personalizada...",
+    "noReadingsAvailable": "No hay lecturas disponibles hoy. Regresa mañana para una nueva lectura o actualiza tu cuenta.",
+    "pastReadings": "Lecturas Anteriores",
+    "noReadingsFound": "No se encontraron lecturas anteriores",
+    "loadMoreReadings": "Cargar Más",
     "reading": "Lectura",
     "history": "Historial",
     "decks": "Mazos",
-    "yourIntention": "Tu Intención",
-    "askTheTarot": "Pregunta al Tarot",
-    "focusOnQuestion": "Concéntrate en una pregunta sobre tu futuro cripto. Sé específico y claro.",
-    "questionPlaceholder": "¿Qué dicen las cartas sobre mi próxima inversión en cripto?",
-    "characters": "caracteres",
-    "intentionPlaceholder": "Ingresa tu pregunta o intención...",
-    "intentionDescription": "Concéntrate en tu pregunta o intención mientras se barajan las cartas.",
-    "readingsAvailable": "Lecturas Disponibles",
-    "readCards": "Revela Tu Fortuna",
-    "selectDeck": "Selecciona un Mazo de Tarot",
-    "deck1Name": "Oráculo Cripto",
-    "deck2Name": "Místico Blockchain",
-    "defaultDeckName": "Mazo Predeterminado",
-    "comingSoon": "PRÓXIMAMENTE",
-    "connectWalletFirst": "Por favor, conecta tu wallet primero",
-    "enterIntention": "Por favor, ingresa tu intención o pregunta",
-    "date": "Fecha",
-    "question": "Pregunta",
-    "cards": "Cartas",
-    "result": "Resultado",
-    "deck1Description": "El mazo original con tema cripto con 22 cartas únicas que representan conceptos clave de blockchain.",
-    "deck2Description": "Un viaje místico por el metaverso con obras de arte únicas inspiradas en NFT.",
-    "noReadings": "Aún no has realizado ninguna lectura. ¡Intenta tu primera lectura ahora!",
-    "noReadingsTitle": "No se encontraron lecturas",
-    "noReadingsAvailable": "Aún no has realizado ninguna lectura. ¡Inicia tu primera lectura en la pestaña Lectura!",
-    "mockQuestion1": "¿Tendrán éxito mis inversiones en criptomonedas?",
-    "mockQuestion2": "¿Cuándo debería vender mi Bitcoin?",
-    "mockCard1": "La Ballena",
-    "mockCard2": "El Minero",
-    "mockCard3": "La Luna",
-    "mockCard4": "El Hodler",
-    "mockCard5": "El Degen",
-    "mockCard6": "El Airdrop",
-    "mockResult1": "Tus inversiones muestran promesa, pero la paciencia será clave.",
-    "mockResult2": "Las cartas sugieren esperar a que el mercado se estabilice antes de tomar decisiones.",
-    "invokingEnergies": "Invocando Energías Cósmicas",
-    "preparingYourReading": "Preparando tu lectura de tarot...",
-    "cosmicMessageReceived": "Mensaje Cósmico Recibido"
+    "viewAllCards": "Ver Todas las Cartas"
   },
-  "navigation": {
-    "home": "Inicio",
-    "app": "Aplicación",
-    "about": "Acerca de",
-    "contact": "Contacto"
+  "errors": {
+    "generalError": "Algo salió mal",
+    "tryAgainLater": "Por favor intenta de nuevo más tarde",
+    "readingFailed": "No se pudo completar la lectura",
+    "deckLoadFailed": "No se pudieron cargar los detalles del mazo",
+    "historyLoadFailed": "No se pudo cargar el historial de lecturas",
+    "connectionError": "Error de conexión"
   },
   "footer": {
     "allRightsReserved": "Todos los derechos reservados",
-    "privacyPolicy": "Política de Privacidad",
-    "cookiesPolicy": "Política de Cookies",
-    "termsOfService": "Términos de Servicio",
-    "createdBy": "Creado por"
+    "privacyPolicy": "Privacidad",
+    "cookiePolicy": "Cookies",
+    "termsOfService": "Términos"
+  },
+  "cookies": {
+    "title": "Política de Cookies",
+    "weUseCookies": "Utilizamos cookies para mejorar tu experiencia",
+    "accept": "Aceptar Todo",
+    "decline": "Rechazar Todo",
+    "preferences": "Preferencias",
+    "essential": "Esenciales",
+    "analytics": "Analíticas",
+    "marketing": "Marketing"
+  },
+  "cards": {
+    "title": "Cartas de Tarot Crypto",
+    "description": "Descubre tu destino crypto con nuestra colección única de cartas de tarot. Cada carta representa diferentes aspectos del viaje crypto."
+  },
+  "hero": {
+    "title": "La Fortuna Crypto Te Espera",
+    "subtitle": "Conecta tu wallet para acceder a lecturas de tarot personalizadas que predicen tu destino crypto",
+    "cta": "Comienza Tu Viaje"
   }
 }

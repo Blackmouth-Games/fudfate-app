@@ -32,7 +32,13 @@ const TarotCardSection = ({ deckId = 'crypto' }: TarotCardSectionProps) => {
     <section id="cards" className="py-20 px-4 md:px-8 lg:px-16 relative">
       <div className="max-w-6xl mx-auto">
         <AnimatedSection animation="fade-in" className="mb-16 text-center">
-          <GlitchText text={t('cards.title')} goldEffect className="text-3xl md:text-4xl font-pixel-2p mb-6 text-black" />
+          <div className="mb-6 overflow-visible">
+            <GlitchText 
+              text={t('cards.title')} 
+              goldEffect 
+              className="text-3xl md:text-4xl font-pixel-2p text-black inline-block"
+            />
+          </div>
           <p className="text-lg md:text-xl text-gray-700 font-pixel max-w-3xl mx-auto">
             {t('cards.description')}
           </p>

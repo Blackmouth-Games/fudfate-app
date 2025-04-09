@@ -1,125 +1,45 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
-import { Sparkles, Loader2, X } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
-import { useEnvironment } from '@/hooks/useEnvironment';
+import { Sparkles, X } from 'lucide-react';
+import PreparingReading from './PreparingReading';
+import CardSelection from './CardSelection';
+import CardReading from './CardReading';
 
 interface IntentionFormProps {
   className?: string;
 }
 
 const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
-  const { intention, setIntention, startReading, loading, setSelectedCards, setFinalMessage } = useTarot();
-  const { connected, userData } = useWallet();
   const { t } = useTranslation();
-  const { webhooks } = useEnvironment();
+  const { userData } = useWallet();
+  const { 
+    intention, setIntention, 
+    phase, startReading, resetReading
+  } = useTarot();
+  
+  const [loading, setLoading] = useState(false);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!connected) {
-      toast.error(t('tarot.connectWalletFirst'));
+    if (intention.trim().length < 3) {
       return;
     }
     
-    if (!intention.trim()) {
-      toast.error(t('tarot.enterIntention'));
-      return;
-    }
-
-    if (!userData?.userId) {
-      toast.error("User ID not available. Please reconnect your wallet.");
-      return;
-    }
-    
-    // Check if the user has already done a reading today
-    if (userData.runsToday === false) {
-      toast.error("You have already done a reading today. Please come back tomorrow.");
-      return;
-    }
-    
+    setLoading(true);
     try {
-      // Call the reading webhook
-      const response = await fetch(webhooks.reading, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userid: userData.userId,
-          question: intention,
-          runs_today: userData.runsToday
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Webhook response:", data);
-      
-      // Process the received data for tarot reading
-      if (data.message) {
-        setFinalMessage(data.message);
-        
-        // Process selected_cards if they are returned from the webhook
-        if (Array.isArray(data.selected_cards) && data.selected_cards.length > 0) {
-          // Get cards from the deck based on the selected card indices
-          import('@/data/tarotCards').then(({ default: tarotCards }) => {
-            const selectedDeckCards = tarotCards.filter(card => card.deck === 'deck1');
-            
-            // Map the received card indices to actual card objects
-            const processedCards = data.selected_cards.map((cardIndex: number) => {
-              const card = selectedDeckCards[cardIndex] || {
-                id: `card-${cardIndex}`,
-                name: `Card ${cardIndex}`,
-                image: `/img/cards/carddeck1/deck1_${cardIndex}_TheDegen.png`,
-                description: "No description available"
-              };
-              
-              return {
-                id: card.id || `card-${cardIndex}`,
-                name: card.name || `Card ${cardIndex}`,
-                image: card.image || `/img/cards/carddeck1/deck1_${cardIndex}_TheDegen.png`,
-                interpretation: "The cosmic energies are aligning with your question.",
-                revealed: true
-              };
-            });
-            
-            setSelectedCards(processedCards);
-          });
-        } else if (data.cards) {
-          // Fallback to previous format for backward compatibility
-          const processedCards = data.cards.map((card: any, index: number) => ({
-            id: card.id || `card-${index}`,
-            name: card.name || `Card ${index + 1}`,
-            image: card.image || `/img/cards/carddeck1/deck1_${index}_TheDegen.png`,
-            interpretation: card.interpretation || "No interpretation available",
-            revealed: true
-          }));
-          
-          setSelectedCards(processedCards);
-        }
-        
-        // Continue with the tarot reading flow
-        await startReading();
-      } else {
-        toast.error("Invalid response from server");
-      }
-    } catch (error) {
-      console.error("Error fetching tarot reading:", error);
-      toast.error("Failed to get your tarot reading. Please try again.");
-      
-      // Fall back to the regular reading process if the webhook fails
       await startReading();
+    } catch (error) {
+      console.error('Error starting reading:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,74 +47,77 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
     setIntention('');
   };
 
+  // Different phases of reading
+  const renderPhaseContent = () => {
+    switch (phase) {
+      case 'preparing':
+        return <PreparingReading />;
+      case 'selection':
+        return <CardSelection />;
+      case 'reading':
+      case 'complete':
+        return <CardReading />;
+      default:
+        return (
+          <Card className="border-amber-400/50 shadow-md">
+            <CardContent className="pt-6">
+              <div className="text-center mb-6">
+                <div className="mb-2 overflow-visible">
+                  <GlitchText 
+                    text={t('tarot.askTheTarot')} 
+                    className="text-xl font-medium text-gray-800"
+                  />
+                </div>
+                <p className="text-gray-600 text-sm">
+                  {t('tarot.focusOnYourQuestion')}
+                </p>
+              </div>
+              
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="relative">
+                  <Input
+                    value={intention}
+                    onChange={(e) => setIntention(e.target.value)}
+                    placeholder={t('tarot.enterYourQuestion')}
+                    className="pr-8 text-center"
+                  />
+                  {intention && (
+                    <button 
+                      type="button" 
+                      onClick={clearIntention}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                
+                <div className="pt-2 flex justify-center">
+                  <Button 
+                    type="submit" 
+                    disabled={!userData?.runsToday || intention.trim().length < 3 || loading}
+                    className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
+                  >
+                    <Sparkles size={14} /> {t('tarot.seekGuidance')}
+                  </Button>
+                </div>
+                
+                {!userData?.runsToday && (
+                  <div className="text-center text-sm text-amber-600 mt-2">
+                    {t('tarot.noReadingsAvailable')}
+                  </div>
+                )}
+              </form>
+            </CardContent>
+          </Card>
+        );
+    }
+  };
+
   return (
-    <Card className={`border-amber-400/50 shadow-md ${className}`}>
-      <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="text-lg font-medium text-center text-gray-800">
-              <GlitchText text={t('tarot.askTheTarot')} />
-            </h3>
-            <p className="text-gray-600 text-xs text-center">
-              {t('tarot.focusOnQuestion')}
-            </p>
-          </div>
-          
-          <div className="relative">
-            <Input
-              value={intention}
-              onChange={(e) => {
-                // Limit to 160 characters
-                if (e.target.value.length <= 160) {
-                  setIntention(e.target.value);
-                }
-              }}
-              placeholder={t('tarot.questionPlaceholder')}
-              className="border-amber-200 placeholder:text-gray-400 pr-8"
-              maxLength={160}
-            />
-            {intention && (
-              <button
-                type="button"
-                onClick={clearIntention}
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                aria-label="Clear question"
-              >
-                <X size={18} />
-              </button>
-            )}
-          </div>
-          
-          <div className="text-xs text-right text-gray-500">
-            {intention.length}/160 {t('tarot.characters')}
-          </div>
-          
-          {userData && userData.runsToday === false && (
-            <div className="p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-xs">
-              <p className="text-center">{t('tarot.noReadingsAvailable')}</p>
-            </div>
-          )}
-          
-          <Button
-            type="submit"
-            className="w-auto px-6 mx-auto block bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all text-sm py-1.5 h-auto"
-            disabled={loading || !intention.trim() || (userData?.runsToday === false)}
-          >
-            {loading ? (
-              <span className="flex items-center">
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                {t('common.loading')}
-              </span>
-            ) : (
-              <span className="flex items-center">
-                <Sparkles className="mr-2 h-3 w-3" />
-                {t('tarot.readCards')}
-              </span>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <div className={className}>
+      {renderPhaseContent()}
+    </div>
   );
 };
 

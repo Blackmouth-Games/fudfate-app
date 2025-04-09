@@ -1,117 +1,105 @@
 
 {
   "common": {
-    "loading": "Loading...",
-    "submit": "Submit",
+    "close": "Close",
     "cancel": "Cancel",
-    "save": "Save",
-    "delete": "Delete",
-    "edit": "Edit",
-    "search": "Search",
-    "yes": "Yes",
-    "no": "No"
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information"
   },
-  "routes": {
+  "nav": {
     "home": "Home",
     "app": "App",
     "about": "About",
-    "privacy": "Privacy Policy",
-    "cookies": "Cookies Policy",
-    "contact": "Contact",
-    "notFound": "Not Found"
-  },
-  "meta": {
-    "title": "FUDFATE - Crypto Tarot",
-    "description": "Discover your crypto fortune with FUDFATE, the crypto tarot reading app."
-  },
-  "home": {
-    "hero": {
-      "title": "FUDFATE",
-      "subtitle": "CRYPTO FORTUNE AWAITS",
-      "connectButton": "Connect Wallet",
-      "enterAppButton": "Enter App"
-    },
-    "about": {
-      "title": "About FUDFATE",
-      "description": "FUDFATE is a crypto tarot app that uses the power of the blockchain to predict your crypto future."
-    }
-  },
-  "cards": {
-    "title": "CRYPTO TAROT CARDS",
-    "description": "Our custom deck of crypto-themed tarot cards will reveal insights about your crypto journey.",
-    "cta": "Get Your Reading"
+    "cookies": "Cookies",
+    "privacy": "Privacy"
   },
   "wallet": {
     "connect": "Connect Wallet",
-    "disconnect": "Disconnect",
-    "connectWith": "Connect with {{wallet}}",
+    "connecting": "Connecting...",
     "connected": "Connected",
-    "userId": "User ID",
-    "notAvailable": "Not available"
-  },
-  "errors": {
-    "walletNotConnected": "Wallet not connected",
-    "walletNotSupported": "Wallet not supported",
-    "readingFailed": "Reading failed",
-    "historyLoadFailed": "Failed to load reading history",
-    "deckLoadFailed": "Failed to load decks",
-    "deckLoadFailedTitle": "Deck Loading Error",
-    "deckLoadFailedDescription": "We couldn't load your decks, so we've selected the default deck for you. Please try again later."
+    "disconnect": "Disconnect",
+    "changeWallet": "Change Wallet",
+    "walletNotDetected": "Wallet not detected",
+    "installWallet": "Please install a wallet",
+    "metamask": "MetaMask",
+    "phantom": "Phantom",
+    "coinbase": "Coinbase Wallet",
+    "walletConnect": "WalletConnect",
+    "connectionFailed": "Wallet connection failed",
+    "tryAgain": "Please try again",
+    "wrongNetwork": "Wrong network",
+    "switchNetwork": "Please switch to the correct network"
   },
   "tarot": {
+    "askTheTarot": "Ask the Tarot",
+    "cosmicMessageReceived": "Cosmic Message Received",
+    "focusOnYourQuestion": "Focus on your question and let the cards guide you",
+    "enterYourQuestion": "Enter your question or intention...",
+    "seekGuidance": "Seek Guidance",
+    "selectCards": "Select Your Cards",
+    "selectCardsDescription": "Choose 3 cards that call to you (selected: {{selected}}/{{total}})",
+    "clickToSelect": "Click to select",
+    "selectedCards": "Selected Cards: {{count}}/3",
+    "revealYourDestiny": "Reveal Your Destiny",
+    "selectDeck": "Select Tarot Deck",
+    "additionalDecksComingSoon": "More decks will be unlocked as your journey progresses",
+    "locked": "Locked",
+    "selected": "Selected",
+    "comingSoon": "Coming Soon",
+    "cardInterpretation": "Card Interpretation",
+    "finalMessage": "Final Reading",
+    "readingComplete": "Reading Complete",
+    "startNewReading": "Start New Reading",
+    "tapToReveal": "Tap to Reveal",
+    "soulJourney": "Your Soul's Journey",
+    "cardReading": "Card Reading",
+    "invokingEnergies": "Invoking Cosmic Energies",
+    "preparingYourReading": "Preparing your personalized reading...",
+    "noReadingsAvailable": "No readings available today. Return tomorrow for a new reading or upgrade your account.",
+    "pastReadings": "Past Readings",
+    "noReadingsFound": "No previous readings found",
+    "loadMoreReadings": "Load More",
     "reading": "Reading",
     "history": "History",
     "decks": "Decks",
-    "yourIntention": "Your Intention",
-    "askTheTarot": "Ask the Tarot",
-    "focusOnQuestion": "Focus on a question about your crypto future. Be specific and clear.",
-    "questionPlaceholder": "What do the cards say about my next crypto investment?",
-    "characters": "characters",
-    "intentionPlaceholder": "Enter your question or intention...",
-    "intentionDescription": "Focus on your question or intention while the cards are being shuffled.",
-    "readingsAvailable": "Readings Available",
-    "readCards": "Reveal Your Fortune",
-    "selectDeck": "Select Tarot Deck",
-    "deck1Name": "Crypto Oracle",
-    "deck2Name": "Blockchain Mystic",
-    "defaultDeckName": "Default Deck",
-    "comingSoon": "COMING SOON",
-    "connectWalletFirst": "Please connect your wallet first",
-    "enterIntention": "Please enter your intention or question",
-    "date": "Date",
-    "question": "Question",
-    "cards": "Cards",
-    "result": "Result",
-    "deck1Description": "The original crypto-themed deck with 22 unique cards representing key blockchain concepts.",
-    "deck2Description": "A mystical journey through the metaverse with unique NFT-inspired artwork.",
-    "noReadings": "You haven't done any readings yet. Try your first reading now!",
-    "noReadingsTitle": "No Readings Found",
-    "noReadingsAvailable": "You haven't done any readings yet. Start your first reading in the Reading tab!",
-    "mockQuestion1": "Will my crypto investments succeed?",
-    "mockQuestion2": "When should I sell my Bitcoin?",
-    "mockCard1": "The Whale",
-    "mockCard2": "The Miner",
-    "mockCard3": "The Moon",
-    "mockCard4": "The Hodler",
-    "mockCard5": "The Degen",
-    "mockCard6": "The Airdrop",
-    "mockResult1": "Your investments show promise, but patience will be key.",
-    "mockResult2": "The cards suggest waiting for the market to stabilize before making decisions.",
-    "invokingEnergies": "Invoking Cosmic Energies",
-    "preparingYourReading": "Preparing your tarot reading...",
-    "cosmicMessageReceived": "Cosmic Message Received"
+    "viewAllCards": "View All Cards"
   },
-  "navigation": {
-    "home": "Home",
-    "app": "App",
-    "about": "About",
-    "contact": "Contact"
+  "errors": {
+    "generalError": "Something went wrong",
+    "tryAgainLater": "Please try again later",
+    "readingFailed": "Reading could not be completed",
+    "deckLoadFailed": "Could not load deck details",
+    "historyLoadFailed": "Could not load reading history",
+    "connectionError": "Connection error"
   },
   "footer": {
     "allRightsReserved": "All rights reserved",
-    "privacyPolicy": "Privacy Policy",
-    "cookiesPolicy": "Cookies Policy",
-    "termsOfService": "Terms of Service",
-    "createdBy": "Created by"
+    "privacyPolicy": "Privacy",
+    "cookiePolicy": "Cookies",
+    "termsOfService": "Terms"
+  },
+  "cookies": {
+    "title": "Cookie Policy",
+    "weUseCookies": "We use cookies to enhance your experience",
+    "accept": "Accept All",
+    "decline": "Decline All",
+    "preferences": "Preferences",
+    "essential": "Essential",
+    "analytics": "Analytics",
+    "marketing": "Marketing"
+  },
+  "cards": {
+    "title": "Crypto Tarot Cards",
+    "description": "Discover your crypto destiny with our unique collection of tarot cards. Each card represents different aspects of the crypto journey."
+  },
+  "hero": {
+    "title": "Crypto Fortune Awaits",
+    "subtitle": "Connect your wallet to access personalized tarot readings that predict your crypto destiny",
+    "cta": "Begin Your Journey"
   }
 }

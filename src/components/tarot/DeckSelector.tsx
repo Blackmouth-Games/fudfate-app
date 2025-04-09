@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
+import { Dialog, DialogContent, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { X } from 'lucide-react';
+import tarotCards from '@/data/tarotCards';
 
 interface DeckSelectorProps {
   className?: string;
@@ -11,6 +14,7 @@ interface DeckSelectorProps {
 const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const { t } = useTranslation();
   const [selectedDeck, setSelectedDeck] = useState<string>('deck1');
+  const [openDeckId, setOpenDeckId] = useState<string | null>(null);
 
   // Mock decks - in a real app, this would come from your backend
   const decks = [
@@ -28,6 +32,19 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
     }
   };
 
+  const openDeckDetails = (deckId: string) => {
+    if (deckId === 'deck1') {
+      setOpenDeckId(deckId);
+    }
+  };
+
+  const closeDeckDetails = () => {
+    setOpenDeckId(null);
+  };
+
+  // Filter cards for the selected deck
+  const deckCards = tarotCards.filter(card => card.deck === openDeckId);
+
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="pt-6">
@@ -40,14 +57,19 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {decks.map((deck) => (
             <div key={deck.id} className="flex flex-col items-center">
               <div 
-                className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[160px] h-[220px] mx-auto
+                className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[120px] h-[170px] mx-auto
                   ${selectedDeck === deck.id ? 'border-amber-500 shadow-amber-200' : 'border-gray-200'}
                   ${!deck.unlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
-                onClick={() => handleSelectDeck(deck.id)}
+                onClick={() => {
+                  handleSelectDeck(deck.id);
+                  if (deck.unlocked) {
+                    openDeckDetails(deck.id);
+                  }
+                }}
               >
                 <img 
                   src={deck.image} 
@@ -79,6 +101,32 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
           ))}
         </div>
       </CardContent>
+
+      <Dialog open={!!openDeckId} onOpenChange={(open) => !open && closeDeckDetails()}>
+        <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogTitle className="flex justify-between items-center">
+            <GlitchText text={openDeckId === 'deck1' ? 'Crypto Classics' : ''} />
+            <DialogClose className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100">
+              <X className="h-4 w-4" />
+              <span className="sr-only">{t('common.close')}</span>
+            </DialogClose>
+          </DialogTitle>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 py-4">
+            {deckCards.map((card) => (
+              <div key={card.id} className="flex flex-col items-center">
+                <div className="border-2 rounded-lg overflow-hidden shadow-md w-full aspect-[2/3]">
+                  <img 
+                    src={card.image} 
+                    alt={card.name} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <h5 className="mt-2 text-center text-xs font-medium">{card.name}</h5>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
