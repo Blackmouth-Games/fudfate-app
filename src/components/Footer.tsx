@@ -19,7 +19,7 @@ const Footer = () => {
           
           <div className="flex justify-center space-x-5 mb-2 sm:mb-0">
             <a 
-              href={socialLinks.twitter} 
+              href={socialLinks.x} 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-accent transition-colors"
@@ -37,7 +37,7 @@ const Footer = () => {
               <MessageCircle size={16} />
             </a>
             <a 
-              href="https://fudfate.blackmouthgames.com/" 
+              href={socialLinks.web} 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-accent transition-colors"
