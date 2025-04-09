@@ -4,10 +4,8 @@ import { useTarot, Deck } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, X, LockIcon } from 'lucide-react';
+import { RadioGroup } from '@/components/ui/radio-group';
+import { AlertTriangle, LockIcon } from 'lucide-react';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { toast } from 'sonner';
 
@@ -24,7 +22,10 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const [decksError, setDecksError] = useState(false);
   const [availableDecks, setAvailableDecks] = useState<{id: string, name: string, available: boolean}[]>([
     { id: 'deck1', name: t('tarot.deck1Name'), available: true },
-    { id: 'deck2', name: t('tarot.deck2Name'), available: false }
+    { id: 'deck2', name: t('tarot.deck2Name'), available: false },
+    { id: 'deck3', name: 'Crypto Memes', available: false },
+    { id: 'deck4', name: 'NFT Art', available: false },
+    { id: 'deck5', name: 'Future Finance', available: false }
   ]);
 
   useEffect(() => {
@@ -54,18 +55,34 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
         console.log('Deck webhook response:', data);
         
         if (data && Array.isArray(data.decks)) {
-          setAvailableDecks(data.decks.map((deck: any) => ({
+          // Preserve our 5 deck structure but update availability from API
+          let apiDecks = data.decks.map((deck: any) => ({
             id: deck.id || 'deck1',
             name: deck.name || t('tarot.defaultDeckName'),
             available: deck.available !== false
-          })));
+          }));
+          
+          // Ensure we always have 5 decks
+          if (apiDecks.length < 5) {
+            const existingIds = apiDecks.map(d => d.id);
+            availableDecks.forEach(defaultDeck => {
+              if (!existingIds.includes(defaultDeck.id)) {
+                apiDecks.push({...defaultDeck, available: false});
+              }
+            });
+          }
+          
+          setAvailableDecks(apiDecks.slice(0, 5));
         }
       } catch (error) {
         console.error('Error fetching decks:', error);
         setDecksError(true);
         // Default to deck1 when there's an error
         setSelectedDeck('deck1');
-        toast.error(t('errors.deckLoadFailed'));
+        toast.error(t('errors.deckLoadFailed'), {
+          position: 'bottom-center',
+          className: 'subtle-toast',
+        });
       } finally {
         setLoadingDecks(false);
       }
@@ -81,22 +98,21 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="pt-6">
-        <h3 className="text-xl font-bold mb-4 text-center text-gray-800">
+        <h3 className="text-lg font-medium mb-4 text-center text-gray-800">
           {t('tarot.selectDeck')}
         </h3>
         
         {decksError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>{t('errors.deckLoadFailedTitle')}</AlertTitle>
-            <AlertDescription>{t('errors.deckLoadFailedDescription')}</AlertDescription>
-          </Alert>
+          <div className="text-amber-600 text-sm bg-amber-50 border border-amber-200 rounded mb-4 p-2 flex items-center justify-center">
+            <AlertTriangle className="h-3 w-3 mr-1" />
+            <span>{t('errors.deckLoadFailedTitle')}</span>
+          </div>
         )}
         
         <RadioGroup
           value={selectedDeck}
           onValueChange={handleDeckChange}
-          className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          className="grid grid-cols-3 gap-4"
         >
           {availableDecks.map((deck) => (
             <div 
@@ -121,29 +137,27 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
               >
                 <div className={`
                   aspect-[2/3] relative overflow-hidden 
-                  ${selectedDeck === deck.id ? 'ring-4 ring-amber-500' : 'ring-1 ring-gray-200'}
-                  ${deck.available ? 'bg-gradient-to-br from-amber-800 to-amber-500' : 'bg-gray-300'}
-                  rounded-lg shadow-md
+                  ${selectedDeck === deck.id ? 'ring-2 ring-amber-500' : 'ring-1 ring-gray-200'}
+                  ${deck.available ? 'bg-gradient-to-br from-amber-700 to-amber-500' : 'bg-gray-300'}
+                  rounded-lg shadow-sm
                 `}>
-                  {deck.id === 'deck1' ? (
+                  {deck.id === 'deck1' && (
                     <img 
                       src="/img/cards/carddeck1/deck1_0_TheDegen.png"
                       alt={deck.name}
                       className="absolute inset-0 w-full h-full object-cover opacity-20"
                     />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-500 opacity-50" />
                   )}
                   
                   {!deck.available && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 z-10">
-                      <LockIcon className="w-12 h-12 text-white/70 mb-2" />
-                      <span className="text-white font-bold text-lg">{t('tarot.comingSoon')}</span>
+                      <LockIcon className="w-8 h-8 text-white/70 mb-1" />
+                      <span className="text-white font-medium text-xs">{t('tarot.comingSoon')}</span>
                     </div>
                   )}
                   
-                  <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
-                    <h4 className="text-white font-bold text-lg">{deck.name}</h4>
+                  <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/70 to-transparent">
+                    <h4 className="text-white font-medium text-xs">{deck.name}</h4>
                   </div>
                 </div>
               </label>

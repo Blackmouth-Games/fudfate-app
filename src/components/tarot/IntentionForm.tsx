@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Sparkles, Loader2, AlertTriangle } from 'lucide-react';
+import { Sparkles, Loader2, X } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
 import { useEnvironment } from '@/hooks/useEnvironment';
 
@@ -123,55 +123,71 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
     }
   };
 
+  const clearIntention = () => {
+    setIntention('');
+  };
+
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <h3 className="text-xl font-bold text-center text-gray-800">
+          <div className="space-y-1">
+            <h3 className="text-lg font-medium text-center text-gray-800">
               <GlitchText text={t('tarot.askTheTarot')} />
             </h3>
-            <p className="text-gray-600 text-sm text-center">
+            <p className="text-gray-600 text-xs text-center">
               {t('tarot.focusOnQuestion')}
             </p>
           </div>
           
-          <Input
-            value={intention}
-            onChange={(e) => {
-              // Limit to 160 characters
-              if (e.target.value.length <= 160) {
-                setIntention(e.target.value);
-              }
-            }}
-            placeholder={t('tarot.questionPlaceholder')}
-            className="border-amber-200 placeholder:text-gray-400"
-            maxLength={160}
-          />
+          <div className="relative">
+            <Input
+              value={intention}
+              onChange={(e) => {
+                // Limit to 160 characters
+                if (e.target.value.length <= 160) {
+                  setIntention(e.target.value);
+                }
+              }}
+              placeholder={t('tarot.questionPlaceholder')}
+              className="border-amber-200 placeholder:text-gray-400 pr-8"
+              maxLength={160}
+            />
+            {intention && (
+              <button
+                type="button"
+                onClick={clearIntention}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                aria-label="Clear question"
+              >
+                <X size={18} />
+              </button>
+            )}
+          </div>
           
           <div className="text-xs text-right text-gray-500">
             {intention.length}/160 {t('tarot.characters')}
           </div>
           
           {userData && userData.runsToday === false && (
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
-              You have already done a reading today. Use the developer tools to enable readings for testing.
+            <div className="p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-xs">
+              <p className="text-center">{t('tarot.noReadingsAvailable')}</p>
             </div>
           )}
           
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all"
+            className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all text-sm py-1.5 h-auto"
             disabled={loading || !intention.trim() || (userData?.runsToday === false)}
           >
             {loading ? (
               <span className="flex items-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                 {t('common.loading')}
               </span>
             ) : (
               <span className="flex items-center">
-                <Sparkles className="mr-2 h-4 w-4" />
+                <Sparkles className="mr-2 h-3 w-3" />
                 {t('tarot.readCards')}
               </span>
             )}
