@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -9,7 +10,6 @@ import GlitchText from '@/components/GlitchText';
 import IntentionForm from '@/components/tarot/IntentionForm';
 import DeckSelector from '@/components/tarot/DeckSelector';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
-import CookieConsent from '@/components/CookieConsent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, History, Layers } from 'lucide-react';
 import { toast } from 'sonner';
@@ -196,8 +196,6 @@ const TarotApp: React.FC = () => {
       </main>
 
       <Footer />
-      
-      <CookieConsent />
     </div>
   );
 };

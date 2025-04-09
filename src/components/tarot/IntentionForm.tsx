@@ -83,41 +83,42 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
                 </p>
               </div>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                  <Input
-                    value={intention}
-                    onChange={(e) => setIntention(e.target.value)}
-                    placeholder={t('tarot.enterYourQuestion')}
-                    className="pr-8 text-center"
-                  />
-                  {intention && (
-                    <button 
-                      type="button" 
-                      onClick={clearIntention}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
-                
-                <div className="pt-2 flex justify-center">
-                  <Button 
-                    type="submit" 
-                    disabled={!userData?.runsToday || intention.trim().length < 3 || loading}
-                    className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
-                  >
-                    <Sparkles size={14} /> {t('tarot.seekGuidance')}
-                  </Button>
-                </div>
-                
-                {!userData?.runsToday && (
-                  <div className="text-center text-sm text-amber-600 mt-2">
-                    {t('tarot.noReadingsAvailable')}
+              {/* Only show form if user has readings available */}
+              {userData?.runsToday ? (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="relative">
+                    <Input
+                      value={intention}
+                      onChange={(e) => setIntention(e.target.value)}
+                      placeholder={t('tarot.enterYourQuestion')}
+                      className="pr-8 text-center"
+                    />
+                    {intention && (
+                      <button 
+                        type="button" 
+                        onClick={clearIntention}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
                   </div>
-                )}
-              </form>
+                  
+                  <div className="pt-2 flex justify-center">
+                    <Button 
+                      type="submit" 
+                      disabled={intention.trim().length < 3 || loading}
+                      className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
+                    >
+                      <Sparkles size={14} /> {t('tarot.seekGuidance')}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="text-center text-sm text-amber-600 mt-2">
+                  {t('tarot.noReadingsAvailable')}
+                </div>
+              )}
             </CardContent>
           </Card>
         );
