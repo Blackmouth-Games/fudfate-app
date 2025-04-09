@@ -1,4 +1,3 @@
-
 /* Animation Styles */
 @keyframes floating {
   0%, 100% {
@@ -73,12 +72,14 @@
     animation: glitch 1.5s infinite;
     display: inline-block;
     overflow: visible !important;
+    white-space: nowrap;
 }
 
 .glitch span {
     position: absolute;
     top: 0;
     left: 0;
+    white-space: nowrap;
 }
 
 .glitch span:first-child {

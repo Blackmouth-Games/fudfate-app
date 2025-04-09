@@ -11,7 +11,7 @@ interface GlitchEffectProps {
 
 const GlitchEffect = ({ children, className, goldEffect = false, type = 'text' }: GlitchEffectProps) => {
   const baseClasses = cn(
-    "relative overflow-visible inline-block",
+    "relative inline-block overflow-visible whitespace-nowrap",
     type === 'text' && "glitch",
     type === 'image' && "glitch-logo",
     type === 'button' && "glitch-button",

@@ -2,10 +2,8 @@
 import React from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import GlitchText from '@/components/GlitchText';
-import { motion } from 'framer-motion';
 
 interface CardReadingProps {
   className?: string;
@@ -14,6 +12,9 @@ interface CardReadingProps {
 const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   const { selectedCards, revealCard, loading, finalMessage, resetReading } = useTarot();
   const { t } = useTranslation();
+  
+  // Card back image
+  const cardBackImage = "/lovable-uploads/c2b7a0ee-e304-442a-94a9-dad07ede9c24.png";
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -61,13 +62,12 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full flex items-center justify-center bg-gradient-to-br from-amber-100/50 to-amber-200/30">
-                    <div className="text-center p-2 transform transition-transform hover:scale-110">
-                      <div className="text-5xl mb-3 drop-shadow-md">🃏</div>
-                      <div className="text-xs text-amber-700 font-semibold bg-white/50 p-1 rounded">
-                        {loading ? t('common.loading') : t('tarot.clickToReveal')}
-                      </div>
-                    </div>
+                  <div className="h-full w-full overflow-hidden">
+                    <img 
+                      src={cardBackImage} 
+                      alt="Card Back" 
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                 )}
               </div>

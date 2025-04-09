@@ -15,6 +15,10 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const { t } = useTranslation();
   const [selectedDeck, setSelectedDeck] = useState<string>('deck1');
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  
+  // Card back image
+  const cardBackImage = "/lovable-uploads/c2b7a0ee-e304-442a-94a9-dad07ede9c24.png";
 
   // Mock decks - in a real app, this would come from your backend
   const decks = [
@@ -41,9 +45,22 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const closeDeckDetails = () => {
     setOpenDeckId(null);
   };
+  
+  // Function to view a specific card
+  const viewCard = (cardId: string) => {
+    setSelectedCard(cardId);
+  };
+  
+  const closeCardView = () => {
+    setSelectedCard(null);
+  };
 
   // Filter cards for the selected deck
   const deckCards = tarotCards.filter(card => card.deck === openDeckId);
+  
+  // Find the selected card details
+  const cardDetails = selectedCard ? 
+    deckCards.find(card => card.id === selectedCard) : null;
 
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
@@ -102,6 +119,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
         </div>
       </CardContent>
 
+      {/* Dialog to show all cards in a deck */}
       <Dialog open={!!openDeckId} onOpenChange={(open) => !open && closeDeckDetails()}>
         <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogTitle className="flex justify-between items-center">
@@ -113,8 +131,12 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
           </DialogTitle>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 py-4">
             {deckCards.map((card) => (
-              <div key={card.id} className="flex flex-col items-center">
-                <div className="border-2 rounded-lg overflow-hidden shadow-md w-full aspect-[2/3]">
+              <div 
+                key={card.id} 
+                className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => viewCard(card.id)}
+              >
+                <div className="border-2 border-amber-300 rounded-lg overflow-hidden shadow-md w-full aspect-[2/3]">
                   <img 
                     src={card.image} 
                     alt={card.name} 
@@ -124,6 +146,39 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
                 <h5 className="mt-2 text-center text-xs font-medium">{card.name}</h5>
               </div>
             ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Dialog for individual card view */}
+      <Dialog open={!!selectedCard} onOpenChange={(open) => !open && closeCardView()}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              <GlitchText text={cardDetails?.name || ''} className="text-xl" />
+            </DialogTitle>
+            <DialogClose className="absolute right-4 top-4">
+              <X className="h-4 w-4" />
+            </DialogClose>
+          </DialogHeader>
+          <div className="p-4 flex flex-col items-center">
+            {cardDetails && (
+              <>
+                <div className="mb-4 w-full max-w-xs mx-auto">
+                  <div className="aspect-[2/3] overflow-hidden rounded-lg border-2 border-amber-400 shadow-lg">
+                    <img 
+                      src={cardDetails.image} 
+                      alt={cardDetails.name} 
+                      className="w-full h-full object-contain" 
+                    />
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-lg border border-amber-200 mt-4 w-full">
+                  <h4 className="font-bold mb-2 text-amber-700">{cardDetails.name}</h4>
+                  <p className="text-gray-700">{cardDetails.description}</p>
+                </div>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>

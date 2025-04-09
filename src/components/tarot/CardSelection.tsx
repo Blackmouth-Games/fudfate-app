@@ -2,7 +2,6 @@
 import React from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
 import GlitchText from '@/components/GlitchText';
 
 interface CardSelectionProps {
@@ -12,6 +11,9 @@ interface CardSelectionProps {
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   const { availableCards, selectedCards, selectCard } = useTarot();
   const { t } = useTranslation();
+  
+  // Card back image
+  const cardBackImage = "/lovable-uploads/c2b7a0ee-e304-442a-94a9-dad07ede9c24.png";
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -30,7 +32,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
           const randomRotation = Math.floor(Math.random() * 30) - 15; // -15 to 15 degrees
           const randomLeft = Math.floor(Math.random() * 65); // 0 to 65% of container width
           const randomTop = Math.floor(Math.random() * 65); // 0 to 65% of container height
-          const randomZIndex = Math.floor(Math.random() * 10); // 0 to 10 for z-index
+          const randomZIndex = Math.floor(Math.random() * 10) + 1; // 1 to 10 for z-index
           
           return (
             <div
@@ -46,13 +48,12 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
               }}
               onClick={() => selectCard(card.id)}
             >
-              <div className="w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg shadow-md border border-amber-300/50 overflow-hidden flex items-center justify-center">
-                <div className="text-center p-2">
-                  <div className="text-4xl mb-2">🃏</div>
-                  <div className="text-xs text-amber-700 rotate-0">
-                    {t('tarot.clickToSelect')}
-                  </div>
-                </div>
+              <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center">
+                <img 
+                  src={cardBackImage} 
+                  alt="Tarot Card Back"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           );
