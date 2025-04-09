@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -40,23 +41,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const { webhooks } = useEnvironment();
 
   useEffect(() => {
-    const storedSession = localStorage.getItem('walletSession');
-    if (storedSession) {
-      try {
-        const session = JSON.parse(storedSession);
-        const expiry = new Date(session.expiry);
-        
-        if (expiry > new Date() && session.walletType) {
-          restoreSession(session);
-        } else {
-          localStorage.removeItem('walletSession');
-        }
-      } catch (e) {
-        console.error("Failed to parse stored session", e);
-        localStorage.removeItem('walletSession');
-      }
-    }
-    
+    // Only check for mock data overrides
     const mockRunsToday = localStorage.getItem('mockRunsToday');
     if (mockRunsToday) {
       setUserDataOverride(prev => ({
@@ -73,31 +58,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }));
     }
   }, []);
-
-  const restoreSession = (session: any) => {
-    console.log("Restoring saved wallet session:", session);
-    
-    setWalletType(session.walletType);
-    setWalletAddress(session.walletAddress);
-    
-    if (session.network) {
-      setNetwork(session.network);
-    } else {
-      setNetwork(session.walletType === 'phantom' ? 'solana' : 'ethereum');
-    }
-    
-    if (session.userData) {
-      const restoredUserData = {
-        userId: userDataOverride.userId || session.userData.userId || 'unknown',
-        runsToday: userDataOverride.runsToday !== undefined ? 
-          userDataOverride.runsToday : 
-          (session.userData.runsToday !== undefined ? session.userData.runsToday : true)
-      };
-      setUserData(restoredUserData);
-    }
-    
-    setConnected(true);
-  };
 
   const isWalletAvailable = (type: WalletType): boolean => {
     if (type === 'phantom') {
@@ -194,41 +154,38 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
-      const alreadyConnected = await isWalletConnected(type);
-      
-      if (!alreadyConnected) {
-        if (type === 'phantom') {
-          try {
-            if (!window.solana) {
-              toast.error(t('errors.phantomNotAvailable'));
-              return false;
-            }
-            await window.solana.connect();
-          } catch (error: any) {
-            if (error.code === 4001) {
-              toast.error(t('errors.connectionRejected'));
-            } else {
-              toast.error(t('errors.phantomConnectionFailed'));
-              console.error("Phantom connection error:", error);
-            }
+      // Always try to connect, don't check if already connected
+      if (type === 'phantom') {
+        try {
+          if (!window.solana) {
+            toast.error(t('errors.phantomNotAvailable'));
             return false;
           }
-        } else if (type === 'metamask') {
-          try {
-            if (!window.ethereum) {
-              toast.error(t('errors.metamaskNotAvailable'));
-              return false;
-            }
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-          } catch (error: any) {
-            if (error.code === 4001) {
-              toast.error(t('errors.connectionRejected'));
-            } else {
-              toast.error(t('errors.metamaskConnectionFailed'));
-              console.error("MetaMask connection error:", error);
-            }
+          await window.solana.connect();
+        } catch (error: any) {
+          if (error.code === 4001) {
+            toast.error(t('errors.connectionRejected'));
+          } else {
+            toast.error(t('errors.phantomConnectionFailed'));
+            console.error("Phantom connection error:", error);
+          }
+          return false;
+        }
+      } else if (type === 'metamask') {
+        try {
+          if (!window.ethereum) {
+            toast.error(t('errors.metamaskNotAvailable'));
             return false;
           }
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+        } catch (error: any) {
+          if (error.code === 4001) {
+            toast.error(t('errors.connectionRejected'));
+          } else {
+            toast.error(t('errors.metamaskConnectionFailed'));
+            console.error("MetaMask connection error:", error);
+          }
+          return false;
         }
       }
       
@@ -273,24 +230,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
       
-      const sessionExpiry = new Date();
-      sessionExpiry.setMinutes(sessionExpiry.getMinutes() + 30);
-      
       const finalUserData = {
         userId: userDataOverride.userId || userDataResponse.userId,
         runsToday: userDataOverride.runsToday !== undefined ? 
           userDataOverride.runsToday : userDataResponse.runsToday
       };
-      
-      const session = {
-        walletType: type,
-        walletAddress: address,
-        network: currentNetwork,
-        userData: finalUserData,
-        expiry: sessionExpiry.toISOString()
-      };
-      
-      localStorage.setItem('walletSession', JSON.stringify(session));
       
       setConnected(true);
       setWalletType(type);
@@ -321,7 +265,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       window.solana.disconnect().catch(console.error);
     }
     
-    localStorage.removeItem('walletSession');
     setConnected(false);
     setWalletType(null);
     setWalletAddress(null);

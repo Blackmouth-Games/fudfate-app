@@ -24,23 +24,39 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
         </p>
       </div>
       
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        {availableCards.map((card) => (
-          <div
-            key={card.id}
-            className="cursor-pointer hover-scale transition-transform duration-300"
-            onClick={() => selectCard(card.id)}
-          >
-            <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg shadow-md border border-amber-300/50 overflow-hidden flex items-center justify-center">
-              <div className="text-center p-2">
-                <div className="text-4xl mb-2">🃏</div>
-                <div className="text-xs text-amber-700">
-                  {t('tarot.clickToSelect')}
+      <div className="relative h-[400px] w-full bg-gradient-to-b from-amber-50/50 to-amber-100/30 rounded-lg my-8 border border-amber-200/30 overflow-hidden">
+        {availableCards.map((card, index) => {
+          // Calculate random positions with some overlap but ensuring cards are mostly visible
+          const randomRotation = Math.floor(Math.random() * 30) - 15; // -15 to 15 degrees
+          const randomLeft = Math.floor(Math.random() * 65); // 0 to 65% of container width
+          const randomTop = Math.floor(Math.random() * 65); // 0 to 65% of container height
+          const randomZIndex = Math.floor(Math.random() * 10); // 0 to 10 for z-index
+          
+          return (
+            <div
+              key={card.id}
+              className="absolute cursor-pointer hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+              style={{
+                left: `${randomLeft}%`,
+                top: `${randomTop}%`,
+                transform: `rotate(${randomRotation}deg)`,
+                zIndex: randomZIndex,
+                width: '150px',
+                height: '225px',
+              }}
+              onClick={() => selectCard(card.id)}
+            >
+              <div className="w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg shadow-md border border-amber-300/50 overflow-hidden flex items-center justify-center">
+                <div className="text-center p-2">
+                  <div className="text-4xl mb-2">🃏</div>
+                  <div className="text-xs text-amber-700 rotate-0">
+                    {t('tarot.clickToSelect')}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       
       <div className="pt-4 border-t border-amber-200">

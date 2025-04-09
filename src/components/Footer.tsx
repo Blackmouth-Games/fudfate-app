@@ -2,7 +2,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Globe } from 'lucide-react';
+import { Globe, X, MessageCircle } from 'lucide-react';
 import { socialLinks } from '@/config/socialConfig';
 
 const Footer = () => {
@@ -17,9 +17,27 @@ const Footer = () => {
             &copy; {currentYear} FudFate · <span className="ml-1">Created by Blackmouthgames</span>
           </div>
           
-          <div className="flex space-x-3 mb-2 sm:mb-0">
+          <div className="flex justify-center space-x-5 mb-2 sm:mb-0">
             <a 
-              href={socialLinks.web} 
+              href={socialLinks.twitter} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-accent transition-colors"
+              aria-label="Twitter/X"
+            >
+              <X size={16} />
+            </a>
+            <a 
+              href={socialLinks.telegram} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-accent transition-colors"
+              aria-label="Telegram"
+            >
+              <MessageCircle size={16} />
+            </a>
+            <a 
+              href="https://fudfate.blackmouthgames.com/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-accent transition-colors"
@@ -27,6 +45,9 @@ const Footer = () => {
             >
               <Globe size={16} />
             </a>
+          </div>
+          
+          <div className="flex space-x-3">
             <Link to="/cookies" className="text-gray-400 hover:text-accent transition-colors">
               {t('footer.cookiePolicy')}
             </Link>

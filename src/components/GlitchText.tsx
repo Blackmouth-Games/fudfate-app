@@ -17,7 +17,7 @@ const GlitchText = ({ text, className, goldEffect = false }: GlitchTextProps) =>
       goldEffect && "text-amber-500 font-bold",
       className
     )}>
-      <GlitchEffect type="text" className="inline-block overflow-visible">
+      <GlitchEffect type="text" className="inline-block overflow-visible w-full">
         <span className="inline-block">{text}</span>
         {goldEffect && (
           <>

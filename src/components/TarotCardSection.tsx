@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
 import AnimatedSection from '@/components/AnimatedSection';
@@ -11,6 +11,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import tarotCards from '@/data/tarotCards';
+import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
+import { X } from 'lucide-react';
 
 // Datos ejemplo para las cartas
 const exampleCards = [
@@ -27,6 +30,10 @@ interface TarotCardSectionProps {
 const TarotCardSection = ({ deckId = 'crypto' }: TarotCardSectionProps) => {
   const { t } = useTranslation();
   const cards = exampleCards;
+  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
+  
+  // Get all cards from the selected deck
+  const selectedDeckCards = tarotCards.filter(card => card.deck === 'deck1');
 
   return (
     <section id="cards" className="py-20 px-4 md:px-8 lg:px-16 relative">
@@ -54,7 +61,11 @@ const TarotCardSection = ({ deckId = 'crypto' }: TarotCardSectionProps) => {
           <CarouselContent className="py-10">
             {cards.map((card, index) => (
               <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3 px-6">
-                <div className="floating" style={{ animationDelay: `${0.2 * index}s` }}>
+                <div 
+                  className="floating cursor-pointer" 
+                  style={{ animationDelay: `${0.2 * index}s` }}
+                  onClick={() => setSelectedDeck(`deck${index + 1}`)}
+                >
                   <TarotCard 
                     imageUrl={card.imageUrl}
                     title={card.title} 
@@ -69,6 +80,31 @@ const TarotCardSection = ({ deckId = 'crypto' }: TarotCardSectionProps) => {
           </div>
         </Carousel>
       </div>
+
+      {/* Dialog to show all cards in a deck */}
+      <Dialog open={!!selectedDeck} onOpenChange={(open) => !open && setSelectedDeck(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              <GlitchText text={t('cards.deckCards')} className="text-xl" />
+            </DialogTitle>
+            <DialogClose className="absolute right-4 top-4">
+              <X className="h-4 w-4" />
+            </DialogClose>
+          </DialogHeader>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+            {selectedDeckCards.map((card) => (
+              <div key={card.id} className="aspect-[2/3]">
+                <TarotCard 
+                  imageUrl={card.image}
+                  title={card.name} 
+                  className="w-full h-full" 
+                />
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };

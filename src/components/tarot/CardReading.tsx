@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import GlitchText from '@/components/GlitchText';
+import { motion } from 'framer-motion';
 
 interface CardReadingProps {
   className?: string;
@@ -38,31 +39,32 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               className="flex flex-col items-center space-y-3"
             >
               <div 
-                className={`aspect-[2/3] w-full max-w-[200px] rounded-lg shadow-md overflow-hidden 
+                className={`aspect-[2/3] w-full max-w-[200px] rounded-lg shadow-lg overflow-hidden 
+                  transform transition-all duration-500 hover:scale-105
                   ${card.revealed 
-                    ? 'bg-gradient-to-br from-amber-100 to-white border border-amber-300' 
-                    : 'bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 cursor-pointer hover:border-amber-400 transition-all'
+                    ? 'bg-gradient-to-br from-amber-100 to-white border-2 border-amber-300' 
+                    : 'bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 cursor-pointer hover:border-amber-400 hover:shadow-xl'
                   }`}
                 onClick={() => !card.revealed && !loading && revealCard(index)}
               >
                 {card.revealed ? (
                   <div className="p-3 h-full flex flex-col">
-                    <div className="text-center font-bold text-amber-700 mb-2">
+                    <div className="text-center font-bold text-amber-700 mb-2 bg-amber-50/50 py-1 rounded">
                       {card.name}
                     </div>
-                    <div className="flex-1 flex items-center justify-center">
+                    <div className="flex-1 flex items-center justify-center p-2">
                       <img 
                         src={card.image} 
                         alt={card.name} 
-                        className="max-h-full object-contain"
+                        className="max-h-full object-contain drop-shadow-md"
                       />
                     </div>
                   </div>
                 ) : (
-                  <div className="h-full flex items-center justify-center">
-                    <div className="text-center p-2">
-                      <div className="text-4xl mb-2">🃏</div>
-                      <div className="text-xs text-amber-700">
+                  <div className="h-full flex items-center justify-center bg-gradient-to-br from-amber-100/50 to-amber-200/30">
+                    <div className="text-center p-2 transform transition-transform hover:scale-110">
+                      <div className="text-5xl mb-3 drop-shadow-md">🃏</div>
+                      <div className="text-xs text-amber-700 font-semibold bg-white/50 p-1 rounded">
                         {loading ? t('common.loading') : t('tarot.clickToReveal')}
                       </div>
                     </div>
@@ -71,7 +73,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               </div>
               
               {card.revealed && (
-                <div className="bg-white p-3 rounded-lg border border-amber-200 shadow-sm">
+                <div className="bg-white p-4 rounded-lg border border-amber-200 shadow-md">
                   <p className="text-sm italic text-gray-700">
                     "{card.interpretation}"
                   </p>
@@ -82,7 +84,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="bg-white p-4 sm:p-6 rounded-lg border border-amber-200 shadow-sm">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border border-amber-200 shadow-md">
             <h4 className="font-bold mb-3 text-center text-gray-800">
               <GlitchText text={t('tarot.finalMessage')} />
             </h4>
@@ -95,17 +97,17 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
             {selectedCards.map((card) => (
               <div 
                 key={card.id}
-                className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-sm"
+                className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-md hover:shadow-lg transition-shadow"
               >
                 <div className="p-2 h-full flex flex-col">
-                  <div className="text-center text-xs font-bold text-amber-700 mb-1">
+                  <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded">
                     {card.name}
                   </div>
-                  <div className="flex-1 flex items-center justify-center">
+                  <div className="flex-1 flex items-center justify-center p-1">
                     <img 
                       src={card.image} 
                       alt={card.name} 
-                      className="max-h-full object-contain"
+                      className="max-h-full object-contain drop-shadow-sm"
                     />
                   </div>
                 </div>
