@@ -32,7 +32,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const { webhooks } = useEnvironment();
 
-  // Check for a stored session on component mount
   useEffect(() => {
     const storedSession = localStorage.getItem('walletSession');
     if (storedSession) {
@@ -41,10 +40,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const expiry = new Date(session.expiry);
         
         if (expiry > new Date() && session.walletType) {
-          // Session is still valid
           connectWallet(session.walletType).catch(console.error);
         } else {
-          // Session expired
           localStorage.removeItem('walletSession');
         }
       } catch (e) {
@@ -54,7 +51,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Function to detect if a wallet provider is available
   const isWalletAvailable = (type: WalletType): boolean => {
     if (type === 'phantom') {
       return window.solana && window.solana.isPhantom || false;
@@ -64,7 +60,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     return false;
   };
 
-  // Call webhook after successful login
   const callLoginWebhook = async (walletType: WalletType, walletAddress: string): Promise<UserData | null> => {
     try {
       const response = await fetch(webhooks.login, {
@@ -95,7 +90,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Connect to wallet
   const connectWallet = async (type: WalletType): Promise<boolean> => {
     try {
       if (!isWalletAvailable(type)) {
@@ -108,24 +102,38 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       let currentNetwork: Network = null;
 
       if (type === 'phantom') {
-        // Connect to Phantom (Solana)
-        const response = await window.solana.connect();
-        address = response.publicKey.toString();
-        
-        // For Phantom, we assume it's always connected to Solana network
-        // This is the fix: Remove the network check for Phantom as it's always on Solana
-        currentNetwork = 'solana';
+        try {
+          const response = await window.solana.connect();
+          address = response.publicKey.toString();
+          
+          currentNetwork = 'solana';
+        } catch (error: any) {
+          if (error.code === 4001) {
+            toast.error("Conexión rechazada por el usuario");
+          } else {
+            toast.error("Error al conectar con Phantom. Verifica que tengas la wallet abierta.");
+            console.error("Phantom error:", error);
+          }
+          return false;
+        }
       } else if (type === 'metamask') {
-        // Connect to MetaMask (Ethereum)
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        address = accounts[0];
-        currentNetwork = 'ethereum';
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          address = accounts[0];
+          currentNetwork = 'ethereum';
+        } catch (error: any) {
+          if (error.code === 4001) {
+            toast.error("Conexión rechazada por el usuario");
+          } else {
+            toast.error("Error al conectar con MetaMask. Verifica que tengas la wallet abierta.");
+            console.error("MetaMask error:", error);
+          }
+          return false;
+        }
       }
 
-      // Call login webhook to register the session
       const userDataResponse = await callLoginWebhook(type, address);
       
-      // Create a session
       const sessionExpiry = new Date();
       sessionExpiry.setMinutes(sessionExpiry.getMinutes() + 30); // 30 minute session
       
@@ -137,14 +145,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       
       localStorage.setItem('walletSession', JSON.stringify(session));
       
-      // Update state
       setConnected(true);
       setWalletType(type);
       setWalletAddress(address);
       setNetwork(currentNetwork);
       setUserData(userDataResponse);
       
-      // Track connection (anonymous)
       trackWalletConnection(type, address);
       
       return true;
@@ -155,22 +161,21 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Disconnect wallet
   const disconnectWallet = () => {
     if (walletType === 'phantom' && window.solana) {
       window.solana.disconnect().catch(console.error);
     }
     
-    // Clear session and state
     localStorage.removeItem('walletSession');
     setConnected(false);
     setWalletType(null);
     setWalletAddress(null);
     setNetwork(null);
     setUserData(null);
+    
+    toast.success("Wallet desconectada correctamente");
   };
 
-  // Sign a message for authentication
   const signMessage = async (message: string): Promise<string | null> => {
     try {
       if (!connected || !walletType) {
@@ -199,9 +204,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Track wallet connection (anonymous)
   const trackWalletConnection = (type: WalletType, address: string) => {
-    // This is just a placeholder for the functionality
     console.log(`Tracked connection: ${type}, ${address}`);
     
     const metrics = {
@@ -215,21 +218,18 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     console.log("Connection metrics:", metrics);
   };
 
-  // Helper function to detect platform
   const detectPlatform = (): string => {
     const userAgent = navigator.userAgent;
     if (/Mobi|Android/i.test(userAgent)) return 'mobile';
     return 'desktop';
   };
 
-  // Helper function to hash wallet address for anonymous tracking
   const hashAddress = (address: string): string => {
-    // Simple hash function for demonstration
     let hash = 0;
     for (let i = 0; i < address.length; i++) {
       const char = address.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash = hash & hash;
     }
     return hash.toString(16);
   };
@@ -256,7 +256,6 @@ export const useWallet = (): WalletContextType => {
   return context;
 };
 
-// Type augmentation for global window object
 declare global {
   interface Window {
     solana?: {
