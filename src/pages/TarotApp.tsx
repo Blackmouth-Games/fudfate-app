@@ -96,7 +96,7 @@ const TarotApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800">
+    <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -135,26 +135,31 @@ const TarotApp: React.FC = () => {
             </div>
           )}
           
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <WalletConnector />
+          <div className="flex items-center">
             <LanguageSwitcher />
+            {connected && (
+              <div className="ml-3">
+                <WalletConnector showButtons={false} />
+              </div>
+            )}
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
+      <main className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
         {/* Connect Wallet Message */}
         {!connected ? (
           <div className="text-center max-w-2xl mx-auto my-8">
             <GlitchLogo 
               imageUrl="/img/logos/FUDFATE_logo.png" 
               className="mb-8"
+              size="large"
             />
             
             <GlitchText
-              text={t('tarot.connectWalletTitle')}
-              className="text-3xl md:text-4xl font-bold mb-6 text-gray-800 font-pixel tracking-wider uppercase"
+              text="CRYPTO FORTUNE AWAITS"
+              className="text-3xl md:text-4xl font-bold mb-6 font-pixel tracking-wider uppercase"
               goldEffect={true}
             />
             
@@ -162,7 +167,9 @@ const TarotApp: React.FC = () => {
               {t('tarot.connectWalletMessage')}
             </p>
             
-            <WalletConnector />
+            <div className="flex flex-col gap-4 items-center max-w-sm mx-auto">
+              <WalletConnector showButtons={true} />
+            </div>
           </div>
         ) : (
           <div className="max-w-4xl mx-auto my-8 w-full">
@@ -205,8 +212,8 @@ const TarotApp: React.FC = () => {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="mt-auto py-6 border-t border-gray-200">
+      {/* Footer - Now anchored to bottom */}
+      <footer className="py-6 border-t border-gray-200 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-500">
             FUDFATE © {new Date().getFullYear()}. {t('footer.allRightsReserved')}

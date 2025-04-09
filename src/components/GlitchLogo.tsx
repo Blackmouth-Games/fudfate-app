@@ -20,7 +20,7 @@ const GlitchLogo = ({
     const sizeClasses = {
       small: "h-20 md:h-24",
       medium: "h-32 md:h-40",
-      large: "h-40 md:h-52"
+      large: "h-48 md:h-56"
     };
     
     const imageClass = sizeClasses[size];
