@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AlertTriangle } from 'lucide-react';
 
 interface CardSelectionProps {
   className?: string;
@@ -41,11 +42,32 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
     setCardPositions(positions);
   }, [availableCards]);
 
+  // Empty state - no cards available
+  if (availableCards.length === 0 && !loading) {
+    return (
+      <div className={`text-center py-12 ${className}`}>
+        <div className="bg-amber-50 border border-amber-100 rounded-lg p-6 max-w-md mx-auto">
+          <div className="mb-4 flex justify-center">
+            <div className="bg-amber-100 p-3 rounded-full">
+              <AlertTriangle className="h-6 w-6 text-amber-500" />
+            </div>
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">
+            <GlitchText text={t('tarot.noMoreReadings')} />
+          </h3>
+          <p className="text-gray-600 text-sm">
+            {t('tarot.comeBackTomorrow')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="text-center space-y-2">
         <h3 className="text-xl font-bold text-gray-800">
-          <GlitchText text={t('tarot.selectCards')} />
+          <GlitchText text={t('tarot.selectCards')} goldEffect />
         </h3>
         <p className="text-gray-600 text-sm">
           {t('tarot.selectCardsDescription', { selected: selectedCards.length, total: 3 })}
@@ -57,13 +79,34 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
               <div className="flex justify-center mb-4">
-                <div className="relative w-32 h-48 animate-pulse">
-                  <Skeleton className="absolute w-full h-full rounded-lg" />
-                  <Skeleton className="absolute w-full h-full rounded-lg transform rotate-6" />
-                  <Skeleton className="absolute w-full h-full rounded-lg transform -rotate-6" />
+                <div className="relative w-32 h-48">
+                  <motion.div 
+                    animate={{ rotate: [-5, 5, -5] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    <Skeleton className="absolute w-full h-full rounded-lg" />
+                  </motion.div>
+                  <motion.div 
+                    animate={{ rotate: [5, -5, 5] }}
+                    transition={{ repeat: Infinity, duration: 2, delay: 0.3 }}
+                  >
+                    <Skeleton className="absolute w-full h-full rounded-lg transform rotate-6" />
+                  </motion.div>
+                  <motion.div 
+                    animate={{ rotate: [-2, 8, -2] }}
+                    transition={{ repeat: Infinity, duration: 2, delay: 0.6 }}
+                  >
+                    <Skeleton className="absolute w-full h-full rounded-lg transform -rotate-6" />
+                  </motion.div>
                 </div>
               </div>
-              <p className="text-amber-600 font-medium">{t('tarot.preparingCards')}</p>
+              <motion.p 
+                className="text-amber-600 font-medium"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                {t('tarot.preparingCards')}
+              </motion.p>
             </div>
           </div>
         ) : (
@@ -119,9 +162,9 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                 key={`slot-${i}`}
                 className={`w-16 h-24 sm:w-20 sm:h-28 rounded-md ${
                   selected 
-                    ? 'bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-400/50' 
+                    ? 'bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-400/50 shadow-md' 
                     : 'border border-dashed border-amber-300 bg-white'
-                } flex items-center justify-center`}
+                } flex items-center justify-center relative overflow-hidden`}
                 initial={selected ? { scale: 0.8 } : {}}
                 animate={selected ? { scale: 1 } : {}}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
@@ -129,13 +172,23 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                 {loading && !selected ? (
                   <Skeleton className="w-full h-full rounded-md" />
                 ) : selected ? (
-                  <div className="text-2xl h-full w-full flex items-center justify-center">
+                  <motion.div 
+                    className="h-full w-full flex items-center justify-center"
+                    initial={{ rotateY: 90 }}
+                    animate={{ rotateY: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <img
                       src={cardBackImage}
                       alt="Selected Card"
                       className="h-full w-full object-cover rounded-md"
                     />
-                  </div>
+                    <motion.div 
+                      className="absolute inset-0 bg-amber-400/20 rounded-md"
+                      animate={{ opacity: [0, 0.5, 0] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                  </motion.div>
                 ) : (
                   <span className="text-xs text-amber-400">{i + 1}</span>
                 )}

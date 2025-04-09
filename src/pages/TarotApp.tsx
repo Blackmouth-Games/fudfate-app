@@ -5,6 +5,7 @@ import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import WalletConnector from '@/components/wallet/WalletConnector';
+import WalletBalance from '@/components/wallet/WalletBalance';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import GlitchText from '@/components/GlitchText';
 import IntentionForm from '@/components/tarot/IntentionForm';
@@ -15,6 +16,8 @@ import { Sparkles, History, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import GlitchLogo from '@/components/GlitchLogo';
 import Footer from '@/components/Footer';
+import CommitSHA from '@/components/CommitSHA';
+import DevToolPanel from '@/components/DevToolPanel';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
@@ -140,10 +143,11 @@ const TarotApp: React.FC = () => {
             </div>
           )}
           
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
             <LanguageSwitcher />
+            {connected && <WalletBalance />}
             {connected && (
-              <div className="ml-3">
+              <div>
                 <WalletConnector showButtons={false} />
               </div>
             )}
@@ -196,6 +200,14 @@ const TarotApp: React.FC = () => {
       </main>
 
       <Footer />
+      <CommitSHA />
+      <DevToolPanel 
+        routes={[
+          { path: '/', name: 'Home' },
+          { path: '/privacy-policy', name: 'Privacy Policy' },
+          { path: '/cookies-policy', name: 'Cookies Policy' }
+        ]}
+      />
     </div>
   );
 };

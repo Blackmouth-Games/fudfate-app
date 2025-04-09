@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import PreparingReading from './PreparingReading';
 import CardSelection from './CardSelection';
 import CardReading from './CardReading';
+import ShareReading from './ShareReading';
 
 interface IntentionFormProps {
   className?: string;
@@ -22,7 +23,8 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
   const { userData } = useWallet();
   const { 
     intention, setIntention, 
-    phase, startReading, resetReading
+    phase, startReading, resetReading,
+    interpretation
   } = useTarot();
   
   const [loading, setLoading] = useState(false);
@@ -66,7 +68,12 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
         return <CardSelection />;
       case 'reading':
       case 'complete':
-        return <CardReading />;
+        return (
+          <>
+            <CardReading />
+            {interpretation && <ShareReading />}
+          </>
+        );
       default:
         return (
           <Card className="border-amber-400/50 shadow-md">
@@ -76,6 +83,7 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
                   <GlitchText 
                     text={t('tarot.askTheTarot')} 
                     className="text-xl font-medium text-gray-800"
+                    goldEffect
                   />
                 </div>
                 <p className="text-gray-600 text-sm">
