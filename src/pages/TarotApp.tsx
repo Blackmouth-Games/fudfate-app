@@ -6,7 +6,6 @@ import { useWallet } from '@/contexts/WalletContext';
 import WalletConnector from '@/components/wallet/WalletConnector';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import GlitchText from '@/components/GlitchText';
-import GlitchLogo from '@/components/GlitchLogo';
 import IntentionForm from '@/components/tarot/IntentionForm';
 import DeckSelector from '@/components/tarot/DeckSelector';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
@@ -30,6 +29,27 @@ const TarotApp: React.FC = () => {
             />
           </div>
           
+          {connected && (
+            <div className="flex-grow flex justify-center">
+              <Tabs defaultValue="reading" className="max-w-xs">
+                <TabsList className="grid grid-cols-3">
+                  <TabsTrigger value="reading" className="flex items-center">
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {t('tarot.reading')}
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="flex items-center">
+                    <History className="mr-2 h-4 w-4" />
+                    {t('tarot.history')}
+                  </TabsTrigger>
+                  <TabsTrigger value="decks" className="flex items-center">
+                    <Layers className="mr-2 h-4 w-4" />
+                    {t('tarot.decks')}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+          
           <div className="flex flex-col sm:flex-row items-center gap-3">
             <WalletConnector />
             <LanguageSwitcher />
@@ -39,13 +59,6 @@ const TarotApp: React.FC = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 flex flex-col items-center justify-center">
-        {/* Hero Logo */}
-        <GlitchLogo 
-          imageUrl="/img/logos/FUDFATE_logo.png" 
-          alt="FUDFATE Logo"
-          className="my-12"
-        />
-        
         {/* Connect Wallet Message */}
         {!connected ? (
           <div className="text-center max-w-2xl mx-auto my-8">
@@ -80,21 +93,6 @@ const TarotApp: React.FC = () => {
             )}
             
             <Tabs defaultValue="reading" className="w-full">
-              <TabsList className="grid grid-cols-3 mb-6">
-                <TabsTrigger value="reading" className="flex items-center">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {t('tarot.reading')}
-                </TabsTrigger>
-                <TabsTrigger value="history" className="flex items-center">
-                  <History className="mr-2 h-4 w-4" />
-                  {t('tarot.history')}
-                </TabsTrigger>
-                <TabsTrigger value="decks" className="flex items-center">
-                  <Layers className="mr-2 h-4 w-4" />
-                  {t('tarot.decks')}
-                </TabsTrigger>
-              </TabsList>
-              
               <TabsContent value="reading" className="mt-0">
                 <IntentionForm className="w-full" />
               </TabsContent>

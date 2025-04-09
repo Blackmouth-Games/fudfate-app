@@ -33,33 +33,30 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({ className = '' }) => {
 
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
-      <CardHeader>
-        <CardTitle className="text-center text-xl font-bold text-gray-800">
-          {t('tarot.readingHistory')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         {mockReadings.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t('tarot.date')}</TableHead>
-                <TableHead>{t('tarot.question')}</TableHead>
-                <TableHead>{t('tarot.cards')}</TableHead>
-                <TableHead>{t('tarot.result')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockReadings.map((reading) => (
-                <TableRow key={reading.id}>
-                  <TableCell className="font-medium">{reading.date}</TableCell>
-                  <TableCell>{reading.question}</TableCell>
-                  <TableCell>{reading.cards.join(', ')}</TableCell>
-                  <TableCell>{reading.result}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t('tarot.date')}</TableHead>
+                  <TableHead>{t('tarot.question')}</TableHead>
+                  <TableHead>{t('tarot.cards')}</TableHead>
+                  <TableHead>{t('tarot.result')}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {mockReadings.map((reading) => (
+                  <TableRow key={reading.id}>
+                    <TableCell className="font-medium">{reading.date}</TableCell>
+                    <TableCell>{reading.question}</TableCell>
+                    <TableCell>{reading.cards.join(', ')}</TableCell>
+                    <TableCell>{reading.result}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         ) : (
           <div className="text-center py-6">
             <p className="text-gray-500">{t('tarot.noReadings')}</p>
