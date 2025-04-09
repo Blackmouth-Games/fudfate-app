@@ -13,7 +13,9 @@ import {
 } from '@/components/ui/drawer';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Environment } from '@/config/webhooks';
+import { useWallet } from '@/contexts/WalletContext';
 
 interface DevToolProps {
   routes: Array<{
@@ -25,12 +27,20 @@ interface DevToolProps {
 const DevTool = ({ routes }: DevToolProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [environment, setEnvironment] = useState<Environment>('development');
+  const [mockRunsToday, setMockRunsToday] = useState<boolean>(false);
+  const { overrideUserData } = useWallet();
 
   // Load environment from localStorage on component mount
   useEffect(() => {
     const savedEnvironment = localStorage.getItem('appEnvironment') as Environment | null;
     if (savedEnvironment && (savedEnvironment === 'development' || savedEnvironment === 'production')) {
       setEnvironment(savedEnvironment);
+    }
+    
+    // Load mock settings
+    const savedMockRunsToday = localStorage.getItem('mockRunsToday');
+    if (savedMockRunsToday) {
+      setMockRunsToday(savedMockRunsToday === 'true');
     }
   }, []);
 
@@ -40,6 +50,15 @@ const DevTool = ({ routes }: DevToolProps) => {
     // Broadcast the environment change
     window.dispatchEvent(new CustomEvent('environment-changed', { detail: { environment } }));
   }, [environment]);
+
+  // Handle mock runs_today change
+  const handleMockRunsTodayChange = (checked: boolean) => {
+    setMockRunsToday(checked);
+    localStorage.setItem('mockRunsToday', String(checked));
+    
+    // Apply the override
+    overrideUserData({ runsToday: checked });
+  };
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
@@ -90,6 +109,22 @@ const DevTool = ({ routes }: DevToolProps) => {
               
               <div className="mt-2 text-xs text-gray-500">
                 Current: <span className="font-semibold">{environment}</span>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-4">
+              <h4 className="font-medium mb-3">Mock User Data</h4>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="mock-runs-today" className="cursor-pointer">Allow Daily Reading</Label>
+                <Switch 
+                  id="mock-runs-today" 
+                  checked={mockRunsToday}
+                  onCheckedChange={handleMockRunsTodayChange}
+                />
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                Current runs_today: <span className="font-semibold">{mockRunsToday ? 'true' : 'false'}</span>
               </div>
             </div>
           </div>

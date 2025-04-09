@@ -39,6 +39,12 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
       return;
     }
     
+    // Check if the user has already done a reading today
+    if (userData.runsToday === false) {
+      toast.error("You have already done a reading today. Please come back tomorrow.");
+      return;
+    }
+    
     try {
       // Call the reading webhook
       const response = await fetch(webhooks.reading, {
@@ -48,7 +54,8 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
         },
         body: JSON.stringify({
           userid: userData.userId,
-          question: intention
+          question: intention,
+          runs_today: userData.runsToday
         }),
       });
 
@@ -110,10 +117,16 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
             className="min-h-[100px] border-amber-200 placeholder:text-gray-400"
           />
           
+          {userData && userData.runsToday === false && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-md text-amber-800 text-sm">
+              You have already done a reading today. Use the developer tools to enable readings for testing.
+            </div>
+          )}
+          
           <Button
             type="submit"
             className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all"
-            disabled={loading || !intention.trim()}
+            disabled={loading || !intention.trim() || (userData?.runsToday === false)}
           >
             {loading ? (
               <span className="flex items-center">

@@ -7,9 +7,10 @@ import WalletConnector from '@/components/wallet/WalletConnector';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import GlitchText from '@/components/GlitchText';
 import GlitchLogo from '@/components/GlitchLogo';
+import IntentionForm from '@/components/tarot/IntentionForm';
 
 const TarotApp: React.FC = () => {
-  const { connected } = useWallet();
+  const { connected, userData } = useWallet();
   const { t } = useTranslation();
 
   return (
@@ -42,17 +43,37 @@ const TarotApp: React.FC = () => {
         />
         
         {/* Connect Wallet Message */}
-        <div className="text-center max-w-2xl mx-auto my-8">
-          <GlitchText
-            text={t('tarot.connectWalletMessage')}
-            className="text-3xl font-bold mb-6 text-gray-800 font-pixel"
-            goldEffect={true}
-          />
-          <p className="text-lg text-gray-600 max-w-md mx-auto text-center mb-8 font-pixel">
-            {t('tarot.connectWalletMessage')}
-          </p>
-          <WalletConnector />
-        </div>
+        {!connected ? (
+          <div className="text-center max-w-2xl mx-auto my-8">
+            <GlitchText
+              text={t('tarot.connectWalletTitle')}
+              className="text-3xl font-bold mb-6 text-gray-800 font-pixel"
+              goldEffect={true}
+            />
+            <p className="text-lg text-gray-600 max-w-md mx-auto text-center mb-8 font-pixel">
+              {t('tarot.connectWalletMessage')}
+            </p>
+            <WalletConnector />
+          </div>
+        ) : (
+          <div className="max-w-2xl mx-auto my-8 w-full">
+            {userData && (
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                <p className="text-sm text-gray-600">
+                  User ID: <span className="font-mono text-gray-800">{userData.userId}</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  Readings Available: 
+                  <span className={`font-bold ml-1 ${userData.runsToday ? 'text-green-600' : 'text-red-600'}`}>
+                    {userData.runsToday ? 'Yes' : 'No'}
+                  </span>
+                </p>
+              </div>
+            )}
+            
+            <IntentionForm className="w-full" />
+          </div>
+        )}
       </main>
 
       {/* Footer */}

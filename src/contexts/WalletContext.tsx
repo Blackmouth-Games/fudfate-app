@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -8,7 +9,12 @@ export type Network = 'solana' | 'ethereum' | null;
 
 interface UserData {
   userId: string;
-  runsToday: number;
+  runsToday: boolean;
+}
+
+interface UserDataOverride {
+  userId?: string;
+  runsToday?: boolean;
 }
 
 interface WalletContextType {
@@ -20,6 +26,7 @@ interface WalletContextType {
   connectWallet: (type: WalletType) => Promise<boolean>;
   disconnectWallet: () => void;
   signMessage: (message: string) => Promise<string | null>;
+  overrideUserData: (override: UserDataOverride) => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -30,6 +37,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [network, setNetwork] = useState<Network>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [userDataOverride, setUserDataOverride] = useState<UserDataOverride>({});
   const { webhooks } = useEnvironment();
 
   useEffect(() => {
@@ -48,6 +56,15 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         console.error("Failed to parse stored session", e);
         localStorage.removeItem('walletSession');
       }
+    }
+    
+    // Check for mock settings
+    const mockRunsToday = localStorage.getItem('mockRunsToday');
+    if (mockRunsToday) {
+      setUserDataOverride(prev => ({
+        ...prev,
+        runsToday: mockRunsToday === 'true'
+      }));
     }
   }, []);
 
@@ -81,7 +98,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       const data = await response.json();
       return {
         userId: data.userid,
-        runsToday: data.runs_today
+        runsToday: data.runs_today === true
       };
     } catch (error) {
       console.error('Error calling login webhook:', error);
@@ -149,7 +166,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setWalletType(type);
       setWalletAddress(address);
       setNetwork(currentNetwork);
-      setUserData(userDataResponse);
+      
+      // Apply any overrides to the user data
+      if (userDataResponse) {
+        setUserData({
+          userId: userDataOverride.userId || userDataResponse.userId,
+          runsToday: userDataOverride.runsToday !== undefined ? userDataOverride.runsToday : userDataResponse.runsToday
+        });
+      }
       
       trackWalletConnection(type, address);
       
@@ -204,6 +228,26 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Function to override user data (for dev purposes)
+  const overrideUserData = (override: UserDataOverride) => {
+    setUserDataOverride(prev => ({
+      ...prev,
+      ...override
+    }));
+    
+    // If we're already connected, apply the override immediately
+    if (connected && userData) {
+      setUserData(prev => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          ...(override.userId !== undefined ? { userId: override.userId } : {}),
+          ...(override.runsToday !== undefined ? { runsToday: override.runsToday } : {})
+        };
+      });
+    }
+  };
+
   const trackWalletConnection = (type: WalletType, address: string) => {
     console.log(`Tracked connection: ${type}, ${address}`);
     
@@ -242,7 +286,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     userData,
     connectWallet,
     disconnectWallet,
-    signMessage
+    signMessage,
+    overrideUserData
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
