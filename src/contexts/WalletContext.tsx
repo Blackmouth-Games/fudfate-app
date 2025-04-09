@@ -138,6 +138,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
 
   const callLoginWebhook = async (walletType: WalletType, walletAddress: string): Promise<UserData | null> => {
     try {
+      console.log(`Calling login webhook with ${walletType}, ${walletAddress}`);
+      
       const response = await fetch(webhooks.login, {
         method: 'POST',
         headers: {
@@ -155,9 +157,21 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const data = await response.json();
+      console.log("Login webhook response:", data);
+      
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        throw new Error('Invalid response format from login webhook');
+      }
+      
+      const userInfo = data[0];
+      
+      if (!userInfo || !userInfo.userid) {
+        throw new Error('User ID not found in response');
+      }
+      
       return {
-        userId: data.userid || 'unknown',
-        runsToday: data.runs_today === true
+        userId: userInfo.userid || 'unknown',
+        runsToday: userInfo.runs_today === true || userInfo.runs_today === 'true'
       };
     } catch (error) {
       console.error('Error calling login webhook:', error);
@@ -177,62 +191,84 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       // Check if the wallet is already connected in the browser
       const alreadyConnected = await isWalletConnected(type);
       
+      if (!alreadyConnected) {
+        // If wallet is not connected, prompt user to connect first
+        if (type === 'phantom') {
+          try {
+            if (!window.solana) {
+              toast.error(t('errors.phantomNotAvailable'));
+              return false;
+            }
+            await window.solana.connect();
+          } catch (error: any) {
+            if (error.code === 4001) {
+              toast.error(t('errors.connectionRejected'));
+            } else {
+              toast.error(t('errors.phantomConnectionFailed'));
+              console.error("Phantom connection error:", error);
+            }
+            return false;
+          }
+        } else if (type === 'metamask') {
+          try {
+            if (!window.ethereum) {
+              toast.error(t('errors.metamaskNotAvailable'));
+              return false;
+            }
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+          } catch (error: any) {
+            if (error.code === 4001) {
+              toast.error(t('errors.connectionRejected'));
+            } else {
+              toast.error(t('errors.metamaskConnectionFailed'));
+              console.error("MetaMask connection error:", error);
+            }
+            return false;
+          }
+        }
+      }
+      
+      // Now get wallet address after successful connection
       let address = '';
       let currentNetwork: Network = null;
 
       if (type === 'phantom') {
-        try {
-          if (!alreadyConnected) {
-            const response = await window.solana.connect();
-            address = response.publicKey.toString();
-          } else {
-            // If already connected, just get the public key
-            address = window.solana.publicKey.toString();
-          }
-          
-          currentNetwork = 'solana';
-        } catch (error: any) {
-          if (error.code === 4001) {
-            toast.error(t('errors.connectionRejected'));
-          } else {
-            toast.error(t('errors.phantomConnectionFailed'));
-            console.error("Phantom error:", error);
-          }
+        if (!window.solana || !window.solana.isConnected) {
+          toast.error(t('errors.phantomNotConnected'));
           return false;
         }
+        address = window.solana.publicKey.toString();
+        currentNetwork = 'solana';
       } else if (type === 'metamask') {
-        try {
-          // This will prompt the user if not already connected
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          address = accounts[0];
-          currentNetwork = 'ethereum';
-        } catch (error: any) {
-          if (error.code === 4001) {
-            toast.error(t('errors.connectionRejected'));
-          } else {
-            toast.error(t('errors.metamaskConnectionFailed'));
-            console.error("MetaMask error:", error);
-          }
+        if (!window.ethereum) {
+          toast.error(t('errors.metamaskNotConnected'));
           return false;
         }
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (!accounts || accounts.length === 0) {
+          toast.error(t('errors.metamaskNoAccounts'));
+          return false;
+        }
+        address = accounts[0];
+        currentNetwork = 'ethereum';
       }
 
+      // Call login webhook and get user data
       const userDataResponse = await callLoginWebhook(type, address);
+      
+      // If the webhook call failed, don't proceed with connection
+      if (!userDataResponse) {
+        return false;
+      }
       
       const sessionExpiry = new Date();
       sessionExpiry.setMinutes(sessionExpiry.getMinutes() + 30); // 30 minute session
       
-      // Create a session object with all the data we need
-      const userData = userDataResponse || { 
-        userId: 'unknown', 
-        runsToday: true 
-      };
-      
       // Apply any overrides to the user data
       const finalUserData = {
-        userId: userDataOverride.userId || userData.userId,
+        userId: userDataOverride.userId || userDataResponse.userId,
         runsToday: userDataOverride.runsToday !== undefined ? 
-          userDataOverride.runsToday : userData.runsToday
+          userDataOverride.runsToday : userDataResponse.runsToday
       };
       
       const session = {
@@ -253,6 +289,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       
       trackWalletConnection(type, address);
       
+      toast.success(t('wallet.connectSuccess'));
       return true;
     } catch (error) {
       console.error(`Error connecting to ${type}:`, error);
@@ -374,6 +411,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         'errors.connectionFailed': 'Error connecting wallet. Please try again.',
         'errors.walletNotConnected': 'Wallet not connected',
         'errors.signatureFailed': 'Error signing message',
+        'errors.phantomNotAvailable': 'Phantom wallet is not available',
+        'errors.metamaskNotAvailable': 'MetaMask wallet is not available',
+        'errors.phantomNotConnected': 'Phantom wallet is not connected',
+        'errors.metamaskNotConnected': 'MetaMask wallet is not connected',
+        'errors.metamaskNoAccounts': 'No accounts found in MetaMask',
+        'wallet.connectSuccess': 'Wallet connected successfully',
         'wallet.disconnectSuccess': 'Wallet disconnected successfully'
       },
       es: {
@@ -384,6 +427,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         'errors.connectionFailed': 'Error al conectar wallet. Inténtalo de nuevo.',
         'errors.walletNotConnected': 'Wallet no conectada',
         'errors.signatureFailed': 'Error al firmar mensaje',
+        'errors.phantomNotAvailable': 'La wallet Phantom no está disponible',
+        'errors.metamaskNotAvailable': 'La wallet MetaMask no está disponible',
+        'errors.phantomNotConnected': 'La wallet Phantom no está conectada',
+        'errors.metamaskNotConnected': 'La wallet MetaMask no está conectada',
+        'errors.metamaskNoAccounts': 'No se encontraron cuentas en MetaMask',
+        'wallet.connectSuccess': 'Wallet conectada correctamente',
         'wallet.disconnectSuccess': 'Wallet desconectada correctamente'
       }
     };

@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface Reading {
   id: string;
@@ -27,7 +29,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const { t } = useTranslation();
   
   // Format the readings data to match our expected format
-  const formattedReadings: Reading[] = readings.length > 0 
+  const formattedReadings: Reading[] = readings && readings.length > 0 
     ? readings.map((reading: any) => ({
         id: reading.id || String(Math.random()),
         date: reading.date || new Date().toISOString().split('T')[0],
@@ -85,7 +87,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                     <TableCell className="font-medium">{reading.date}</TableCell>
                     <TableCell>{reading.question}</TableCell>
                     <TableCell>{Array.isArray(reading.cards) ? reading.cards.join(', ') : ''}</TableCell>
-                    <TableCell>{reading.result}</TableCell>
+                    <TableCell className="max-w-xs truncate">{reading.result}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -93,7 +95,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           </div>
         ) : (
           <div className="text-center py-6">
-            <p className="text-gray-500">{t('tarot.noReadings')}</p>
+            <Alert>
+              <InfoIcon className="h-4 w-4" />
+              <AlertTitle>{t('tarot.noReadingsTitle')}</AlertTitle>
+              <AlertDescription>{t('tarot.noReadings')}</AlertDescription>
+            </Alert>
           </div>
         )}
       </CardContent>

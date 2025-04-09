@@ -27,6 +27,7 @@ const TarotApp: React.FC = () => {
     
     if (value === 'decks' && userData?.userId) {
       try {
+        console.log("Calling deck webhook with userid:", userData.userId);
         // Call the deck webhook when the decks tab is selected
         const response = await fetch(webhooks.deck, {
           method: 'POST',
@@ -43,8 +44,9 @@ const TarotApp: React.FC = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        // Process response if needed
-        console.log('Deck webhook called successfully');
+        const data = await response.json();
+        console.log('Deck webhook response:', data);
+        
       } catch (error) {
         console.error('Error calling deck webhook:', error);
         toast.error(t('errors.deckLoadFailed'));
@@ -52,6 +54,7 @@ const TarotApp: React.FC = () => {
     } else if (value === 'history' && userData?.userId) {
       setIsLoadingHistory(true);
       try {
+        console.log("Calling history webhook with userid:", userData.userId);
         // Call the history webhook when the history tab is selected
         const response = await fetch(webhooks.history, {
           method: 'POST',
@@ -70,9 +73,15 @@ const TarotApp: React.FC = () => {
         
         // Process the history data from the response
         const data = await response.json();
+        console.log("History webhook response:", data);
+        
         if (data && Array.isArray(data.readings)) {
           setHistoryData(data.readings);
+        } else if (data && Array.isArray(data)) {
+          // Handle case where the API returns an array directly
+          setHistoryData(data);
         } else {
+          console.warn("Unexpected history data format:", data);
           setHistoryData([]);
         }
       } catch (error) {
