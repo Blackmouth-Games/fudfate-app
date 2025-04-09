@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from './LanguageSwitcher';
-import { X, Telegram } from 'lucide-react';
+import { X, MessageCircle } from 'lucide-react';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -66,7 +66,7 @@ const Footer = () => {
                 className="text-gray-700 hover:text-accent transition-colors"
                 aria-label="Telegram"
               >
-                <Telegram size={24} />
+                <MessageCircle size={24} />
               </a>
             </div>
           </div>

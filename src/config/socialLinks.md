@@ -7,7 +7,7 @@ This document explains how to configure the social media links used in the FUDFa
 
 The application currently supports the following social media platforms:
 - X (formerly Twitter)
-- Telegram
+- Telegram (displayed as a message circle icon)
 
 ## Configuration Methods
 
