@@ -169,11 +169,13 @@ const TarotApp: React.FC = () => {
               size="large"
             />
             
-            <GlitchText
-              text="CRYPTO FORTUNE AWAITS"
-              className="text-3xl md:text-4xl font-bold mb-12 font-pixel tracking-wider uppercase mx-auto"
-              goldEffect={true}
-            />
+            <div className="flex justify-center w-full mb-12">
+              <GlitchText
+                text="CRYPTO FORTUNE AWAITS"
+                className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase"
+                goldEffect={true}
+              />
+            </div>
             
             <div className="flex flex-col gap-4 items-center max-w-sm mx-auto">
               <WalletConnector showButtons={true} />
@@ -183,7 +185,7 @@ const TarotApp: React.FC = () => {
           <div className="max-w-4xl mx-auto my-8 w-full">
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsContent value="reading" className="mt-0">
-                {!userData?.runsToday && (
+                {userData && !userData.runsToday && (
                   <div className="mb-4 p-2 text-sm text-amber-700 bg-amber-50 rounded-md border border-amber-200">
                     {t('tarot.noReadingsAvailable')}
                   </div>

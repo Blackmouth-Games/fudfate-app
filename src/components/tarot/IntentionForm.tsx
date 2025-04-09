@@ -177,7 +177,7 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
           
           <Button
             type="submit"
-            className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all text-sm py-1.5 h-auto"
+            className="w-auto px-6 mx-auto block bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium transition-all text-sm py-1.5 h-auto"
             disabled={loading || !intention.trim() || (userData?.runsToday === false)}
           >
             {loading ? (

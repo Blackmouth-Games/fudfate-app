@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -48,8 +47,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const expiry = new Date(session.expiry);
         
         if (expiry > new Date() && session.walletType) {
-          // Instead of auto-connecting, just restore the session data
-          // without actually connecting to the wallet
           restoreSession(session);
         } else {
           localStorage.removeItem('walletSession');
@@ -60,7 +57,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    // Check for mock settings
     const mockRunsToday = localStorage.getItem('mockRunsToday');
     if (mockRunsToday) {
       setUserDataOverride(prev => ({
@@ -78,11 +74,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // New function to restore session data without connecting to wallet
   const restoreSession = (session: any) => {
     console.log("Restoring saved wallet session:", session);
     
-    // Only set UI state, don't reconnect to the wallet
     setWalletType(session.walletType);
     setWalletAddress(session.walletAddress);
     
@@ -93,7 +87,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
     
     if (session.userData) {
-      // Apply any overrides to the restored user data
       const restoredUserData = {
         userId: userDataOverride.userId || session.userData.userId || 'unknown',
         runsToday: userDataOverride.runsToday !== undefined ? 
@@ -119,13 +112,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     try {
       if (type === 'phantom') {
         if (!window.solana) return false;
-        // Check if already connected to Phantom
         return window.solana.isConnected;
       } else if (type === 'metamask') {
         if (!window.ethereum) return false;
-        // Check if already connected to MetaMask
         const accounts = await window.ethereum.request({ 
-          method: 'eth_accounts' // This gets accounts without prompting
+          method: 'eth_accounts'
         });
         return accounts && accounts.length > 0;
       }
@@ -140,9 +131,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     try {
       console.log(`Calling login webhook with ${walletType}, ${walletAddress}`);
       
-      // Add timeout to prevent hanging requests
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
       
       const response = await fetch(webhooks.login, {
         method: 'POST',
@@ -182,7 +172,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           runsToday: userInfo.runs_today === true || userInfo.runs_today === 'true'
         };
       } else if (data.userid) {
-        // Handle non-array response format
         return {
           userId: data.userid || 'unknown',
           runsToday: data.runs_today === true || data.runs_today === 'true'
@@ -205,11 +194,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         return false;
       }
 
-      // Check if the wallet is already connected in the browser
       const alreadyConnected = await isWalletConnected(type);
       
       if (!alreadyConnected) {
-        // If wallet is not connected, prompt user to connect first
         if (type === 'phantom') {
           try {
             if (!window.solana) {
@@ -245,7 +232,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       
-      // Now get wallet address after successful connection
+      const isNowConnected = await isWalletConnected(type);
+      if (!isNowConnected) {
+        toast.error(t('errors.walletConnectionFailed'));
+        return false;
+      }
+      
       let address = '';
       let currentNetwork: Network = null;
 
@@ -270,12 +262,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         currentNetwork = 'ethereum';
       }
 
-      // Call login webhook and get user data
       const userDataResponse = await callLoginWebhook(type, address);
       
-      // If the webhook call failed, don't proceed with connection
       if (!userDataResponse) {
-        // Reset the connection state to ensure UI shows disconnected
         setConnected(false);
         setWalletType(null);
         setWalletAddress(null);
@@ -285,9 +274,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
       
       const sessionExpiry = new Date();
-      sessionExpiry.setMinutes(sessionExpiry.getMinutes() + 30); // 30 minute session
+      sessionExpiry.setMinutes(sessionExpiry.getMinutes() + 30);
       
-      // Apply any overrides to the user data
       const finalUserData = {
         userId: userDataOverride.userId || userDataResponse.userId,
         runsToday: userDataOverride.runsToday !== undefined ? 
@@ -298,7 +286,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         walletType: type,
         walletAddress: address,
         network: currentNetwork,
-        userData: finalUserData, // Store userData in session for restoration
+        userData: finalUserData,
         expiry: sessionExpiry.toISOString()
       };
       
@@ -318,7 +306,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       console.error(`Error connecting to ${type}:`, error);
       toast.error(t('errors.connectionFailed'));
       
-      // Reset the connection state to ensure UI shows disconnected
       setConnected(false);
       setWalletType(null);
       setWalletAddress(null);
@@ -372,14 +359,12 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Function to override user data (for dev purposes)
   const overrideUserData = (override: UserDataOverride) => {
     setUserDataOverride(prev => ({
       ...prev,
       ...override
     }));
     
-    // If we're already connected, apply the override immediately
     if (connected && userData) {
       setUserData(prev => {
         if (!prev) return null;
@@ -391,7 +376,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       });
     }
     
-    // Save to localStorage for persistence
     if (override.userId !== undefined) {
       localStorage.setItem('mockUserId', override.userId);
     }
@@ -430,9 +414,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     return hash.toString(16);
   };
 
-  // Helper function to access translation outside of components
   const t = (key: string): string => {
-    // Simple translation function for common terms
     const translations: Record<string, Record<string, string>> = {
       en: {
         'errors.walletNotInstalled': 'wallet is not installed. Please install it to continue.',
@@ -447,8 +429,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         'errors.phantomNotConnected': 'Phantom wallet is not connected',
         'errors.metamaskNotConnected': 'MetaMask wallet is not connected',
         'errors.metamaskNoAccounts': 'No accounts found in MetaMask',
+        'errors.walletConnectionFailed': 'Wallet connection failed',
         'wallet.connectSuccess': 'Wallet connected successfully',
-        'wallet.disconnectSuccess': 'Wallet disconnected successfully'
+        'wallet.disconnectSuccess': 'Wallet disconnected successfully',
+        'wallet.phantomNotInstalled': 'Phantom wallet is not installed',
+        'wallet.metamaskNotInstalled': 'MetaMask wallet is not installed'
       },
       es: {
         'errors.walletNotInstalled': 'no está instalado. Por favor instálalo para continuar.',
@@ -463,8 +448,11 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         'errors.phantomNotConnected': 'La wallet Phantom no está conectada',
         'errors.metamaskNotConnected': 'La wallet MetaMask no está conectada',
         'errors.metamaskNoAccounts': 'No se encontraron cuentas en MetaMask',
+        'errors.walletConnectionFailed': 'Conexión de wallet fallida',
         'wallet.connectSuccess': 'Wallet conectada correctamente',
-        'wallet.disconnectSuccess': 'Wallet desconectada correctamente'
+        'wallet.disconnectSuccess': 'Wallet desconectada correctamente',
+        'wallet.phantomNotInstalled': 'La wallet Phantom no está instalada',
+        'wallet.metamaskNotInstalled': 'La wallet MetaMask no está instalada'
       }
     };
     

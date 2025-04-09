@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet, WalletType } from '@/contexts/WalletContext';
 import { useTranslation } from 'react-i18next';
@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from 'sonner';
 
 interface WalletConnectorProps {
   showButtons?: boolean;
@@ -19,6 +20,17 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
   const { connected, walletAddress, walletType, connectWallet, disconnectWallet } = useWallet();
   const { t } = useTranslation();
   const [isConnecting, setIsConnecting] = useState<WalletType | null>(null);
+  const [isPhantomAvailable, setIsPhantomAvailable] = useState(false);
+  const [isMetamaskAvailable, setIsMetamaskAvailable] = useState(false);
+
+  // Check wallet availability on component mount
+  useEffect(() => {
+    // Check if Phantom is available
+    setIsPhantomAvailable(!!window.solana && !!window.solana.isPhantom);
+    
+    // Check if Metamask is available
+    setIsMetamaskAvailable(!!window.ethereum && !!window.ethereum.isMetaMask);
+  }, []);
 
   // Format wallet address to show first and last few characters
   const formatAddress = (address: string | null): string => {
@@ -28,6 +40,17 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
 
   // Handle wallet connection
   const handleConnect = async (type: WalletType) => {
+    // Check if the wallet is available before attempting to connect
+    if (type === 'phantom' && !isPhantomAvailable) {
+      toast.error(t('wallet.phantomNotInstalled'));
+      return;
+    }
+    
+    if (type === 'metamask' && !isMetamaskAvailable) {
+      toast.error(t('wallet.metamaskNotInstalled'));
+      return;
+    }
+    
     setIsConnecting(type);
     try {
       console.log(`Attempting to connect ${type} wallet`);
@@ -89,8 +112,8 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
     <div className="flex flex-col gap-3 w-full">
       <Button 
         onClick={() => handleConnect('metamask')}
-        disabled={isConnecting !== null}
-        className="w-full font-medium text-black"
+        disabled={isConnecting !== null || !isMetamaskAvailable}
+        className={`w-full font-medium text-black ${!isMetamaskAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
         style={{ backgroundColor: '#FFA680', borderColor: '#FF8A57' }}
       >
         {isConnecting === 'metamask' ? (
@@ -105,15 +128,15 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               alt="Metamask" 
               className="w-5 h-5 mr-2"
             />
-            {t('wallet.connectMetamask')}
+            {isMetamaskAvailable ? t('wallet.connectMetamask') : t('wallet.metamaskNotInstalled')}
           </>
         )}
       </Button>
       
       <Button 
         onClick={() => handleConnect('phantom')}
-        disabled={isConnecting !== null}
-        className="w-full font-medium text-white"
+        disabled={isConnecting !== null || !isPhantomAvailable}
+        className={`w-full font-medium text-white ${!isPhantomAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
         style={{ backgroundColor: '#AB9FF2', borderColor: '#9887E0' }}
       >
         {isConnecting === 'phantom' ? (
@@ -128,7 +151,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               alt="Phantom" 
               className="w-5 h-5 mr-2"
             />
-            {t('wallet.connectPhantom')}
+            {isPhantomAvailable ? t('wallet.connectPhantom') : t('wallet.phantomNotInstalled')}
           </>
         )}
       </Button>
