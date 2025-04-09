@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet, WalletType } from '@/contexts/WalletContext';
 import { useTranslation } from 'react-i18next';
-import { Wallet, ChevronDown, LogOut } from 'lucide-react';
+import { Wallet, ChevronDown, LogOut, Loader2 } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -42,12 +42,21 @@ const WalletConnector: React.FC = () => {
             className="w-full sm:w-auto font-medium text-white"
             style={{ backgroundColor: '#AB9FF2', borderColor: '#9887E0' }}
           >
-            <img 
-              src="/img/icons/Phantom-Icon_Transparent_White.svg" 
-              alt="Phantom" 
-              className="w-5 h-5 mr-2"
-            />
-            {isConnecting === 'phantom' ? t('wallet.connecting') : t('wallet.connectPhantom')}
+            {isConnecting === 'phantom' ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t('wallet.connecting')}
+              </>
+            ) : (
+              <>
+                <img 
+                  src="/img/icons/Phantom-Icon_Transparent_White.svg" 
+                  alt="Phantom" 
+                  className="w-5 h-5 mr-2"
+                />
+                {t('wallet.connectPhantom')}
+              </>
+            )}
           </Button>
           
           <Button 
@@ -56,12 +65,21 @@ const WalletConnector: React.FC = () => {
             className="w-full sm:w-auto font-medium text-black"
             style={{ backgroundColor: '#FFA680', borderColor: '#FF8A57' }}
           >
-            <img 
-              src="/img/icons/MetaMask-icon-fox.svg" 
-              alt="Metamask" 
-              className="w-5 h-5 mr-2"
-            />
-            {isConnecting === 'metamask' ? t('wallet.connecting') : t('wallet.connectMetamask')}
+            {isConnecting === 'metamask' ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t('wallet.connecting')}
+              </>
+            ) : (
+              <>
+                <img 
+                  src="/img/icons/MetaMask-icon-fox.svg" 
+                  alt="Metamask" 
+                  className="w-5 h-5 mr-2"
+                />
+                {t('wallet.connectMetamask')}
+              </>
+            )}
           </Button>
         </div>
       ) : (

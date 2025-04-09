@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
 import { useEnvironment } from '@/hooks/useEnvironment';
 
@@ -130,7 +130,7 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
           >
             {loading ? (
               <span className="flex items-center">
-                <span className="animate-spin mr-2">⋯</span>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {t('common.loading')}
               </span>
             ) : (
