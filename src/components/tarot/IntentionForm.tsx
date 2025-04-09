@@ -64,14 +64,40 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
       }
 
       const data = await response.json();
+      console.log("Webhook response:", data);
       
       // Process the received data for tarot reading
-      if (data.fatemessage && data.cards) {
-        setFinalMessage(data.fatemessage);
+      if (data.message) {
+        setFinalMessage(data.message);
         
-        // Process cards if they are returned from the webhook
-        if (Array.isArray(data.cards) && data.cards.length > 0) {
-          // Map the received cards to the format expected by the app
+        // Process selected_cards if they are returned from the webhook
+        if (Array.isArray(data.selected_cards) && data.selected_cards.length > 0) {
+          // Get cards from the deck based on the selected card indices
+          import('@/data/tarotCards').then(({ default: tarotCards }) => {
+            const selectedDeckCards = tarotCards.filter(card => card.deck === 'deck1');
+            
+            // Map the received card indices to actual card objects
+            const processedCards = data.selected_cards.map((cardIndex: number) => {
+              const card = selectedDeckCards[cardIndex] || {
+                id: `card-${cardIndex}`,
+                name: `Card ${cardIndex}`,
+                image: `/img/cards/carddeck1/deck1_${cardIndex}_TheDegen.png`,
+                description: "No description available"
+              };
+              
+              return {
+                id: card.id || `card-${cardIndex}`,
+                name: card.name || `Card ${cardIndex}`,
+                image: card.image || `/img/cards/carddeck1/deck1_${cardIndex}_TheDegen.png`,
+                interpretation: "The cosmic energies are aligning with your question.",
+                revealed: true
+              };
+            });
+            
+            setSelectedCards(processedCards);
+          });
+        } else if (data.cards) {
+          // Fallback to previous format for backward compatibility
           const processedCards = data.cards.map((card: any, index: number) => ({
             id: card.id || `card-${index}`,
             name: card.name || `Card ${index + 1}`,
