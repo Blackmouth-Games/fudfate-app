@@ -85,7 +85,9 @@
   "footer": {
     "allRightsReserved": "Todos los derechos reservados.",
     "privacyPolicy": "Política de Privacidad",
-    "termsOfService": "Términos de Servicio"
+    "termsOfService": "Términos de Servicio",
+    "cookiePolicy": "Política de Cookies",
+    "rights": "Todos los derechos reservados."
   },
   "languageSwitcher": {
     "language": "Idioma",

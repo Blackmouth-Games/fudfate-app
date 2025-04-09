@@ -102,11 +102,17 @@ const TarotApp: React.FC = () => {
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
           {/* Always show the logo */}
           <div className="flex items-center">
-            <img 
-              src="/img/logos/FUDFATE_logo.png" 
-              alt="FUDFATE" 
-              className="h-12"
-            />
+            <a 
+              href="https://app-fudfate.blackmouthgames.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img 
+                src="/img/logos/FUDFATE_logo.png" 
+                alt="FUDFATE" 
+                className="h-12"
+              />
+            </a>
           </div>
           
           {connected && (
@@ -159,13 +165,9 @@ const TarotApp: React.FC = () => {
             
             <GlitchText
               text="CRYPTO FORTUNE AWAITS"
-              className="text-3xl md:text-4xl font-bold mb-6 font-pixel tracking-wider uppercase"
+              className="text-3xl md:text-4xl font-bold mb-12 font-pixel tracking-wider uppercase mx-auto"
               goldEffect={true}
             />
-            
-            <p className="text-lg text-gray-600 max-w-md mx-auto text-center mb-8 font-pixel">
-              {t('tarot.connectWalletMessage')}
-            </p>
             
             <div className="flex flex-col gap-4 items-center max-w-sm mx-auto">
               <WalletConnector showButtons={true} />
@@ -212,7 +214,7 @@ const TarotApp: React.FC = () => {
         )}
       </main>
 
-      {/* Footer - Now anchored to bottom */}
+      {/* Footer - Already anchored to bottom */}
       <footer className="py-6 border-t border-gray-200 mt-auto">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-gray-500">

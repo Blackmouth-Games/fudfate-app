@@ -8,6 +8,8 @@ import i18n from './i18n';
 import TarotApp from './pages/TarotApp';
 import Index from './pages/Index';
 import NotFound from './pages/NotFound';
+import CookiesPolicy from './pages/CookiesPolicy';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import { WalletProvider } from './contexts/WalletContext';
 import { TarotProvider } from './contexts/TarotContext';
 import DevTool from './components/DevTool';
@@ -26,6 +28,8 @@ const queryClient = new QueryClient({
 const routes = [
   { path: '/', name: 'Home' },
   { path: '/app', name: 'Tarot App' },
+  { path: '/cookies', name: 'Cookies Policy' },
+  { path: '/privacy', name: 'Privacy Policy' },
 ];
 
 function App() {
@@ -39,6 +43,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/app" element={<TarotApp />} />
+                  <Route path="/cookies" element={<CookiesPolicy />} />
+                  <Route path="/privacy" element={<PrivacyPolicy />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <DevTool routes={routes} />

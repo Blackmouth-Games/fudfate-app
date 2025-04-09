@@ -5,7 +5,7 @@ import { Environment, webhooks } from '@/config/webhooks';
 export function useEnvironment() {
   const [environment, setEnvironment] = useState<Environment>(() => {
     const saved = localStorage.getItem('appEnvironment') as Environment | null;
-    return (saved === 'development' || saved === 'production') ? saved : 'development';
+    return (saved === 'development' || saved === 'production') ? saved : 'production';
   });
 
   useEffect(() => {
