@@ -3,7 +3,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import LanguageSwitcher from './LanguageSwitcher';
-import { X, MessageCircle } from 'lucide-react';
+import { X, MessageCircle, Github } from 'lucide-react';
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -12,7 +12,8 @@ const Footer = () => {
   // Get social links from environment variable or config
   const socialLinks = {
     x: process.env.SOCIAL_X_URL || 'https://twitter.com',
-    telegram: process.env.SOCIAL_TELEGRAM_URL || 'https://t.me'
+    telegram: process.env.SOCIAL_TELEGRAM_URL || 'https://t.me',
+    github: process.env.SOCIAL_GITHUB_URL || 'https://github.com/blackmouthgames'
   };
 
   return (
@@ -67,6 +68,15 @@ const Footer = () => {
                 aria-label="Telegram"
               >
                 <MessageCircle size={24} />
+              </a>
+              <a 
+                href={socialLinks.github} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-700 hover:text-accent transition-colors"
+                aria-label="GitHub"
+              >
+                <Github size={24} />
               </a>
             </div>
           </div>

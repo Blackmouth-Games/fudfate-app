@@ -10,10 +10,12 @@ import GlitchText from '@/components/GlitchText';
 import IntentionForm from '@/components/tarot/IntentionForm';
 import DeckSelector from '@/components/tarot/DeckSelector';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
+import CookieConsent from '@/components/CookieConsent';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sparkles, History, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 import GlitchLogo from '@/components/GlitchLogo';
+import Footer from '@/components/Footer';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
@@ -50,7 +52,9 @@ const TarotApp: React.FC = () => {
         
       } catch (error) {
         console.error('Error calling deck webhook:', error);
-        toast.error(t('errors.deckLoadFailed'));
+        toast.error(t('errors.deckLoadFailed'), {
+          position: 'bottom-center',
+        });
       }
     } else if (value === 'history' && userData?.userId) {
       setIsLoadingHistory(true);
@@ -87,7 +91,9 @@ const TarotApp: React.FC = () => {
         }
       } catch (error) {
         console.error('Error calling history webhook:', error);
-        toast.error(t('errors.historyLoadFailed'));
+        toast.error(t('errors.historyLoadFailed'), {
+          position: 'bottom-center',
+        });
         setHistoryData([]);
       } finally {
         setIsLoadingHistory(false);
@@ -175,26 +181,13 @@ const TarotApp: React.FC = () => {
           </div>
         ) : (
           <div className="max-w-4xl mx-auto my-8 w-full">
-            {userData && (
-              <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                <div className="flex flex-col md:flex-row justify-between items-center">
-                  <div>
-                    <p className="text-sm text-gray-600">
-                      {t('wallet.userId')}: <span className="font-mono text-gray-800">{userData.userId || t('wallet.notAvailable')}</span>
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {t('tarot.readingsAvailable')}: 
-                      <span className={`font-bold ml-1 ${userData.runsToday ? 'text-green-600' : 'text-red-600'}`}>
-                        {userData.runsToday ? t('common.yes') : t('common.no')}
-                      </span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
             <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
               <TabsContent value="reading" className="mt-0">
+                {!userData?.runsToday && (
+                  <div className="mb-4 p-2 text-sm text-amber-700 bg-amber-50 rounded-md border border-amber-200">
+                    {t('tarot.noReadingsAvailable')}
+                  </div>
+                )}
                 <IntentionForm className="w-full" />
               </TabsContent>
               
@@ -214,14 +207,11 @@ const TarotApp: React.FC = () => {
         )}
       </main>
 
-      {/* Footer - Already anchored to bottom */}
-      <footer className="py-6 border-t border-gray-200 mt-auto">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-gray-500">
-            FUDFATE © {new Date().getFullYear()}. {t('footer.allRightsReserved')}
-          </p>
-        </div>
-      </footer>
+      {/* Footer */}
+      <Footer />
+      
+      {/* Cookie Consent */}
+      <CookieConsent />
     </div>
   );
 };

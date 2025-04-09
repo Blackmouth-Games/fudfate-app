@@ -6,8 +6,9 @@ This document explains how to configure the social media links used in the FUDFa
 ## Available Social Media Platforms
 
 The application currently supports the following social media platforms:
-- X (formerly Twitter)
+- X (formerly Twitter) - displayed with the X icon
 - Telegram (displayed as a message circle icon)
+- GitHub (displayed with the GitHub icon)
 
 ## Configuration Methods
 
@@ -20,6 +21,7 @@ You can set the following environment variables:
 ```
 SOCIAL_X_URL=https://twitter.com/yourusername
 SOCIAL_TELEGRAM_URL=https://t.me/yourchannel
+SOCIAL_GITHUB_URL=https://github.com/yourusername
 ```
 
 ### 2. Direct Editing
@@ -29,7 +31,8 @@ If you don't want to use environment variables, you can edit the links directly 
 ```jsx
 const socialLinks = {
   x: process.env.SOCIAL_X_URL || 'https://twitter.com/yourusername',
-  telegram: process.env.SOCIAL_TELEGRAM_URL || 'https://t.me/yourchannel'
+  telegram: process.env.SOCIAL_TELEGRAM_URL || 'https://t.me/yourchannel',
+  github: process.env.SOCIAL_GITHUB_URL || 'https://github.com/yourusername'
 };
 ```
 

@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
 import i18n from './i18n';
 import TarotApp from './pages/TarotApp';
 import Index from './pages/Index';
@@ -13,6 +13,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import { WalletProvider } from './contexts/WalletContext';
 import { TarotProvider } from './contexts/TarotContext';
 import DevTool from './components/DevTool';
+import CookieConsent from './components/CookieConsent';
 
 // Create React Query client with appropriate settings
 const queryClient = new QueryClient({
@@ -48,8 +49,9 @@ function App() {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <DevTool routes={routes} />
+                <CookieConsent />
               </Router>
-              <Toaster position="top-center" />
+              <Toaster position="bottom-center" />
             </TarotProvider>
           </WalletProvider>
         </I18nextProvider>
