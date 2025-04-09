@@ -46,6 +46,7 @@
     "clickToSelect": "Clic para seleccionar",
     "selectedCards": "Cartas seleccionadas: {{count}}/3",
     "revealYourDestiny": "Revela Tu Destino",
+    "tapToReveal": "Haz clic en cada carta para revelar tu destino",
     "selectDeck": "Selecciona Mazo de Tarot",
     "additionalDecksComingSoon": "Más mazos se desbloquearán a medida que avances en tu viaje",
     "locked": "Bloqueado",
@@ -54,8 +55,11 @@
     "cardInterpretation": "Interpretación de la Carta",
     "finalMessage": "Lectura Final",
     "readingComplete": "Lectura Completa",
+    "readingCompleteDescription": "Tus cartas han revelado su sabiduría",
     "startNewReading": "Iniciar Nueva Lectura",
-    "tapToReveal": "Toca para Revelar",
+    "newReading": "Nueva Lectura",
+    "revealCards": "Revela Tus Cartas",
+    "revealCardsDescription": "Haz clic en cada carta para ver lo que el destino tiene para ti",
     "soulJourney": "El Viaje de Tu Alma",
     "cardReading": "Lectura de Cartas",
     "invokingEnergies": "Invocando Energías Cósmicas",
@@ -67,7 +71,8 @@
     "reading": "Lectura",
     "history": "Historial",
     "decks": "Mazos",
-    "viewAllCards": "Ver Todas las Cartas"
+    "viewAllCards": "Ver Todas las Cartas",
+    "deckCards": "Cartas del Mazo"
   },
   "errors": {
     "generalError": "Algo salió mal",
@@ -86,20 +91,35 @@
   "cookies": {
     "title": "Política de Cookies",
     "weUseCookies": "Utilizamos cookies para mejorar tu experiencia",
+    "description": "Utilizamos cookies para mejorar tu experiencia de navegación",
     "accept": "Aceptar Todo",
     "decline": "Rechazar Todo",
     "preferences": "Preferencias",
+    "settings": "Configuración",
     "essential": "Esenciales",
     "analytics": "Analíticas",
     "marketing": "Marketing"
   },
   "cards": {
     "title": "Cartas de Tarot Crypto",
-    "description": "Descubre tu destino crypto con nuestra colección única de cartas de tarot. Cada carta representa diferentes aspectos del viaje crypto."
+    "description": "Descubre tu destino crypto con nuestra colección única de cartas de tarot. Cada carta representa diferentes aspectos del viaje crypto.",
+    "deckCards": "Cartas del Mazo"
   },
   "hero": {
     "title": "La Fortuna Crypto Te Espera",
     "subtitle": "Conecta tu wallet para acceder a lecturas de tarot personalizadas que predicen tu destino crypto",
-    "cta": "Comienza Tu Viaje"
+    "cta": "Comienza Tu Viaje",
+    "description": "Descubre las fuerzas místicas que guían tus inversiones en criptomonedas con nuestras lecturas de tarot especializadas"
+  },
+  "about": {
+    "title": "Sobre Crypto Tarot",
+    "description": "Nuestra mezcla única de misticismo y orientación en criptomonedas",
+    "feature1": "Cartas Artísticas de Tarot",
+    "feature2": "Cultura Crypto",
+    "feature3": "Visiones Predictivas"
+  },
+  "cta": {
+    "title": "¿Listo para Ver Tu Futuro?",
+    "subtitle": "Conecta tu wallet y descubre lo que el universo crypto tiene reservado para ti"
   }
 }

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -79,9 +80,9 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const card = availableCards.find(c => c.id === cardId);
+      const card = tarotCards.find(c => c.id === cardId);
       if (!card) throw new Error("Card not found");
       
       return `Para tu intención "${userIntention}", la carta ${card.name} sugiere que estás en un momento de transformación. Esta energía te invita a confiar en tu intuición y seguir adelante con confianza en el camino que has elegido.`;
@@ -97,7 +98,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       return `La combinación de las cartas elegidas revela un patrón interesante para tu intención "${userIntention}". El mensaje general sugiere que estás en un momento de importantes decisiones que determinarán tu futuro cercano. Confía en tu intuición y mantén la mente abierta a nuevas posibilidades.`;
     } catch (error) {
@@ -110,18 +111,24 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
 
   const startReading = async () => {
     if (!connected) {
-      toast.error("Debes conectar tu wallet para realizar una lectura");
+      toast.error("Debes conectar tu wallet para realizar una lectura", {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
       return;
     }
     
     if (!intention.trim()) {
-      toast.error("Por favor ingresa tu intención o pregunta");
+      toast.error("Por favor ingresa tu intención o pregunta", {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
       return;
     }
     
     const hasRequiredToken = await checkUserToken();
     if (!hasRequiredToken) {
-      toast.error("Necesitas tener el token requerido en tu wallet para realizar una lectura");
+      toast.error("Necesitas tener el token requerido en tu wallet para realizar una lectura", {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
       return;
     }
     
@@ -135,9 +142,15 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setAvailableCards(randomCards);
       
       setPhase('selection');
+      
+      toast.success("Lectura iniciada correctamente", {
+        style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
+      });
     } catch (error) {
       console.error("Error starting reading:", error);
-      toast.error("Error al iniciar la lectura. Inténtalo de nuevo.");
+      toast.error("Error al iniciar la lectura. Inténtalo de nuevo.", {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
       setPhase('intention');
     }
   };
@@ -146,22 +159,32 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     if (phase !== 'selection') return;
     
     if (selectedCards.length >= 3) {
-      toast.error("Ya has seleccionado 3 cartas");
+      toast.error("Ya has seleccionado 3 cartas", {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
       return;
     }
     
     const card = availableCards.find(c => c.id === cardId);
     if (!card) return;
     
+    // Remove selected card from available cards
     setAvailableCards(prev => prev.filter(c => c.id !== cardId));
     
+    // Add card to selected cards
     setSelectedCards(prev => [
       ...prev, 
       { ...card, revealed: false }
     ]);
     
+    // If we've now selected 3 cards, proceed to reading phase
     if (selectedCards.length === 2) {
-      setPhase('reading');
+      setTimeout(() => {
+        setPhase('reading');
+        toast.success("Selección completada. Revela las cartas para ver tu lectura.", {
+          style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
+        });
+      }, 500);
     }
   };
 
@@ -172,6 +195,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     if (!card || card.revealed) return;
     
     try {
+      setLoading(true);
       const interpretation = await generateCardInterpretation(card.id, intention);
       
       const updatedCards = [...selectedCards];
@@ -182,16 +206,24 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       };
       
       setSelectedCards(updatedCards);
+      setLoading(false);
       
       const allRevealed = updatedCards.every(c => c.revealed);
       if (allRevealed) {
+        toast.success("Todas las cartas reveladas. Generando lectura final...", {
+          style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
+        });
+        
         const finalMsg = await generateFinalMessage(updatedCards, intention);
         setFinalMessage(finalMsg);
         setPhase('complete');
       }
     } catch (error) {
       console.error("Error revealing card:", error);
-      toast.error("Error al revelar la carta. Inténtalo de nuevo.");
+      toast.error("Error al revelar la carta. Inténtalo de nuevo.", {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
+      setLoading(false);
     }
   };
 
@@ -202,6 +234,10 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setSelectedCards([]);
     setIntroMessage(null);
     setFinalMessage(null);
+    
+    toast.success("Nueva lectura iniciada", {
+      style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
+    });
   };
 
   const checkUserToken = async (): Promise<boolean> => {

@@ -46,6 +46,7 @@
     "clickToSelect": "Click to select",
     "selectedCards": "Selected Cards: {{count}}/3",
     "revealYourDestiny": "Reveal Your Destiny",
+    "tapToReveal": "Click on each card to reveal your fate",
     "selectDeck": "Select Tarot Deck",
     "additionalDecksComingSoon": "More decks will be unlocked as your journey progresses",
     "locked": "Locked",
@@ -54,8 +55,11 @@
     "cardInterpretation": "Card Interpretation",
     "finalMessage": "Final Reading",
     "readingComplete": "Reading Complete",
+    "readingCompleteDescription": "Your cards have revealed their wisdom",
     "startNewReading": "Start New Reading",
-    "tapToReveal": "Tap to Reveal",
+    "newReading": "New Reading",
+    "revealCards": "Reveal Your Cards",
+    "revealCardsDescription": "Click on each card to see what fate has in store for you",
     "soulJourney": "Your Soul's Journey",
     "cardReading": "Card Reading",
     "invokingEnergies": "Invoking Cosmic Energies",
@@ -67,7 +71,8 @@
     "reading": "Reading",
     "history": "History",
     "decks": "Decks",
-    "viewAllCards": "View All Cards"
+    "viewAllCards": "View All Cards",
+    "deckCards": "Deck Cards"
   },
   "errors": {
     "generalError": "Something went wrong",
@@ -86,20 +91,35 @@
   "cookies": {
     "title": "Cookie Policy",
     "weUseCookies": "We use cookies to enhance your experience",
+    "description": "We use cookies to enhance your browsing experience",
     "accept": "Accept All",
     "decline": "Decline All",
     "preferences": "Preferences",
+    "settings": "Settings",
     "essential": "Essential",
     "analytics": "Analytics",
     "marketing": "Marketing"
   },
   "cards": {
     "title": "Crypto Tarot Cards",
-    "description": "Discover your crypto destiny with our unique collection of tarot cards. Each card represents different aspects of the crypto journey."
+    "description": "Discover your crypto destiny with our unique collection of tarot cards. Each card represents different aspects of the crypto journey.",
+    "deckCards": "Deck Cards"
   },
   "hero": {
     "title": "Crypto Fortune Awaits",
     "subtitle": "Connect your wallet to access personalized tarot readings that predict your crypto destiny",
-    "cta": "Begin Your Journey"
+    "cta": "Begin Your Journey",
+    "description": "Unveil the mystical forces guiding your crypto investments with our specialized tarot readings"
+  },
+  "about": {
+    "title": "About Crypto Tarot",
+    "description": "Our unique blend of mysticism and cryptocurrency guidance",
+    "feature1": "Artistic Tarot Cards",
+    "feature2": "Crypto Culture",
+    "feature3": "Predictive Insights"
+  },
+  "cta": {
+    "title": "Ready to See Your Future?",
+    "subtitle": "Connect your wallet and reveal what the crypto universe has in store for you"
   }
 }

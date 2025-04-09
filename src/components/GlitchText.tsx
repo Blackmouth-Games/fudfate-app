@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '../lib/utils';
 import GlitchEffect from './core/GlitchEffect';
@@ -12,7 +13,7 @@ interface GlitchTextProps {
 const GlitchText = ({ text, className, goldEffect = false }: GlitchTextProps) => {
   return (
     <div className={cn(
-      "w-full text-center relative mb-8", 
+      "w-full text-center relative mb-4", 
       className
     )}>
       <GlitchEffect type="text" className="w-full">
@@ -21,16 +22,16 @@ const GlitchText = ({ text, className, goldEffect = false }: GlitchTextProps) =>
           goldEffect ? "text-amber-500 font-bold" : "text-purple-500"
         )}>{text}</span>
         <span className={cn(
-          "absolute glitch-effect-1",
+          "absolute glitch-effect-1 top-0 left-0",
           goldEffect 
-            ? "text-amber-600 -top-1 left-0" 
-            : "text-cyan-400 -top-1 -left-1"
+            ? "text-amber-600 -translate-y-0.5 -translate-x-0.5" 
+            : "text-cyan-400 -translate-y-0.5 -translate-x-0.5"
         )}>{text}</span>
         <span className={cn(
-          "absolute glitch-effect-2",
+          "absolute glitch-effect-2 top-0 left-0",
           goldEffect 
-            ? "text-amber-400 -top-1 left-0"
-            : "text-pink-500 -top-1 left-1"
+            ? "text-amber-400 translate-y-0.5 translate-x-0.5"
+            : "text-pink-500 translate-y-0.5 translate-x-0.5"
         )}>{text}</span>
       </GlitchEffect>
     </div>

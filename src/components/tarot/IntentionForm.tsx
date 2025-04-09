@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import GlitchText from '@/components/GlitchText';
 import { Sparkles, X } from 'lucide-react';
+import { toast } from 'sonner';
 import PreparingReading from './PreparingReading';
 import CardSelection from './CardSelection';
 import CardReading from './CardReading';
@@ -30,14 +31,23 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
     e.preventDefault();
     
     if (intention.trim().length < 3) {
+      toast.error(t('tarot.intentionTooShort'), {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
       return;
     }
     
     setLoading(true);
     try {
       await startReading();
+      toast.success(t('tarot.readingStarted'), {
+        style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
+      });
     } catch (error) {
       console.error('Error starting reading:', error);
+      toast.error(t('errors.readingFailed'), {
+        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+      });
     } finally {
       setLoading(false);
     }

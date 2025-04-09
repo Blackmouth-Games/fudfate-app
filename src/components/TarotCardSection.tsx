@@ -15,7 +15,7 @@ import tarotCards from '@/data/tarotCards';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { X } from 'lucide-react';
 
-// Datos ejemplo para las cartas
+// Example cards for the carousel
 const exampleCards = [
   { id: 1, title: "The Degen", imageUrl: "/img/cards/carddeck1/deck1_0_TheDegen.png" },
   { id: 2, title: "The Miner", imageUrl: "/img/cards/carddeck1/deck1_1_TheMiner.png" },
