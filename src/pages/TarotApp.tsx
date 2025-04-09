@@ -30,7 +30,6 @@ const TarotApp: React.FC = () => {
     if (value === 'decks' && userData?.userId) {
       try {
         console.log("Calling deck webhook with userid:", userData.userId);
-        // Call the deck webhook when the decks tab is selected
         const response = await fetch(webhooks.deck, {
           method: 'POST',
           headers: {
@@ -59,7 +58,6 @@ const TarotApp: React.FC = () => {
       setIsLoadingHistory(true);
       try {
         console.log("Calling history webhook with userid:", userData.userId);
-        // Call the history webhook when the history tab is selected
         const response = await fetch(webhooks.history, {
           method: 'POST',
           headers: {
@@ -75,14 +73,12 @@ const TarotApp: React.FC = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        // Process the history data from the response
         const data = await response.json();
         console.log("History webhook response:", data);
         
         if (data && Array.isArray(data.readings)) {
           setHistoryData(data.readings);
         } else if (data && Array.isArray(data)) {
-          // Handle case where the API returns an array directly
           setHistoryData(data);
         } else {
           console.warn("Unexpected history data format:", data);
@@ -102,10 +98,8 @@ const TarotApp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          {/* Always show the logo */}
           <div className="flex items-center">
             <a 
               href="https://app-fudfate.blackmouthgames.com/"
@@ -157,9 +151,7 @@ const TarotApp: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
-        {/* Connect Wallet Message */}
         {!connected ? (
           <div className="flex flex-col items-center max-w-2xl w-full mx-auto">
             <GlitchLogo 
@@ -168,14 +160,12 @@ const TarotApp: React.FC = () => {
               className="mb-8"
             />
             
-            <div className="container flex items-center justify-center mb-8">
-              <div className="flex-1 flex justify-center">
-                <GlitchText
-                  text="CRYPTO FORTUNE AWAITS"
-                  className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase mx-auto"
-                  goldEffect={true}
-                />
-              </div>
+            <div className="text-center mb-8">
+              <GlitchText
+                text={t('tarot.cryptoFortuneAwaits')}
+                className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase"
+                goldEffect={true}
+              />
             </div>
             
             <div className="flex flex-col gap-4 items-center max-w-sm w-full">
@@ -205,10 +195,8 @@ const TarotApp: React.FC = () => {
         )}
       </main>
 
-      {/* Footer */}
       <Footer />
       
-      {/* Cookie Consent */}
       <CookieConsent />
     </div>
   );

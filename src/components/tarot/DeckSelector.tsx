@@ -18,15 +18,16 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
   // Card back image
-  const cardBackImage = "/img/cards/carddeck1/deck1_back.png";
+  const cardBackImage = "/img/cards/carddeck1/card_back.jpg";
+  const deckBackImage = "/img/cards/carddeck1/deck1_back.png";
 
   // Mock decks - in a real app, this would come from your backend
   const decks = [
-    { id: 'deck1', name: 'Crypto Classics', image: '/img/cards/carddeck1/deck1_0_TheDegen.png', unlocked: true },
-    { id: 'deck2', name: 'DeFi Destinies', image: '/img/cards/carddeck1/deck1_1_TheMiner.png', unlocked: false },
-    { id: 'deck3', name: 'NFT Narratives', image: '/img/cards/carddeck1/deck1_3_TheWhale.png', unlocked: false },
-    { id: 'deck4', name: 'Meme Magic', image: '/img/cards/carddeck1/deck1_19_TheMemecoin.png', unlocked: false },
-    { id: 'deck5', name: 'Web3 Wonders', image: '/img/cards/carddeck1/deck1_21_TheDAO.png', unlocked: false }
+    { id: 'deck1', name: 'Crypto Classics', image: deckBackImage, unlocked: true },
+    { id: 'deck2', name: 'DeFi Destinies', image: deckBackImage, unlocked: false },
+    { id: 'deck3', name: 'NFT Narratives', image: deckBackImage, unlocked: false },
+    { id: 'deck4', name: 'Meme Magic', image: deckBackImage, unlocked: false },
+    { id: 'deck5', name: 'Web3 Wonders', image: deckBackImage, unlocked: false }
   ];
 
   const handleSelectDeck = (deckId: string) => {
@@ -122,13 +123,15 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
       {/* Dialog to show all cards in a deck */}
       <Dialog open={!!openDeckId} onOpenChange={(open) => !open && closeDeckDetails()}>
         <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
-          <DialogTitle className="flex justify-between items-center">
-            <GlitchText text={openDeckId === 'deck1' ? 'Crypto Classics' : ''} />
-            <DialogClose className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100">
-              <X className="h-4 w-4" />
-              <span className="sr-only">{t('common.close')}</span>
-            </DialogClose>
-          </DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <GlitchText text={openDeckId === 'deck1' ? 'Crypto Classics' : ''} />
+              <DialogClose className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100">
+                <X className="h-4 w-4" />
+                <span className="sr-only">{t('common.close')}</span>
+              </DialogClose>
+            </DialogTitle>
+          </DialogHeader>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 py-4">
             {deckCards.map((card) => (
               <div 

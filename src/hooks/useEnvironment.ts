@@ -3,10 +3,7 @@ import { useState, useEffect } from 'react';
 import { Environment, webhooks } from '@/config/webhooks';
 
 export function useEnvironment() {
-  const [environment, setEnvironment] = useState<Environment>(() => {
-    const saved = localStorage.getItem('appEnvironment') as Environment | null;
-    return (saved === 'development' || saved === 'production') ? saved : 'production';
-  });
+  const [environment, setEnvironment] = useState<Environment>('production');
 
   useEffect(() => {
     const handleEnvironmentChange = (event: Event) => {
