@@ -57,8 +57,8 @@ export const connectPhantom = async (): Promise<{ address: string | null; networ
       await new Promise(resolve => setTimeout(resolve, 300));
     }
     
-    // Explicitly request connection
-    const response = await window.solana.connect({ onlyIfTrusted: false });
+    // Explicitly request connection - Fix: Remove the argument from connect()
+    const response = await window.solana.connect();
     const address = response.publicKey.toString();
     
     console.log("Connected to Phantom wallet:", address);
