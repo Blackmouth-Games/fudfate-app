@@ -3,8 +3,21 @@ import { WebhookResponse } from '@/types/tarot';
 import { toast } from 'sonner';
 import { nanoid } from 'nanoid';
 
+// Interfaz para el log de webhook
+export interface WebhookLog {
+  id: string;
+  timestamp: string;
+  type: string;
+  url: string;
+  request: any;
+  response?: any;
+  error?: string;
+  status?: number;
+  environment: string;
+}
+
 const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
-  const logEntry = {
+  const logEntry: WebhookLog = {
     id: nanoid(),
     timestamp: new Date().toISOString(),
     type,
@@ -85,15 +98,12 @@ export const callReadingWebhook = async (
     // Log failed webhook call
     logWebhookCall('Reading', webhookUrl, requestData, null, error, undefined, environment);
     
-    // In development, we allow continuing without the webhook
-    if (environment === 'development') {
-      toast.error("Error calling reading webhook. Using fallback data in development mode.", {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
-      return null;
-    }
+    // No damos respuesta automática ni en desarrollo
+    toast.error("Error calling reading webhook. Please try again later.", {
+      style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+    });
     
-    // In production, we fail the reading
+    // En ambos casos, fallamos la lectura
     throw error;
   }
 };

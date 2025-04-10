@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { logLoginWebhook } from '@/services/webhook-service';
 import { UserData } from '@/types/walletTypes';
+import { toast } from 'sonner';
 
 export const useWalletConnection = (addConnectionLog: (action: string, details: string) => void) => {
   const { webhooks, environment } = useEnvironment();
@@ -15,8 +16,52 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
     
     try {
-      const address = `0x${Math.random().toString(16).substring(2, 14)}`;
-      const networkId = 'mainnet';
+      let address: string | null = null;
+      let networkId: string | null = null;
+      
+      // Intenta conectar con la wallet real
+      if (walletType === 'metamask') {
+        if (!window.ethereum?.isMetaMask) {
+          toast.error('Metamask not installed or not unlocked');
+          addConnectionLog('Connect Failed', 'Metamask not installed or not unlocked');
+          return false;
+        }
+        
+        try {
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          if (accounts && accounts.length > 0) {
+            address = accounts[0];
+            const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
+            networkId = parseInt(chainIdHex, 16).toString();
+          } else {
+            addConnectionLog('Connect Failed', 'No accounts returned from Metamask');
+            toast.error('No accounts available. Please unlock Metamask');
+            return false;
+          }
+        } catch (error) {
+          console.error('Metamask connection error:', error);
+          toast.error('Failed to connect with Metamask. Please make sure it is unlocked');
+          addConnectionLog('Connect Failed', `Metamask connection error: ${error instanceof Error ? error.message : String(error)}`);
+          return false;
+        }
+      } else if (walletType === 'phantom') {
+        if (!window.solana?.isPhantom) {
+          toast.error('Phantom not installed or not unlocked');
+          addConnectionLog('Connect Failed', 'Phantom not installed or not unlocked');
+          return false;
+        }
+        
+        try {
+          const response = await window.solana.connect();
+          address = response.publicKey.toString();
+          networkId = 'solana'; // Phantom no expone directamente la red actual de la misma manera que Metamask
+        } catch (error) {
+          console.error('Phantom connection error:', error);
+          toast.error('Failed to connect with Phantom. Please make sure it is unlocked');
+          addConnectionLog('Connect Failed', `Phantom connection error: ${error instanceof Error ? error.message : String(error)}`);
+          return false;
+        }
+      }
       
       if (!address) {
         addConnectionLog('Connect Failed', `No address returned from ${walletType}`);
@@ -29,7 +74,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       
       localStorage.setItem('walletAddress', address);
       localStorage.setItem('walletType', walletType);
-      localStorage.setItem('network', networkId);
+      localStorage.setItem('network', networkId || '');
       
       addConnectionLog('Login WebhookCall', `Calling login webhook with ${walletType}, ${address}`);
       console.log(`Calling login webhook with ${walletType}, ${address}`);
@@ -76,14 +121,11 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
           console.error("Invalid webhook response format:", data);
           
           if (environment === 'development') {
-            const mockUserData: UserData = {
-              userId: `mock_${Math.random().toString(16).substring(2, 10)}`,
-              runsToday: true
-            };
-            
-            setUserData(mockUserData);
-            localStorage.setItem('userData', JSON.stringify(mockUserData));
-            addConnectionLog('Mock Data', `Created mock user data: ${JSON.stringify(mockUserData)}`);
+            // Incluso en desarrollo, no generamos datos falsos automáticamente
+            toast.error('Invalid webhook response format', {
+              position: 'bottom-center',
+            });
+            return false;
           }
         }
       } catch (error) {
@@ -91,15 +133,12 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         console.error("Error calling login webhook:", error);
         
         if (environment === 'development') {
-          const mockUserData: UserData = {
-            userId: `mock_${Math.random().toString(16).substring(2, 10)}`,
-            runsToday: true
-          };
-          
-          setUserData(mockUserData);
-          localStorage.setItem('userData', JSON.stringify(mockUserData));
-          addConnectionLog('Mock Data', `Created mock user data: ${JSON.stringify(mockUserData)}`);
+          // Solo en modo desarrollo mostramos un error más amigable
+          toast.error('Error connecting to login webhook. Please try again later.', {
+            position: 'bottom-center',
+          });
         }
+        return false;
       }
 
       addConnectionLog('Connection Success', `Connected with ${walletType}, ${address}`);
@@ -109,6 +148,9 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     } catch (error) {
       addConnectionLog('Connect Error', `Error: ${error instanceof Error ? error.message : String(error)}`);
       console.error("Error connecting wallet:", error);
+      toast.error('Failed to connect wallet. Please try again.', {
+        position: 'bottom-center',
+      });
       return false;
     }
   };

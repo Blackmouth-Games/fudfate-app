@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWallet, WalletType } from '@/contexts/WalletContext';
 import { useTranslation } from 'react-i18next';
-import { Wallet, ChevronDown, LogOut, Loader2 } from 'lucide-react';
+import { Wallet, ChevronDown, LogOut, Loader2, ExternalLink } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -42,12 +42,24 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
   const handleConnect = async (type: WalletType) => {
     // Check if the wallet is available before attempting to connect
     if (type === 'phantom' && !isPhantomAvailable) {
-      toast.error(t('wallet.phantomNotInstalled'));
+      toast.error(t('wallet.phantomNotInstalled'), {
+        description: "Please install Phantom wallet to connect.",
+        action: {
+          label: "Install",
+          onClick: () => window.open("https://phantom.app/", "_blank")
+        }
+      });
       return;
     }
     
     if (type === 'metamask' && !isMetamaskAvailable) {
-      toast.error(t('wallet.metamaskNotInstalled'));
+      toast.error(t('wallet.metamaskNotInstalled'), {
+        description: "Please install Metamask wallet to connect.",
+        action: {
+          label: "Install",
+          onClick: () => window.open("https://metamask.io/download/", "_blank")
+        }
+      });
       return;
     }
     
@@ -128,7 +140,15 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               alt="Metamask" 
               className="w-5 h-5 mr-2"
             />
-            {isMetamaskAvailable ? t('wallet.connectMetamask') : t('wallet.metamaskNotInstalled')}
+            {isMetamaskAvailable ? t('wallet.connectMetamask') : (
+              <div className="flex items-center">
+                {t('wallet.metamaskNotInstalled')}
+                <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
+                  e.stopPropagation();
+                  window.open("https://metamask.io/download/", "_blank");
+                }} />
+              </div>
+            )}
           </>
         )}
       </Button>
@@ -151,7 +171,15 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               alt="Phantom" 
               className="w-5 h-5 mr-2"
             />
-            {isPhantomAvailable ? t('wallet.connectPhantom') : t('wallet.phantomNotInstalled')}
+            {isPhantomAvailable ? t('wallet.connectPhantom') : (
+              <div className="flex items-center">
+                {t('wallet.phantomNotInstalled')}
+                <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
+                  e.stopPropagation();
+                  window.open("https://phantom.app/", "_blank");
+                }} />
+              </div>
+            )}
           </>
         )}
       </Button>
