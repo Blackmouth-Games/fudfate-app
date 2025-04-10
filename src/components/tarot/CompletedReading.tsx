@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ReadingCard } from '@/types/tarot';
 import GlitchText from '@/components/GlitchText';
 import { Button } from '@/components/ui/button';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface CompletedReadingProps {
   finalMessage: string;
@@ -33,25 +34,27 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
         {selectedCards.map((card, index) => (
           <div 
             key={card?.id || `card-${index}`}
-            className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-md hover:shadow-lg transition-shadow"
+            className="rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-md hover:shadow-lg transition-shadow"
           >
             {card && (
-              <div className="p-2 h-full flex flex-col">
-                <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded truncate">
-                  {card.name}
+              <AspectRatio ratio={2/3}>
+                <div className="p-2 h-full flex flex-col">
+                  <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded truncate">
+                    {card.name}
+                  </div>
+                  <div className="flex-1 flex items-center justify-center p-1">
+                    <img 
+                      src={card.image} 
+                      alt={card.name} 
+                      className="max-h-full max-w-full object-contain drop-shadow-sm"
+                      onError={(e) => {
+                        console.warn(`Failed to load card image: ${card.image}, using fallback`);
+                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="flex-1 flex items-center justify-center p-1">
-                  <img 
-                    src={card.image} 
-                    alt={card.name} 
-                    className="max-h-full object-contain drop-shadow-sm"
-                    onError={(e) => {
-                      console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                      e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
-                    }}
-                  />
-                </div>
-              </div>
+              </AspectRatio>
             )}
           </div>
         ))}

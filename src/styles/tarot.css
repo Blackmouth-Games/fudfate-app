@@ -33,6 +33,7 @@
   justify-content: center;
   color: white;
   border: 1px solid rgba(147, 112, 219, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .tarot-card-back {
@@ -41,6 +42,7 @@
   border: 1px solid rgba(147, 112, 219, 0.3);
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .tarot-card.flipped .tarot-card-inner {
@@ -103,4 +105,31 @@
   max-height: 100%;
   max-width: 100%;
   object-fit: contain;
+}
+
+/* Selection area highlight */
+.selection-slot {
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 0px rgba(159, 122, 234, 0);
+}
+
+.selection-slot-highlight {
+  box-shadow: inset 0 0 10px rgba(159, 122, 234, 0.5);
+}
+
+/* Improved card shadows for distinguishing overlapped cards */
+.tarot-selection-card {
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(111, 76, 255, 0.08);
+  transition: all 0.3s ease;
+}
+
+.tarot-selection-card:hover {
+  box-shadow: 
+    0 10px 15px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 0 0 2px rgba(111, 76, 255, 0.15);
+  z-index: 50 !important;
 }
