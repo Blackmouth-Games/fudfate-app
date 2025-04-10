@@ -220,7 +220,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     intention,
     setIntention,
     phase,
-    setPhase,
     availableCards,
     selectedCards,
     setSelectedCards,

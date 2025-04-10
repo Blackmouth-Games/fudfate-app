@@ -1,12 +1,11 @@
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
 import { Card } from '@/types/tarot';
-import { useTarot } from '@/contexts/TarotContext';
 
 interface CardSelectionDeckProps {
   allDeckCards: Card[];
@@ -28,7 +27,6 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
   handleCardSelect
 }) => {
   const { t } = useTranslation();
-  const { phase } = useTarot();
 
   if (loading) {
     return (
@@ -68,48 +66,24 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
     );
   }
 
-  const handleContinue = () => {
-    if (selectedCards.length === 3) {
-      // The parent component should handle this navigation
-      // We don't need to do anything here - the parent component manages phase transitions
-    }
-  };
-
   return (
-    <motion.div 
-      className="relative h-[60vh] sm:h-[50vh] overflow-visible"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <motion.div 
-        className="bg-gradient-to-r from-amber-50/50 to-amber-100/30 rounded-lg p-4 mb-6 text-center"
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <p className="text-amber-700 text-sm">
-          {t('tarot.selectCardsDescription', { selected: selectedCards.length, total: 3 })}
-        </p>
-      </motion.div>
-      
+    <div className="relative h-[70vh] sm:h-[50vh] overflow-visible">
       <div className="absolute inset-0 px-4">
         <div className="flex flex-wrap justify-center">
           <AnimatePresence>
             {allDeckCards.map((card, index) => {
+              // Calculate offset for fan-like arrangement
               const isSelected = card.id === selectedCardId;
-              
-              const spreadFactor = Math.min(40 / allDeckCards.length, 2);
               const angle = ((index - allDeckCards.length / 2) / allDeckCards.length) * 40;
-              
               const baseZIndex = index;
               
+              // Calculate the target position for animation (if this card is being animated to a slot)
               const isAnimating = isSelected && animatingToSlot !== null;
               
-              let xPos = 50 + (index - allDeckCards.length / 2) * spreadFactor;
+              // Calculate positions in the fan arrangement
+              let xPos = 50 + (index - allDeckCards.length / 2) * 3;
+              // Ensure the position stays within visible bounds
               xPos = Math.max(10, Math.min(90, xPos));
-              
-              const yVariation = Math.sin(index * 0.5) * 10;
               
               return (
                 <motion.div
@@ -117,7 +91,7 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                   className={`cursor-pointer absolute tarot-selection-card ${isSelected ? 'z-50' : ''}`}
                   initial={{ 
                     left: `${xPos}%`, 
-                    top: `${50 + yVariation}px`,
+                    top: `${50 + (index % 4) * 5}px`,
                     rotate: angle,
                     scale: 1,
                     zIndex: baseZIndex
@@ -131,17 +105,16 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                     transition: { duration: 0.5, ease: "easeInOut" }
                   } : {
                     left: `${xPos}%`, 
-                    top: `${50 + yVariation}px`,
+                    top: `${50 + (index % 4) * 5}px`,
                     rotate: angle,
                     scale: 1,
                     zIndex: baseZIndex,
                     transition: { duration: 0.3 }
                   }}
                   whileHover={!isAnimating ? { 
-                    y: -30, 
-                    scale: 1.2,
+                    y: -20, 
+                    scale: 1.1,
                     zIndex: 50,
-                    boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
                     transition: { duration: 0.2 } 
                   } : {}}
                   onClick={() => !isAnimating && handleCardSelect(card.id)}
@@ -155,8 +128,9 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                       <motion.img 
                         src={cardBackImage} 
                         alt="Tarot Card Back"
-                        className="w-full h-full object-contain p-1"
+                        className="w-full h-full object-cover"
                         onError={(e) => {
+                          // Fallback to default image if the dynamic path fails
                           console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
                           e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
                         }}
@@ -170,25 +144,19 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
         </div>
       </div>
       
+      {/* Continue button if exactly 3 cards are selected */}
       {selectedCards.length === 3 && (
-        <motion.div 
-          className="absolute bottom-0 left-0 right-0 pb-4 flex justify-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div className="mt-8 flex justify-center">
           <Button 
             variant="default" 
-            className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-6 font-medium shadow-md"
+            className="bg-amber-600 hover:bg-amber-700 px-6"
             disabled={loading}
-            onClick={handleContinue}
           >
             {t('tarot.continueToReading')}
-            <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 };
 
