@@ -1,12 +1,19 @@
 
 import { useState } from 'react';
 import { useEnvironment } from '@/hooks/useEnvironment';
-import { logLoginWebhook } from '@/services/webhook-service';
 import { UserData } from '@/types/walletTypes';
 import { toast } from 'sonner';
+import { 
+  connectMetamask, 
+  connectPhantom, 
+  callLoginWebhook,
+  parseUserData
+} from '@/utils/wallet-connection-utils';
+import { useWalletStorage } from '@/hooks/useWalletStorage';
 
 export const useWalletConnection = (addConnectionLog: (action: string, details: string) => void) => {
   const { webhooks, environment } = useEnvironment();
+  const { saveWalletData, clearWalletData, saveUserData } = useWalletStorage();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [walletType, setWalletType] = useState<string | null>(null);
   const [network, setNetwork] = useState<string | null>(null);
@@ -16,118 +23,55 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
     
     try {
-      let address: string | null = null;
-      let networkId: string | null = null;
+      let connectionResult;
       
-      // Conexión a Metamask
+      // Connect to the appropriate wallet type
       if (walletType === 'metamask') {
-        if (!window.ethereum?.isMetaMask) {
-          toast.error('Metamask not installed or not unlocked');
-          addConnectionLog('Connect Failed', 'Metamask not installed');
-          return false;
-        }
-        
-        try {
-          // Verificar primero si Metamask está desbloqueado
-          const isUnlocked = await window.ethereum._metamask?.isUnlocked();
-          if (!isUnlocked) {
-            toast.error('Metamask is locked. Please unlock your wallet first.', {
-              description: "You need to unlock your wallet before connecting."
-            });
-            addConnectionLog('Connect Failed', 'Metamask is locked');
-            return false;
-          }
-          
-          // Intentar obtener cuentas - esto también fallaría si Metamask está bloqueado
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          if (accounts && accounts.length > 0) {
-            address = accounts[0];
-            const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
-            networkId = parseInt(chainIdHex, 16).toString();
-          } else {
-            addConnectionLog('Connect Failed', 'No accounts returned from Metamask');
-            toast.error('No accounts available. Please unlock Metamask');
-            return false;
-          }
-        } catch (error) {
-          console.error('Metamask connection error:', error);
-          toast.error('Failed to connect with Metamask. Please make sure it is unlocked');
-          addConnectionLog('Connect Failed', `Metamask connection error: ${error instanceof Error ? error.message : String(error)}`);
-          return false;
-        }
+        connectionResult = await connectMetamask();
       } else if (walletType === 'phantom') {
-        if (!window.solana?.isPhantom) {
-          toast.error('Phantom not installed or not unlocked');
-          addConnectionLog('Connect Failed', 'Phantom not installed');
-          return false;
-        }
-        
-        try {
-          // Phantom tiene un comportamiento diferente, intenta conectar directamente
-          const response = await window.solana.connect();
-          address = response.publicKey.toString();
-          networkId = 'solana';
-        } catch (error) {
-          console.error('Phantom connection error:', error);
-          toast.error('Failed to connect with Phantom. Please make sure it is unlocked');
-          addConnectionLog('Connect Failed', `Phantom connection error: ${error instanceof Error ? error.message : String(error)}`);
-          return false;
-        }
+        connectionResult = await connectPhantom();
+      } else {
+        addConnectionLog('Connect Failed', `Unknown wallet type: ${walletType}`);
+        return false;
       }
+      
+      // Handle connection errors
+      if (connectionResult.error) {
+        addConnectionLog('Connect Failed', connectionResult.error);
+        toast.error(connectionResult.error);
+        return false;
+      }
+      
+      const { address, networkId } = connectionResult;
       
       if (!address) {
         addConnectionLog('Connect Failed', `No address returned from ${walletType}`);
         return false;
       }
 
+      // Set state and save to localStorage
       setWalletAddress(address);
       setWalletType(walletType);
       setNetwork(networkId);
+      saveWalletData(address, walletType, networkId);
       
-      localStorage.setItem('walletAddress', address);
-      localStorage.setItem('walletType', walletType);
-      localStorage.setItem('network', networkId || '');
-      
-      addConnectionLog('Login WebhookCall', `Calling login webhook with ${walletType}, ${address}`);
-      console.log(`Calling login webhook with ${walletType}, ${address}`);
-      
+      // Call login webhook
       try {
-        const response = await fetch(webhooks.login, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            date: new Date().toISOString(),
-            wallet: address,
-            type: walletType
-          }),
-        });
+        const data = await callLoginWebhook(
+          webhooks.login, 
+          address, 
+          walletType, 
+          environment,
+          addConnectionLog
+        );
         
-        const status = response.status;
+        // Process user data from webhook response
+        const userDataObj = parseUserData(data);
         
-        if (!response.ok) {
-          const errorText = await response.text();
-          addConnectionLog('Login Error', `HTTP error! status: ${status}, ${errorText}`);
-          logLoginWebhook(webhooks.login, { wallet: address, type: walletType }, null, `HTTP error! status: ${status}`, status, environment);
-          throw new Error(`HTTP error! status: ${status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Login webhook response:', data);
-        
-        logLoginWebhook(webhooks.login, { wallet: address, type: walletType }, data, undefined, status, environment);
-        
-        if (data && Array.isArray(data) && data.length > 0) {
-          addConnectionLog('Login Success', `User ID: ${data[0].userid}`);
-          
-          const userDataObj: UserData = {
-            userId: data[0].userid,
-            runsToday: data[0].runs_today === true,
-          };
-          
+        if (userDataObj) {
+          addConnectionLog('Login Success', `User ID: ${userDataObj.userId}`);
           setUserData(userDataObj);
-          localStorage.setItem('userData', JSON.stringify(userDataObj));
+          saveUserData(userDataObj);
         } else {
           addConnectionLog('Login Error', 'Invalid webhook response format');
           console.error("Invalid webhook response format:", data);
@@ -168,11 +112,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     setWalletType(null);
     setNetwork(null);
     setUserData(null);
-    
-    localStorage.removeItem('walletAddress');
-    localStorage.removeItem('walletType');
-    localStorage.removeItem('network');
-    localStorage.removeItem('userData');
+    clearWalletData();
     
     console.log("Wallet disconnected");
   };
@@ -188,7 +128,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       };
       
       setUserData(newUserData);
-      localStorage.setItem('userData', JSON.stringify(newUserData));
+      saveUserData(newUserData);
       return;
     }
     
@@ -198,7 +138,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     };
     
     setUserData(updatedUserData);
-    localStorage.setItem('userData', JSON.stringify(updatedUserData));
+    saveUserData(updatedUserData);
   };
 
   return {
