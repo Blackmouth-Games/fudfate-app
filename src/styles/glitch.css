@@ -1,0 +1,128 @@
+/* Text Glitch Animation */
+.text-container {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.text-glitch-effect-1,
+.text-glitch-effect-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.text-glitch-effect-1 {
+  clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+  animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+}
+
+.text-glitch-effect-2 {
+  clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% {
+    transform: translate(0, 0);
+    filter: hue-rotate(0deg);
+  }
+  30% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(90deg);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+    filter: hue-rotate(180deg);
+  }
+  70% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(270deg);
+  }
+  100% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes glitch-anim-2 {
+  0% {
+    transform: translate(0, 0);
+    filter: hue-rotate(270deg);
+  }
+  30% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(180deg);
+  }
+  50% {
+    transform: translate(1px, -1px);
+    filter: hue-rotate(90deg);
+  }
+  70% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Base text animation */
+.text-base {
+  animation: text-glitch 2s infinite alternate-reverse;
+  font-size: inherit;
+  line-height: inherit;
+  display: inline-block;
+}
+
+@keyframes text-glitch {
+  0% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  5% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(45deg);
+  }
+  10% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(90deg);
+  }
+  15% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  85% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  90% {
+    transform: translate(1px, -1px);
+    filter: hue-rotate(-45deg);
+  }
+  95% {
+    transform: translate(-1px, 1px);
+    filter: hue-rotate(-90deg);
+  }
+  100% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+}
+
+/* Gold text effect */
+.gold-text {
+  color: #FFD700;
+  text-shadow: 
+    0 0 2px rgba(255, 215, 0, 0.8),
+    0 0 4px rgba(255, 215, 0, 0.6),
+    0 0 6px rgba(255, 215, 0, 0.4);
+} 
