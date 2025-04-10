@@ -24,7 +24,7 @@ const SelectionSlot: React.FC<SelectionSlotProps> = ({
   return (
     <motion.div
       key={`slot-${index}`}
-      className={`w-20 h-28 sm:w-24 sm:h-36 rounded-md ${
+      className={`w-24 h-36 sm:w-32 sm:h-48 rounded-md ${
         selected 
           ? 'bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-400/50 shadow-md' 
           : 'border border-dashed border-amber-300 bg-white selection-slot'

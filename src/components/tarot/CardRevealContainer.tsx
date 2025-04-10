@@ -76,7 +76,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
         <div className="my-6 p-5 bg-amber-50 border border-amber-200 rounded-lg text-center">
           <GlitchText 
             text={webhookMessage}
-            intensity="light"
+            intensity="normal"
             className="text-lg font-medium text-amber-800"
           />
         </div>

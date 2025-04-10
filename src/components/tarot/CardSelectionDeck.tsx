@@ -1,10 +1,8 @@
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/types/tarot';
 import { useTarot } from '@/contexts/TarotContext';
 
@@ -30,9 +28,30 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
   const { t } = useTranslation();
   const { phase, setPhase } = useTarot();
 
-  // Function to continue to reading phase
-  const handleContinueToReading = () => {
-    setPhase('reading');
+  useEffect(() => {
+    if (selectedCards.length === 3) {
+      const timer = setTimeout(() => {
+        setPhase('reading');
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedCards.length, setPhase]);
+
+  const getCardBorderColor = (index: number) => {
+    const colors = [
+      'border-purple-400',
+      'border-indigo-400',
+      'border-blue-400',
+      'border-teal-400',
+      'border-green-400',
+      'border-yellow-400',
+      'border-amber-400',
+      'border-orange-400',
+      'border-red-400',
+      'border-pink-400'
+    ];
+    return colors[index % colors.length];
   };
 
   if (loading) {
@@ -79,7 +98,6 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
         <div className="flex flex-wrap justify-center">
           <AnimatePresence>
             {allDeckCards.map((card, index) => {
-              // Skip cards that have already been selected
               if (selectedCards.some(sc => sc.id === card.id)) {
                 return null;
               }
@@ -88,24 +106,24 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
               const angle = ((index - allDeckCards.length / 2) / allDeckCards.length) * 40;
               const baseZIndex = index;
               
-              // Calculate the target position for animation (if this card is being animated to a slot)
               const isAnimating = isSelected && animatingToSlot !== null;
               
-              // Calculate positions in the fan arrangement
               let xPos = 50 + (index - allDeckCards.length / 2) * 3;
-              // Ensure the position stays within visible bounds
               xPos = Math.max(10, Math.min(90, xPos));
+              
+              const borderColor = getCardBorderColor(index);
               
               return (
                 <motion.div
                   key={card.id}
-                  className={`cursor-pointer absolute tarot-selection-card ${isSelected ? 'z-50' : ''}`}
+                  className={`cursor-pointer absolute tarot-selection-card ${isSelected ? 'z-50' : ''} ${borderColor}`}
                   initial={{ 
                     left: `${xPos}%`, 
                     top: `${50 + (index % 4) * 5}px`,
                     rotate: angle,
                     scale: 1,
-                    zIndex: baseZIndex
+                    zIndex: baseZIndex,
+                    y: 0
                   }}
                   animate={isAnimating ? {
                     left: '50%',
@@ -124,7 +142,7 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                     opacity: 1,
                     transition: { duration: 0.3 }
                   }}
-                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.3 } }}
+                  exit={{ opacity: 0, scale: 0.8, y: -30, transition: { duration: 0.3 } }}
                   whileHover={!isAnimating ? { 
                     y: -20, 
                     scale: 1.1,
@@ -138,13 +156,12 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                   }}
                 >
                   <AspectRatio ratio={2/3}>
-                    <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 border-amber-200/50 hover:border-amber-400 transition-colors">
+                    <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 hover:border-amber-400 transition-colors">
                       <motion.img 
                         src={cardBackImage} 
                         alt="Tarot Card Back"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          // Fallback to default image if the dynamic path fails
                           console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
                           e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
                         }}
@@ -157,20 +174,6 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
           </AnimatePresence>
         </div>
       </div>
-      
-      {/* Continue button if exactly 3 cards are selected */}
-      {selectedCards.length === 3 && (
-        <div className="mt-8 flex justify-center">
-          <Button 
-            variant="default" 
-            className="bg-amber-600 hover:bg-amber-700 px-6"
-            disabled={loading}
-            onClick={handleContinueToReading}
-          >
-            {t('tarot.continueToReading')}
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

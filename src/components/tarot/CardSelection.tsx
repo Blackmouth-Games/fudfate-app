@@ -15,7 +15,7 @@ interface CardSelectionProps {
 }
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
-  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase } = useTarot();
+  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase, webhookResponse } = useTarot();
   const { userData } = useWallet();
   const { t } = useTranslation();
   
@@ -31,8 +31,50 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   useEffect(() => {
     // Get all cards for the selected deck
     const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
-    setAllDeckCards(deckCards);
-  }, [selectedDeck]);
+    
+    // If we have webhook response with selected_cards, use those specific cards
+    if (webhookResponse && webhookResponse.selected_cards && webhookResponse.selected_cards.length > 0) {
+      try {
+        // Extract the selected card ids from the webhook
+        const selectedCardIds = webhookResponse.selected_cards.map(cardNum => {
+          // Find cards that start with this number
+          const matchingCards = deckCards.filter(card => 
+            card.id.startsWith(`${cardNum}_`) ||
+            card.id === `${cardNum}`
+          );
+          
+          if (matchingCards.length > 0) {
+            return matchingCards[0].id;
+          }
+          return null;
+        }).filter(Boolean);
+        
+        console.log("Using preselected cards from webhook:", selectedCardIds);
+        
+        // Add these cards to the deck to ensure they're available
+        const webhookCards = selectedCardIds.map(id => 
+          deckCards.find(card => card.id === id)
+        ).filter(Boolean);
+        
+        if (webhookCards.length > 0) {
+          // Ensure the webhook cards are included in the deck
+          const remainingCards = deckCards.filter(card => 
+            !webhookCards.some(wc => wc.id === card.id)
+          );
+          
+          // Mix webhook cards with remaining cards
+          setAllDeckCards([...webhookCards, ...remainingCards]);
+        } else {
+          setAllDeckCards(deckCards);
+        }
+      } catch (error) {
+        console.error("Error processing webhook selected_cards:", error);
+        setAllDeckCards(deckCards);
+      }
+    } else {
+      setAllDeckCards(deckCards);
+    }
+  }, [selectedDeck, webhookResponse]);
   
   // Check if user can make readings (userData.runsToday should be true for "can read")
   // Empty state - no cards available or user can't read
@@ -89,20 +131,32 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
         </p>
       </div>
       
-      {/* Display selected cards at the top */}
-      <SelectedCardsDisplay
-        selectedCards={selectedCards}
-        highlightedSlot={highlightedSlot}
-        loading={loading}
-        cardBackImage={cardBackImage}
-      />
+      {/* Display selected cards at the top with larger size */}
+      <div className="mb-8">
+        <SelectedCardsDisplay
+          selectedCards={selectedCards}
+          highlightedSlot={highlightedSlot}
+          loading={loading}
+          cardBackImage={cardBackImage}
+        />
+        
+        {/* Display Selected Cards text BELOW the cards */}
+        <div className="text-center mt-4">
+          <h4 className="font-medium text-gray-700">
+            {t('tarot.selectedCards', { count: selectedCards.length })}
+          </h4>
+        </div>
+        
+        {/* Available Cards text now goes below selected cards */}
+        <div className="text-center mt-8 mb-4">
+          <h4 className="font-medium text-gray-700">
+            {t('tarot.availableCards')}
+          </h4>
+        </div>
+      </div>
       
       {/* All available cards for selection with improved layout */}
-      <div className="relative mt-8">
-        <h4 className="text-center font-medium mb-4 text-gray-700">
-          {t('tarot.availableCards')}
-        </h4>
-        
+      <div className="relative mt-2">
         <CardSelectionDeck
           allDeckCards={allDeckCards}
           loading={loading}
