@@ -34,7 +34,7 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
         {selectedCards.map((card, index) => (
           <div 
             key={card?.id || `card-${index}`}
-            className="rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-md hover:shadow-lg transition-shadow"
+            className="card-fullview border border-amber-300 rounded-lg overflow-hidden"
           >
             {card && (
               <AspectRatio ratio={2/3}>
@@ -46,7 +46,7 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
                     <img 
                       src={card.image} 
                       alt={card.name} 
-                      className="max-h-full max-w-full object-contain drop-shadow-sm"
+                      className="max-h-full max-w-full object-contain"
                       onError={(e) => {
                         console.warn(`Failed to load card image: ${card.image}, using fallback`);
                         e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;

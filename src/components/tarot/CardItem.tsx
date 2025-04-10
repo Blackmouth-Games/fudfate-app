@@ -24,10 +24,10 @@ const CardItem: React.FC<CardItemProps> = ({
   return (
     <div className="flex flex-col items-center space-y-3">
       <motion.div 
-        className="perspective-1000 w-full max-w-[200px]"
+        className="perspective-1000 w-full"
         whileHover={{ scale: isRevealed ? 1 : 1.05, transition: { duration: 0.2 } }}
       >
-        <AspectRatio ratio={2/3}>
+        <AspectRatio ratio={2/3} className="w-full">
           <motion.div 
             className={`relative w-full h-full transition-transform duration-1000 transform-style-3d cursor-pointer`}
             style={{ 
@@ -38,7 +38,7 @@ const CardItem: React.FC<CardItemProps> = ({
           >
             {/* Card Back */}
             <div 
-              className="absolute w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg shadow-md backface-hidden"
+              className="absolute w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg backface-hidden card-fullview"
               style={{ backfaceVisibility: "hidden" }}
             >
               <img 
@@ -54,7 +54,7 @@ const CardItem: React.FC<CardItemProps> = ({
             
             {/* Card Front */}
             <div 
-              className="absolute w-full h-full bg-gradient-to-br from-amber-100 to-white border-2 border-amber-300 rounded-lg shadow-lg backface-hidden"
+              className="absolute w-full h-full bg-gradient-to-br from-amber-100 to-white border-2 border-amber-300 rounded-lg backface-hidden card-fullview"
               style={{ 
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)"
@@ -69,7 +69,7 @@ const CardItem: React.FC<CardItemProps> = ({
                     <img 
                       src={card.image} 
                       alt={card.name} 
-                      className="max-h-full max-w-full object-contain drop-shadow-md"
+                      className="max-h-full max-w-full object-contain"
                       onError={(e) => {
                         console.warn(`Failed to load card image: ${card.image}, using fallback`);
                         e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
