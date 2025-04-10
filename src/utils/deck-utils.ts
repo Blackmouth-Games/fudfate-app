@@ -7,8 +7,8 @@
  * Get the path to a card back image based on deck ID
  */
 export const getCardBackPath = (deckId: string = 'deck1'): string => {
-  // Ensure we're using the format the image files have
-  const formattedDeckId = deckId.replace('_', '');
+  // Format should be 'deck_1' instead of 'deck1' for file paths
+  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
   return `/img/cards/${formattedDeckId}/99_back.png`;
 };
 
@@ -16,17 +16,17 @@ export const getCardBackPath = (deckId: string = 'deck1'): string => {
  * Get the path to a deck back image based on deck ID
  */
 export const getDeckBackPath = (deckId: string = 'deck1'): string => {
-  // Ensure we're using the format the image files have
-  const formattedDeckId = deckId.replace('_', '');
-  return `/img/cards/${formattedDeckId}/99_back.png`;
+  // Format should be 'deck_1' instead of 'deck1' for file paths
+  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
+  return `/img/cards/${formattedDeckId}/99_BACK.png`;
 };
 
 /**
  * Get the path to a specific card image
  */
 export const getCardImagePath = (deckId: string, cardId: string): string => {
-  // Ensure we're using the format the image files have
-  const formattedDeckId = deckId.replace('_', '');
+  // Format should be 'deck_1' instead of 'deck1' for file paths
+  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
   return `/img/cards/${formattedDeckId}/${cardId}.png`;
 };
 
@@ -34,8 +34,8 @@ export const getCardImagePath = (deckId: string, cardId: string): string => {
  * Format a card path for the data structure
  */
 export const formatCardPath = (deckId: string, cardNumber: number, cardName: string): string => {
-  // Ensure we're using the format the image files have
-  const formattedDeckId = deckId.replace('_', '');
+  // Format should be 'deck_1' instead of 'deck1' for file paths
+  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
   return `/img/cards/${formattedDeckId}/${cardNumber}_${cardName}.png`;
 };
 
@@ -55,8 +55,8 @@ export interface DeckInfo {
  * Map a deck ID from API to internal deck ID
  */
 export const mapDeckIdFromApi = (apiName: string): string => {
-  // Map from 'deck_1' to 'deck1'
-  return apiName.replace('_', '');
+  // Convert from 'deck_1' format to internal 'deck1' format
+  return apiName.replace(/_/g, '');
 };
 
 /**

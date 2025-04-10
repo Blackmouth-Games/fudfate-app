@@ -18,6 +18,7 @@ import DevToolPanel from '@/components/dev/DevToolPanel';
 import TarotHeader from '@/components/tarot/TarotHeader';
 import { fetchAvailableDecks, processDecksFromApi } from '@/utils/wallet-connection-utils';
 import { convertApiDeckToInternal, DeckInfo } from '@/utils/deck-utils';
+import { logDeckWebhook, logWebhookCall } from '@/services/webhook-service';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
@@ -41,9 +42,22 @@ const TarotApp: React.FC = () => {
     
     setIsLoadingDecks(true);
     try {
+      // Log the deck webhook call
+      console.log(`Fetching decks for user ${userData.userId} from ${webhooks.deck}`);
+      
       // Get decks from webhook
       const decksData = await fetchAvailableDecks(webhooks.deck, userData.userId, environment);
       console.log("Raw decks data from API:", decksData);
+      
+      // Log the webhook response
+      logDeckWebhook(
+        webhooks.deck,
+        { userid: userData.userId },
+        decksData,
+        undefined,
+        200,
+        environment
+      );
       
       if (Array.isArray(decksData) && decksData.length > 0) {
         // Process API response
@@ -69,6 +83,16 @@ const TarotApp: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching decks:', error);
+      // Log the webhook error
+      logDeckWebhook(
+        webhooks.deck,
+        { userid: userData.userId },
+        null,
+        error instanceof Error ? error.message : String(error),
+        undefined,
+        environment
+      );
+      
       toast.error(t('errors.deckLoadFailed'), {
         position: 'bottom-center',
       });

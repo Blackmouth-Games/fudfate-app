@@ -93,7 +93,8 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                       className="h-full w-full object-cover rounded-md"
                       onError={(e) => {
                         // Fallback to default image if the dynamic path fails
-                        e.currentTarget.src = `/img/cards/deck1/99_back.png`;
+                        console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
+                        e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
                       }}
                     />
                     <motion.div 
@@ -176,7 +177,8 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         // Fallback to default image if the dynamic path fails
-                        e.currentTarget.src = `/img/cards/deck1/99_back.png`;
+                        console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
+                        e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
                       }}
                     />
                   </div>

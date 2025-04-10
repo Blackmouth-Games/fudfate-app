@@ -112,3 +112,11 @@ export const callReadingWebhook = async (
 export const logLoginWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
   logWebhookCall('Login', url, requestData, responseData, error, status, environment);
 };
+
+// Add specific logging for deck webhook calls
+export const logDeckWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+  logWebhookCall('Deck', url, requestData, responseData, error, status, environment);
+};
+
+// Make the general webhook logger available for export
+export { logWebhookCall };

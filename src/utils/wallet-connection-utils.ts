@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { logLoginWebhook } from '@/services/webhook-service';
 
@@ -145,6 +146,7 @@ export const fetchAvailableDecks = async (
 ): Promise<any[]> => {
   try {
     console.log(`Calling deck webhook for user: ${userId}`);
+    console.log(`Using webhook URL: ${webhookUrl}`);
     
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -157,16 +159,27 @@ export const fetchAvailableDecks = async (
       }),
     });
     
+    // Log the full response for debugging
+    const status = response.status;
+    console.log(`Deck webhook response status: ${status}`);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Deck webhook error: ${errorText}`);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
     const data = await response.json();
-    console.log('Deck webhook response:', data);
+    console.log('Deck webhook response data:', data);
     
+    // Ensure we have an array, even if empty
     return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error("Error fetching decks:", error);
+    // Log full error with stack trace if available
+    if (error instanceof Error) {
+      console.error("Error details:", error.message, error.stack);
+    }
     return [];
   }
 };
@@ -176,8 +189,11 @@ export const fetchAvailableDecks = async (
  */
 export const processDecksFromApi = (decksData: any[]): any[] => {
   if (!Array.isArray(decksData) || decksData.length === 0) {
+    console.log("No decks data to process or invalid format");
     return [];
   }
+
+  console.log("Processing decks data:", decksData);
 
   // Map API response to expected format
   return decksData.map(deck => ({

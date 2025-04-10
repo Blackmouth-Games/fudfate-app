@@ -16,12 +16,12 @@ import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@
 import { X } from 'lucide-react';
 import { getCardBackPath } from '@/utils/deck-utils';
 
-// Example cards for the carousel
+// Example cards for the carousel - updated paths to proper format
 const exampleCards = [
-  { id: 1, title: "The Degen", imageUrl: "/img/cards/deck1/0_TheDegen.png" },
-  { id: 2, title: "The Miner", imageUrl: "/img/cards/deck1/1_TheMiner.png" },
-  { id: 3, title: "The Oracle", imageUrl: "/img/cards/deck1/2_TheOracle.png" },
-  { id: 4, title: "The Whale", imageUrl: "/img/cards/deck1/3_TheWhale.png" },
+  { id: 1, title: "The Degen", imageUrl: "/img/cards/deck_1/0_TheDegen.png" },
+  { id: 2, title: "The Miner", imageUrl: "/img/cards/deck_1/1_TheMiner.png" },
+  { id: 3, title: "The Oracle", imageUrl: "/img/cards/deck_1/2_TheOracle.png" },
+  { id: 4, title: "The Whale", imageUrl: "/img/cards/deck_1/3_TheWhale.png" },
 ];
 
 interface TarotCardSectionProps {

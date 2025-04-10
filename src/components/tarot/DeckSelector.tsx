@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,8 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   
   // Get decks from props if available, otherwise use default decks
   const decks = availableDecks.length > 0 ? availableDecks : getAvailableDecks();
+  
+  console.log("DeckSelector - Available decks:", decks);
 
   const handleSelectDeck = (deckId: string) => {
     // Only allow selecting unlocked decks
@@ -119,8 +122,10 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                   alt={deck.displayName} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
+                    // Log the error
+                    console.warn(`Failed to load deck image: ${deck.backImage}, using fallback`);
                     // Fallback to a default image if the path is incorrect
-                    e.currentTarget.src = "/img/cards/deck1/99_back.png";
+                    e.currentTarget.src = "/img/cards/deck_1/99_BACK.png";
                   }}
                 />
                 {!deck.unlocked && (
