@@ -38,7 +38,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [network, setNetwork] = useState<Network>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [userDataOverride, setUserDataOverride] = useState<UserDataOverride>({});
-  const { webhooks } = useEnvironment();
+  const { webhooks, environment } = useEnvironment();
 
   useEffect(() => {
     // Only check for mock data overrides
