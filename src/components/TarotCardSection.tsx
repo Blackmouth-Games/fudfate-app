@@ -14,20 +14,21 @@ import {
 import tarotCards from '@/data/tarotCards';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { X } from 'lucide-react';
+import { getCardBackPath } from '@/utils/deck-utils';
 
 // Example cards for the carousel
 const exampleCards = [
-  { id: 1, title: "The Degen", imageUrl: "/img/cards/carddeck1/deck1_0_TheDegen.png" },
-  { id: 2, title: "The Miner", imageUrl: "/img/cards/carddeck1/deck1_1_TheMiner.png" },
-  { id: 3, title: "The Oracle", imageUrl: "/img/cards/carddeck1/deck1_2_TheOracle.png" },
-  { id: 4, title: "The Whale", imageUrl: "/img/cards/carddeck1/deck1_3_TheWhale.png" },
+  { id: 1, title: "The Degen", imageUrl: "/img/cards/deck1/0_TheDegen.png" },
+  { id: 2, title: "The Miner", imageUrl: "/img/cards/deck1/1_TheMiner.png" },
+  { id: 3, title: "The Oracle", imageUrl: "/img/cards/deck1/2_TheOracle.png" },
+  { id: 4, title: "The Whale", imageUrl: "/img/cards/deck1/3_TheWhale.png" },
 ];
 
 interface TarotCardSectionProps {
   deckId?: string;
 }
 
-const TarotCardSection = ({ deckId = 'crypto' }: TarotCardSectionProps) => {
+const TarotCardSection = ({ deckId = 'deck1' }: TarotCardSectionProps) => {
   const { t } = useTranslation();
   const cards = exampleCards;
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
