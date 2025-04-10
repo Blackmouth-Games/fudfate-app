@@ -22,11 +22,13 @@ const CardItem: React.FC<CardItemProps> = ({
   cardBackImage
 }) => {
   return (
-    <div className="flex flex-col items-center space-y-3">
-      <motion.div 
-        className="perspective-1000 w-full"
-        whileHover={{ scale: isRevealed ? 1 : 1.05, transition: { duration: 0.2 } }}
-      >
+    <motion.div 
+      className="flex flex-col items-center space-y-3"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+    >
+      <div className="perspective-1000 w-full">
         <AspectRatio ratio={2/3} className="w-full">
           <motion.div 
             className={`relative w-full h-full transition-transform duration-1000 transform-style-3d cursor-pointer`}
@@ -34,17 +36,18 @@ const CardItem: React.FC<CardItemProps> = ({
               transformStyle: "preserve-3d",
               transform: isRevealed ? 'rotateY(180deg)' : 'rotateY(0deg)'
             }}
+            whileHover={!isRevealed && !loading ? { scale: 1.05, transition: { duration: 0.2 } } : {}}
             onClick={() => !isRevealed && !loading && handleCardClick(index)}
           >
             {/* Card Back */}
             <div 
-              className="absolute w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg backface-hidden card-fullview"
+              className="absolute w-full h-full border-2 border-amber-300 rounded-lg backface-hidden"
               style={{ backfaceVisibility: "hidden" }}
             >
               <img 
                 src={cardBackImage} 
                 alt="Card Back" 
-                className="h-full w-full object-cover rounded-lg"
+                className="h-full w-full object-contain rounded-lg p-1"
                 onError={(e) => {
                   console.warn(`Failed to load card back image: ${cardBackImage}, using fallback`);
                   e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
@@ -54,18 +57,18 @@ const CardItem: React.FC<CardItemProps> = ({
             
             {/* Card Front */}
             <div 
-              className="absolute w-full h-full bg-gradient-to-br from-amber-100 to-white border-2 border-amber-300 rounded-lg backface-hidden card-fullview"
+              className="absolute w-full h-full bg-white border-2 border-amber-300 rounded-lg backface-hidden"
               style={{ 
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)"
               }}
             >
               {card && (
-                <div className="p-3 h-full flex flex-col">
-                  <div className="text-center font-bold text-amber-700 mb-2 bg-amber-50/50 py-1 rounded truncate">
+                <div className="p-2 h-full flex flex-col">
+                  <div className="text-center font-bold text-amber-700 mb-1 bg-amber-50/50 py-1 px-2 rounded truncate text-sm">
                     {card.name}
                   </div>
-                  <div className="flex-1 flex items-center justify-center p-2">
+                  <div className="flex-1 flex items-center justify-center p-1 relative">
                     <img 
                       src={card.image} 
                       alt={card.name} 
@@ -75,14 +78,32 @@ const CardItem: React.FC<CardItemProps> = ({
                         e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
                       }}
                     />
+                    
+                    <motion.div 
+                      className="absolute inset-0 bg-amber-400/10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    />
                   </div>
                 </div>
               )}
             </div>
           </motion.div>
         </AspectRatio>
-      </motion.div>
-    </div>
+      </div>
+      
+      {isRevealed && (
+        <motion.div 
+          className="text-sm text-center text-amber-800 font-medium px-2 py-1 rounded-full bg-amber-100/50 mt-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          {index === 0 ? "Past" : index === 1 ? "Present" : "Future"}
+        </motion.div>
+      )}
+    </motion.div>
   );
 };
 

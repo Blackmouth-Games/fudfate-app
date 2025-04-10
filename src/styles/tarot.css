@@ -32,13 +32,13 @@
   align-items: center;
   justify-content: center;
   color: white;
-  border: 1px solid rgba(147, 112, 219, 0.3);
+  border: 2px solid rgba(147, 112, 219, 0.3);
 }
 
 .tarot-card-back {
   background: linear-gradient(135deg, #481e86, #2a1757);
   transform: rotateY(180deg);
-  border: 1px solid rgba(147, 112, 219, 0.3);
+  border: 2px solid rgba(147, 112, 219, 0.3);
   display: flex;
   flex-direction: column;
 }
@@ -56,6 +56,7 @@
 .tarot-card-selectable:hover {
   transform: translateY(-10px);
   border-color: rgba(159, 122, 234, 0.7);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .tarot-card-selected {
@@ -107,11 +108,17 @@
 /* Selection area highlight */
 .selection-slot {
   transition: all 0.3s ease;
-  border: 1px dashed transparent;
+  border: 2px dashed rgba(217, 119, 6, 0.3);
+}
+
+.selection-slot:hover {
+  border-color: rgba(217, 119, 6, 0.6);
 }
 
 .selection-slot-highlight {
-  border: 1px dashed rgba(159, 122, 234, 0.7);
+  border: 2px dashed rgba(217, 119, 6, 0.8);
+  box-shadow: 0 0 15px rgba(217, 119, 6, 0.2);
+  animation: pulse-border 1.5s infinite;
 }
 
 /* Improved card borders for distinguishing overlapped cards */
@@ -119,12 +126,14 @@
   border: 2px solid rgba(255, 215, 0, 0.3);
   border-radius: 0.5rem;
   transition: all 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: white;
   overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .tarot-selection-card:hover {
   border-color: rgba(255, 215, 0, 0.7);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   z-index: 50 !important;
 }
 
@@ -133,21 +142,55 @@
   aspect-ratio: 2/3;
   border-radius: 0.5rem;
   overflow: hidden;
-  border: 2px solid rgba(255, 215, 0, 0.3);
+  border: 2px solid rgba(245, 158, 11, 0.5);
   background-color: white;
+  transition: all 0.3s ease;
 }
 
 .card-fullview:hover {
-  border-color: rgba(255, 215, 0, 0.7);
+  border-color: rgba(245, 158, 11, 0.8);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-5px);
 }
 
 /* Card animation when moving to selection slot */
 @keyframes pulse-border {
-  0% { border-color: rgba(255, 215, 0, 0.3); }
-  50% { border-color: rgba(255, 215, 0, 0.8); }
-  100% { border-color: rgba(255, 215, 0, 0.3); }
+  0% { border-color: rgba(217, 119, 6, 0.4); }
+  50% { border-color: rgba(217, 119, 6, 0.8); }
+  100% { border-color: rgba(217, 119, 6, 0.4); }
 }
 
 .card-selecting {
   animation: pulse-border 1.5s infinite;
+}
+
+/* Card flip effect */
+.backface-hidden {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+/* Fluid transitions */
+.fade-transition {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.scale-transition {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift {
+  transition: transform 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
 }
