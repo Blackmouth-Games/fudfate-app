@@ -3,7 +3,7 @@ import { WebhookResponse } from '@/types/tarot';
 import { toast } from 'sonner';
 import { nanoid } from 'nanoid';
 
-const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number) => {
+const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
   const logEntry = {
     id: nanoid(),
     timestamp: new Date().toISOString(),
@@ -12,7 +12,8 @@ const logWebhookCall = (type: string, url: string, requestData: any, responseDat
     request: requestData,
     response: responseData,
     error: error ? (error.message || String(error)) : undefined,
-    status
+    status,
+    environment // Add environment to the log entry
   };
 
   // Dispatch custom event with the log data
@@ -56,7 +57,7 @@ export const callReadingWebhook = async (
     if (!response.ok) {
       console.error(`Webhook error! status: ${status}`);
       const errorText = await response.text();
-      logWebhookCall('Reading', webhookUrl, requestData, null, `HTTP error! status: ${status}`, status);
+      logWebhookCall('Reading', webhookUrl, requestData, null, `HTTP error! status: ${status}`, status, environment);
       throw new Error(`HTTP error! status: ${status}`);
     }
     
@@ -64,14 +65,14 @@ export const callReadingWebhook = async (
     console.log('Reading webhook response:', data);
     
     // Log successful webhook call
-    logWebhookCall('Reading', webhookUrl, requestData, data, undefined, status);
+    logWebhookCall('Reading', webhookUrl, requestData, data, undefined, status, environment);
     
     return data;
   } catch (error) {
     console.error('Error calling reading webhook:', error);
     
     // Log failed webhook call
-    logWebhookCall('Reading', webhookUrl, requestData, null, error);
+    logWebhookCall('Reading', webhookUrl, requestData, null, error, undefined, environment);
     
     // In development, we allow continuing without the webhook
     if (environment === 'development') {
@@ -84,4 +85,9 @@ export const callReadingWebhook = async (
     // In production, we fail the reading
     throw error;
   }
+};
+
+// Add export for the logWebhookCall function to be used in WalletContext for login logging
+export const logLoginWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+  logWebhookCall('Login', url, requestData, responseData, error, status, environment);
 };

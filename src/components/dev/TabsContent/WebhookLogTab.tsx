@@ -14,6 +14,7 @@ interface WebhookLog {
   response?: any;
   error?: string;
   status?: number;
+  environment?: string;
 }
 
 const WebhookLogTab: React.FC = () => {
@@ -111,6 +112,13 @@ const WebhookLogTab: React.FC = () => {
                       }`}
                     />
                     <span className="font-medium">{log.type}</span>
+                    {log.environment && (
+                      <span className={`text-[8px] px-1 py-0.5 rounded ${
+                        log.environment === 'production' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {log.environment === 'production' ? 'PROD' : 'DEV'}
+                      </span>
+                    )}
                   </div>
                   <span className="text-gray-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
                 </summary>

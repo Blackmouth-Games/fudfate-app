@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { useEnvironment } from '@/hooks/useEnvironment';
+import { logLoginWebhook } from '@/services/webhook-service';
 
 // Define types for our wallet providers
 export type WalletType = 'phantom' | 'metamask' | null;
@@ -94,27 +94,36 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
       
+      const requestData = {
+        date: new Date().toISOString(),
+        wallet: walletAddress,
+        walletType: walletType
+      };
+
       const response = await fetch(webhooks.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          date: new Date().toISOString(),
-          wallet: walletAddress,
-          walletType: walletType
-        }),
+        body: JSON.stringify(requestData),
         signal: controller.signal
       });
       
       clearTimeout(timeoutId);
+      
+      const status = response.status;
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const error = `HTTP error! status: ${status}`;
+        logLoginWebhook(webhooks.login, requestData, null, error, status, environment);
+        throw new Error(error);
       }
 
       const data = await response.json();
       console.log("Login webhook response:", data);
+      
+      // Log successful login webhook call
+      logLoginWebhook(webhooks.login, requestData, data, undefined, status, environment);
       
       if (!data) {
         throw new Error('Empty response from login webhook');
@@ -141,6 +150,10 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error('Error calling login webhook:', error);
+      
+      // Log failed login webhook call
+      logLoginWebhook(webhooks.login, { wallet: walletAddress, walletType }, null, error, undefined, environment);
+      
       toast.error('Error registering wallet session');
       return null;
     }
