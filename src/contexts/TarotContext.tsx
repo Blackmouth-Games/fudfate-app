@@ -126,12 +126,15 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     
     setAvailableCards(prev => prev.filter(c => c.id !== cardId));
     
-    setSelectedCards(prev => [
-      ...prev, 
+    const updatedSelectedCards = [
+      ...selectedCards, 
       { ...card, revealed: false }
-    ]);
+    ];
     
-    if (selectedCards.length === 2) {
+    setSelectedCards(updatedSelectedCards);
+    
+    // Automatically advance to reading phase when 3 cards are selected
+    if (updatedSelectedCards.length === 3) {
       setTimeout(() => {
         setPhase('reading');
         toast.success("Selección completada. Revela las cartas para ver tu lectura.", {

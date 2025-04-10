@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
@@ -12,11 +11,11 @@ interface CardSelectionProps {
 }
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
-  const { availableCards, selectedCards, selectCard, loading, selectedDeck } = useTarot();
+  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase } = useTarot();
   const { t } = useTranslation();
   
   // Use the correct path format for card back images
-  const cardBackImage = `/img/decks/${selectedDeck}/${selectedDeck}_back.png`;
+  const cardBackImage = `/img/cards/${selectedDeck}/99_back.png`;
   
   // State to track if a card has been selected
   const [hasSelectedCard, setHasSelectedCard] = useState(false);
@@ -173,7 +172,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         // Fallback to default image if the dynamic path fails
-                        e.currentTarget.src = "/img/cards/carddeck1/card_back.jpg";
+                        e.currentTarget.src = `/img/cards/${selectedDeck}/99_back.png`;
                       }}
                     />
                   </div>
@@ -220,7 +219,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                       className="h-full w-full object-cover rounded-md"
                       onError={(e) => {
                         // Fallback to default image if the dynamic path fails
-                        e.currentTarget.src = "/img/cards/carddeck1/card_back.jpg";
+                        e.currentTarget.src = `/img/cards/${selectedDeck}/99_back.png`;
                       }}
                     />
                     <motion.div 

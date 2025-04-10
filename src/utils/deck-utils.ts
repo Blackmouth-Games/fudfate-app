@@ -7,14 +7,14 @@
  * Get the path to a card back image based on deck ID
  */
 export const getCardBackPath = (deckId: string = 'deck1'): string => {
-  return `/img/cards/${deckId}/card_back.jpg`;
+  return `/img/cards/${deckId}/99_back.png`;
 };
 
 /**
  * Get the path to a deck back image based on deck ID
  */
 export const getDeckBackPath = (deckId: string = 'deck1'): string => {
-  return `/img/cards/${deckId}/${deckId}_back.png`;
+  return `/img/cards/${deckId}/99_back.png`;
 };
 
 /**
@@ -28,7 +28,7 @@ export const getCardImagePath = (deckId: string, cardId: string): string => {
  * Format a card path for the data structure
  */
 export const formatCardPath = (deckId: string, cardNumber: number, cardName: string): string => {
-  return `/img/cards/${deckId}/${deckId}_${cardNumber}_${cardName}.png`;
+  return `/img/cards/${deckId}/${cardNumber}_${cardName}.png`;
 };
 
 export interface DeckInfo {
@@ -44,9 +44,9 @@ export interface DeckInfo {
 export const getAvailableDecks = (): DeckInfo[] => {
   return [
     { id: 'deck1', name: 'Crypto Classics', backImage: getDeckBackPath('deck1'), unlocked: true },
-    { id: 'deck2', name: 'DeFi Destinies', backImage: getDeckBackPath('deck1'), unlocked: false },
-    { id: 'deck3', name: 'NFT Narratives', backImage: getDeckBackPath('deck1'), unlocked: false },
-    { id: 'deck4', name: 'Meme Magic', backImage: getDeckBackPath('deck1'), unlocked: false },
-    { id: 'deck5', name: 'Web3 Wonders', backImage: getDeckBackPath('deck1'), unlocked: false }
+    { id: 'deck2', name: 'DeFi Destinies', backImage: getDeckBackPath('deck2'), unlocked: false },
+    { id: 'deck3', name: 'NFT Narratives', backImage: getDeckBackPath('deck3'), unlocked: false },
+    { id: 'deck4', name: 'Meme Magic', backImage: getDeckBackPath('deck4'), unlocked: false },
+    { id: 'deck5', name: 'Web3 Wonders', backImage: getDeckBackPath('deck5'), unlocked: false }
   ];
 };
