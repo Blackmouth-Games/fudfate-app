@@ -15,15 +15,40 @@ const DebugTab = () => {
     if (webhookResponse) {
       // Try to parse the webhook response
       try {
-        if (typeof webhookResponse.returnwebhoock === 'string') {
-          const parsed = JSON.parse(webhookResponse.returnwebhoock);
-          setParsedWebhook(parsed);
+        console.log("Debug tab parsing webhook response:", webhookResponse);
+        
+        // Handle case where webhookResponse is an array
+        if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
+          const firstResponse = webhookResponse[0];
           
-          if (Array.isArray(parsed.selected_cards)) {
-            setWebhookCards(parsed.selected_cards);
+          // Try to parse returnwebhoock
+          if (firstResponse.returnwebhoock && typeof firstResponse.returnwebhoock === 'string') {
+            const parsed = JSON.parse(firstResponse.returnwebhoock);
+            setParsedWebhook(parsed);
+            
+            if (Array.isArray(parsed.selected_cards)) {
+              console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
+              setWebhookCards(parsed.selected_cards);
+            }
+          } else if (firstResponse.selected_cards && Array.isArray(firstResponse.selected_cards)) {
+            console.log("Found selected_cards directly in webhook:", firstResponse.selected_cards);
+            setWebhookCards(firstResponse.selected_cards);
           }
-        } else if (Array.isArray(webhookResponse.selected_cards)) {
-          setWebhookCards(webhookResponse.selected_cards);
+        } 
+        // Handle case where webhookResponse is an object 
+        else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
+          if (webhookResponse.returnwebhoock && typeof webhookResponse.returnwebhoock === 'string') {
+            const parsed = JSON.parse(webhookResponse.returnwebhoock);
+            setParsedWebhook(parsed);
+            
+            if (Array.isArray(parsed.selected_cards)) {
+              console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
+              setWebhookCards(parsed.selected_cards);
+            }
+          } else if (webhookResponse.selected_cards && Array.isArray(webhookResponse.selected_cards)) {
+            console.log("Found selected_cards directly in webhook:", webhookResponse.selected_cards);
+            setWebhookCards(webhookResponse.selected_cards);
+          }
         }
       } catch (error) {
         console.error("Error parsing webhook in debug tab:", error);

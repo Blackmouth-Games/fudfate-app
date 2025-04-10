@@ -28,28 +28,50 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   
   // Parse webhook message if available
   useEffect(() => {
-    if (webhookResponse && typeof webhookResponse === 'object') {
+    if (webhookResponse) {
       try {
-        // Try to get message directly from the response
-        if (webhookResponse.message) {
-          setWebhookMessage(webhookResponse.message);
-          return;
-        }
-        
-        // Try to parse returnwebhoock if it exists
-        if (typeof webhookResponse.returnwebhoock === 'string') {
-          try {
-            const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-            if (parsedData && parsedData.message) {
-              setWebhookMessage(parsedData.message);
+        // Handle case where webhookResponse is an array
+        if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
+          const firstResponse = webhookResponse[0];
+          
+          // Try to get message directly
+          if (firstResponse.message) {
+            setWebhookMessage(firstResponse.message);
+            return;
+          }
+          
+          // Try to parse returnwebhoock
+          if (typeof firstResponse.returnwebhoock === 'string') {
+            try {
+              const parsedData = JSON.parse(firstResponse.returnwebhoock);
+              if (parsedData && parsedData.message) {
+                setWebhookMessage(parsedData.message);
+                console.log("Found message in parsed webhook array:", parsedData.message);
+              }
+            } catch (error) {
+              console.error("Error parsing webhook message in CardReading:", error);
             }
-            
-            // For debugging in DevTools - log selected cards from webhook
-            if (parsedData && Array.isArray(parsedData.selected_cards)) {
-              console.log("Webhook selected cards:", parsedData.selected_cards);
+          }
+        } 
+        // Handle case where webhookResponse is an object
+        else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
+          // Try to get message directly from the response
+          if (webhookResponse.message) {
+            setWebhookMessage(webhookResponse.message);
+            return;
+          }
+          
+          // Try to parse returnwebhoock if it exists
+          if (typeof webhookResponse.returnwebhoock === 'string') {
+            try {
+              const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+              if (parsedData && parsedData.message) {
+                setWebhookMessage(parsedData.message);
+                console.log("Found message in parsed webhook object:", parsedData.message);
+              }
+            } catch (error) {
+              console.error("Error parsing webhook message in CardReading:", error);
             }
-          } catch (error) {
-            console.error("Error parsing webhook message in CardReading:", error);
           }
         }
       } catch (error) {
