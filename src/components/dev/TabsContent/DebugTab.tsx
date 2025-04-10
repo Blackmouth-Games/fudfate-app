@@ -69,7 +69,7 @@ const DebugTab = () => {
                   Card {index + 1}
                 </Badge>
                 <span className="text-xs">
-                  {card.id} - {card.name}
+                  {card.id} - {card.name} - {card.deck || selectedDeck}
                 </span>
               </div>
             ))}
@@ -102,7 +102,7 @@ const DebugTab = () => {
                     </Badge>
                     {webhookCard && (
                       <span className="text-xs">
-                        {webhookCard.id} - {webhookCard.name}
+                        {webhookCard.id} - {webhookCard.name} - {webhookCard.deck}
                       </span>
                     )}
                   </div>
@@ -110,7 +110,7 @@ const DebugTab = () => {
                   {selectedCardAtIndex && selectedCardAtIndex.revealed && (
                     <div className="ml-6 mt-1 text-xs">
                       <span className={isMatch ? "text-green-600" : "text-amber-600"}>
-                        {isMatch ? "✓ Matches revealed card" : "⚠ Doesn't match revealed card: " + selectedCardAtIndex.name}
+                        {isMatch ? "✓ Matches revealed card" : "⚠ Doesn't match revealed card: " + selectedCardAtIndex.name + (selectedCardAtIndex.deck ? ` (${selectedCardAtIndex.deck})` : '')}
                       </span>
                     </div>
                   )}
