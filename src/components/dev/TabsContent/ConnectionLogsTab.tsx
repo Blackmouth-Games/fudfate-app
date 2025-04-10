@@ -1,185 +1,322 @@
 
-import React, { useState, useEffect } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import React, { useState, useEffect, useRef } from 'react';
+import { useConnectionLogs } from '@/hooks/useConnectionLogs';
 import { Button } from '@/components/ui/button';
-import { Trash, Download, Maximize2, Minimize2, RotateCw } from 'lucide-react';
-import { toast } from 'sonner';
-import { ConnectionLog } from '@/types/walletTypes';
-import { useWallet } from '@/contexts/WalletContext';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { Maximize2, Download, RefreshCw, X, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { format } from 'date-fns';
 
-const ConnectionLogsTab: React.FC = () => {
-  const { connectionLogs } = useWallet();
-  const [expanded, setExpanded] = useState(false);
-
-  const downloadLogs = () => {
-    const dataStr = JSON.stringify(connectionLogs, null, 2);
+const ConnectionLogsTab = () => {
+  const { logs, clearLogs } = useConnectionLogs();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filters, setFilters] = useState({
+    connect: true,
+    disconnect: true,
+    login: true,
+    error: true,
+    other: true
+  });
+  
+  // Ref for the logs container, used for scrolling
+  const logsContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll to bottom when new logs arrive
+  useEffect(() => {
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
+  }, [logs]);
+  
+  // Function to download logs as JSON
+  const handleDownloadLogs = () => {
+    const filteredLogs = applyFilters(logs);
+    const dataStr = JSON.stringify(filteredLogs, null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
     
     const link = document.createElement('a');
     link.setAttribute('href', dataUri);
-    link.setAttribute('download', `connection-logs-${new Date().toISOString()}.json`);
+    link.setAttribute('download', `wallet-connection-logs-${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
-    toast.success('Connection logs downloaded');
   };
-
-  const formatTime = (timestamp: string) => {
-    try {
-      return new Date(timestamp).toLocaleTimeString();
-    } catch (error) {
-      return 'Invalid time';
-    }
+  
+  // Apply filters to the logs
+  const applyFilters = (logs: any[]) => {
+    return logs.filter(log => {
+      // Filter by search term if provided
+      if (searchTerm && !log.action.toLowerCase().includes(searchTerm.toLowerCase()) && 
+          !log.details.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+      
+      // Apply category filters
+      if (log.action.toLowerCase().includes('connect') && !filters.connect) return false;
+      if (log.action.toLowerCase().includes('disconnect') && !filters.disconnect) return false;
+      if (log.action.toLowerCase().includes('login') && !filters.login) return false;
+      if (log.action.toLowerCase().includes('error') || log.action.toLowerCase().includes('failed') && !filters.error) return false;
+      
+      // Check if log falls into "other" category
+      const isOther = !['connect', 'disconnect', 'login', 'error', 'failed'].some(keyword => 
+        log.action.toLowerCase().includes(keyword)
+      );
+      
+      if (isOther && !filters.other) return false;
+      
+      return true;
+    });
   };
-
-  const getActionColor = (action: string) => {
-    if (action.includes('Error') || action.includes('Failed')) return 'text-red-600';
-    if (action.includes('Success') || action.includes('Connected')) return 'text-green-600';
-    if (action.includes('Attempt') || action.includes('Connecting')) return 'text-amber-600';
-    return 'text-blue-600';
-  };
-
+  
+  // Get icon based on action type
   const getActionIcon = (action: string) => {
-    if (action.includes('Error') || action.includes('Failed')) return '❌';
-    if (action.includes('Success') || action.includes('Connected')) return '✅';
-    if (action.includes('Attempt') || action.includes('Connecting')) return '⏳';
-    if (action.includes('Disconnect')) return '🔌';
-    return '🔄';
+    if (action.toLowerCase().includes('connect success') || action.toLowerCase().includes('login success')) {
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    } else if (action.toLowerCase().includes('error') || action.toLowerCase().includes('failed')) {
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    } else if (action.toLowerCase().includes('connect') || action.toLowerCase().includes('login')) {
+      return <Clock className="h-4 w-4 text-amber-500" />;
+    }
+    return null;
   };
+  
+  const filteredLogs = applyFilters(logs);
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-xs font-medium">Connection Activity</h3>
-        <div className="flex gap-1">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium">Connection Logs ({filteredLogs.length})</h3>
+        <div className="flex items-center gap-1">
           <Button 
             variant="outline" 
-            size="sm" 
-            className="h-6 w-6 p-0" 
-            onClick={downloadLogs}
-            disabled={connectionLogs.length === 0}
-            title="Download Logs"
+            size="icon" 
+            className="h-7 w-7" 
+            onClick={() => setIsFullscreen(true)}
+            title="Fullscreen"
           >
-            <Download className="h-3 w-3" />
+            <Maximize2 className="h-3.5 w-3.5" />
           </Button>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button 
-                variant="outline"
-                size="sm"
-                className="h-6 w-6 p-0"
-                title="Expanded View"
-              >
-                <Maximize2 className="h-3 w-3" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
-              <DialogHeader>
-                <DialogTitle>Connection Logs</DialogTitle>
-              </DialogHeader>
-              <div className="flex justify-end gap-1 mb-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={downloadLogs}
-                  disabled={connectionLogs.length === 0}
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-              </div>
-              <ScrollArea className="flex-1 border rounded-md overflow-hidden">
-                <div className="p-3">
-                  {connectionLogs.length === 0 ? (
-                    <div className="text-center py-6 text-sm text-gray-500">
-                      No connection activity logged yet
-                    </div>
-                  ) : (
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-3 py-2 text-left font-medium text-gray-700">Time</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-700">Action</th>
-                          <th className="px-3 py-2 text-left font-medium text-gray-700">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
-                        {connectionLogs.map((log, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-3 py-2 text-gray-500 whitespace-nowrap">
-                              {formatTime(log.timestamp)}
-                            </td>
-                            <td className="px-3 py-2 whitespace-nowrap">
-                              <span className={`font-medium ${getActionColor(log.action)}`}>
-                                {getActionIcon(log.action)} {log.action}
-                              </span>
-                            </td>
-                            <td className="px-3 py-2 text-gray-600">
-                              <code className="text-[11px] bg-gray-50 px-1 py-0.5 rounded">
-                                {log.details}
-                              </code>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-7 w-7" 
+            onClick={handleDownloadLogs}
+            title="Download logs"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </Button>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            className="h-7 px-2 text-xs" 
+            onClick={clearLogs}
+          >
+            Clear
+          </Button>
+        </div>
+      </div>
+      
+      <div className="flex flex-wrap gap-2 items-center">
+        <Input 
+          type="text" 
+          placeholder="Search logs..." 
+          className="h-7 text-xs w-full sm:w-auto sm:flex-1" 
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <div className="flex flex-wrap gap-2 text-xs">
+          <div className="flex items-center space-x-1">
+            <Checkbox 
+              id="filter-connect" 
+              checked={filters.connect} 
+              onCheckedChange={(checked) => setFilters({...filters, connect: !!checked})}
+            />
+            <Label htmlFor="filter-connect" className="text-xs cursor-pointer">Connect</Label>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Checkbox 
+              id="filter-disconnect" 
+              checked={filters.disconnect} 
+              onCheckedChange={(checked) => setFilters({...filters, disconnect: !!checked})}
+            />
+            <Label htmlFor="filter-disconnect" className="text-xs cursor-pointer">Disconnect</Label>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Checkbox 
+              id="filter-login" 
+              checked={filters.login} 
+              onCheckedChange={(checked) => setFilters({...filters, login: !!checked})}
+            />
+            <Label htmlFor="filter-login" className="text-xs cursor-pointer">Login</Label>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Checkbox 
+              id="filter-error" 
+              checked={filters.error} 
+              onCheckedChange={(checked) => setFilters({...filters, error: !!checked})}
+            />
+            <Label htmlFor="filter-error" className="text-xs cursor-pointer">Errors</Label>
+          </div>
+          <div className="flex items-center space-x-1">
+            <Checkbox 
+              id="filter-other" 
+              checked={filters.other} 
+              onCheckedChange={(checked) => setFilters({...filters, other: !!checked})}
+            />
+            <Label htmlFor="filter-other" className="text-xs cursor-pointer">Other</Label>
+          </div>
         </div>
       </div>
 
-      {connectionLogs.length === 0 ? (
-        <div className="text-center py-6 text-xs text-gray-500">
-          No connection activity logged yet
-        </div>
-      ) : (
-        <ScrollArea className={`${expanded ? 'h-[400px]' : 'h-[200px]'} w-full border rounded-md`}>
-          <div className="p-2 space-y-2">
-            {connectionLogs.map((log, index) => (
-              <div key={index} className="text-[10px] bg-gray-50 p-2 rounded-md">
-                <div className="flex justify-between items-start">
-                  <span className={`font-medium ${getActionColor(log.action)}`}>
-                    {getActionIcon(log.action)} {log.action}
-                  </span>
-                  <span className="text-gray-500 text-[9px]">{formatTime(log.timestamp)}</span>
+      <div className="border rounded-md h-64 overflow-auto text-xs" ref={logsContainerRef}>
+        {filteredLogs.length === 0 ? (
+          <div className="h-full flex items-center justify-center text-gray-400">
+            No logs to display
+          </div>
+        ) : (
+          <div className="space-y-1 p-2">
+            {filteredLogs.map((log, index) => (
+              <Card key={index} className="p-1.5 text-xs bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="flex items-start gap-2">
+                  <div className="mt-0.5">
+                    {getActionIcon(log.action)}
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium truncate">{log.action}</span>
+                      <span className="text-[10px] text-gray-500">
+                        {format(new Date(log.timestamp), 'HH:mm:ss.SSS')}
+                      </span>
+                    </div>
+                    <div className="text-[10px] whitespace-pre-wrap break-words text-gray-600 mt-0.5">
+                      {log.details}
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-1">
-                  <pre className="text-[9px] bg-gray-100 p-1 rounded overflow-x-auto whitespace-pre-wrap break-words">
-                    {log.details}
-                  </pre>
-                </div>
-              </div>
+              </Card>
             ))}
           </div>
-        </ScrollArea>
-      )}
-      {connectionLogs.length > 0 && (
-        <div className="flex justify-end">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-6 text-xs px-2"
-            onClick={() => setExpanded(!expanded)}
-          >
-            {expanded ? (
-              <>
-                <Minimize2 className="h-3 w-3 mr-1" />
-                Show Less
-              </>
+        )}
+      </div>
+
+      <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
+        <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Connection Logs</span>
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-7 w-7" 
+                  onClick={handleDownloadLogs}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="h-7 px-2 text-xs" 
+                  onClick={clearLogs}
+                >
+                  Clear Logs
+                </Button>
+                <DialogClose className="h-7 w-7 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </DialogClose>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-wrap gap-2 items-center mb-2">
+            <Input 
+              type="text" 
+              placeholder="Search logs..." 
+              className="h-8 text-sm flex-1"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <div className="flex flex-wrap gap-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="fs-filter-connect" 
+                  checked={filters.connect} 
+                  onCheckedChange={(checked) => setFilters({...filters, connect: !!checked})}
+                />
+                <Label htmlFor="fs-filter-connect" className="text-sm cursor-pointer">Connect</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="fs-filter-disconnect" 
+                  checked={filters.disconnect} 
+                  onCheckedChange={(checked) => setFilters({...filters, disconnect: !!checked})}
+                />
+                <Label htmlFor="fs-filter-disconnect" className="text-sm cursor-pointer">Disconnect</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="fs-filter-login" 
+                  checked={filters.login} 
+                  onCheckedChange={(checked) => setFilters({...filters, login: !!checked})}
+                />
+                <Label htmlFor="fs-filter-login" className="text-sm cursor-pointer">Login</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="fs-filter-error" 
+                  checked={filters.error} 
+                  onCheckedChange={(checked) => setFilters({...filters, error: !!checked})}
+                />
+                <Label htmlFor="fs-filter-error" className="text-sm cursor-pointer">Errors</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="fs-filter-other" 
+                  checked={filters.other} 
+                  onCheckedChange={(checked) => setFilters({...filters, other: !!checked})}
+                />
+                <Label htmlFor="fs-filter-other" className="text-sm cursor-pointer">Other</Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 border rounded-md overflow-auto">
+            {filteredLogs.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-gray-400">
+                No logs to display
+              </div>
             ) : (
-              <>
-                <Maximize2 className="h-3 w-3 mr-1" />
-                Show More
-              </>
+              <div className="space-y-2 p-3">
+                {filteredLogs.map((log, index) => (
+                  <Card key={index} className="p-3 text-sm bg-gray-50 hover:bg-gray-100 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        {getActionIcon(log.action)}
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">{log.action}</span>
+                          <span className="text-xs text-gray-500">
+                            {format(new Date(log.timestamp), 'yyyy-MM-dd HH:mm:ss.SSS')}
+                          </span>
+                        </div>
+                        <div className="text-xs whitespace-pre-wrap break-words text-gray-600 mt-1">
+                          {log.details}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
             )}
-          </Button>
-        </div>
-      )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

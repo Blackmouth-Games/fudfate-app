@@ -4,32 +4,42 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
 import { Dialog, DialogContent, DialogTitle, DialogClose, DialogHeader } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
+import { X, LockIcon } from 'lucide-react';
 import tarotCards from '@/data/tarotCards';
-import { getDeckBackPath, getAvailableDecks } from '@/utils/deck-utils';
+import { DeckInfo, getAvailableDecks } from '@/utils/deck-utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTarot } from '@/contexts/TarotContext';
 
 interface DeckSelectorProps {
   className?: string;
+  availableDecks?: DeckInfo[];
+  isLoading?: boolean;
 }
 
-const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
+const DeckSelector: React.FC<DeckSelectorProps> = ({ 
+  className = '', 
+  availableDecks = [], 
+  isLoading = false 
+}) => {
   const { t } = useTranslation();
-  const [selectedDeck, setSelectedDeck] = useState<string>('deck1');
+  const { selectedDeck, setSelectedDeck } = useTarot();
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
-  // Get decks from our utility
-  const decks = getAvailableDecks();
+  // Get decks from props if available, otherwise use default decks
+  const decks = availableDecks.length > 0 ? availableDecks : getAvailableDecks();
 
   const handleSelectDeck = (deckId: string) => {
-    // Only allow selecting the unlocked deck
-    if (deckId === 'deck1') {
+    // Only allow selecting unlocked decks
+    const deck = decks.find(d => d.id === deckId);
+    if (deck && deck.unlocked) {
       setSelectedDeck(deckId);
     }
   };
 
   const openDeckDetails = (deckId: string) => {
-    if (deckId === 'deck1') {
+    const deck = decks.find(d => d.id === deckId);
+    if (deck && deck.unlocked) {
       setOpenDeckId(deckId);
     }
   };
@@ -53,6 +63,29 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   // Find the selected card details
   const cardDetails = selectedCard ? 
     deckCards.find(card => card.id === selectedCard) : null;
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <Card className={`border-amber-400/50 shadow-md ${className}`}>
+        <CardContent className="pt-6">
+          <div className="text-center mb-6">
+            <Skeleton className="h-7 w-48 mx-auto mb-2" />
+            <Skeleton className="h-4 w-64 mx-auto" />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="flex flex-col items-center">
+                <Skeleton className="w-full max-w-[120px] h-[170px] mx-auto rounded-lg" />
+                <Skeleton className="h-4 w-24 mt-2" />
+                <Skeleton className="h-3 w-16 mt-1" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
@@ -82,26 +115,36 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
               >
                 <img 
                   src={deck.backImage} 
-                  alt={deck.name} 
+                  alt={deck.displayName} 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to a default image if the path is incorrect
+                    e.currentTarget.src = "/img/cards/deck1/99_back.png";
+                  }}
                 />
                 {!deck.unlocked && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                    <span className="text-white font-medium text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-                      {t('tarot.locked')}
-                    </span>
+                    <div className="bg-black bg-opacity-50 px-2 py-1 rounded flex items-center gap-1">
+                      <LockIcon className="h-3 w-3 text-white" />
+                      <span className="text-white font-medium text-sm">
+                        {t('tarot.locked')}
+                      </span>
+                    </div>
                   </div>
+                )}
+                {selectedDeck === deck.id && (
+                  <div className="absolute top-1 right-1 bg-amber-500 w-3 h-3 rounded-full border border-white"></div>
                 )}
               </div>
               <h4 className="mt-2 text-center text-sm font-medium">
-                {deck.name}
+                {deck.displayName}
               </h4>
-              {deck.id === 'deck1' && (
+              {selectedDeck === deck.id && (
                 <span className="text-xs text-amber-600 font-medium">
                   {t('tarot.selected')}
                 </span>
               )}
-              {deck.id !== 'deck1' && (
+              {!deck.unlocked && (
                 <span className="text-xs text-gray-400 italic">
                   {t('tarot.comingSoon')}
                 </span>
@@ -116,7 +159,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
         <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex justify-between items-center">
-              <GlitchText text={openDeckId === 'deck1' ? 'Crypto Classics' : ''} />
+              <GlitchText text={decks.find(d => d.id === openDeckId)?.displayName || ''} />
               <DialogClose className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100">
                 <X className="h-4 w-4" />
                 <span className="sr-only">{t('common.close')}</span>
@@ -135,6 +178,10 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
                     src={card.image} 
                     alt={card.name} 
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to a default image if the path is incorrect
+                      e.currentTarget.src = "/img/cards/deck1/0_TheDegen.png";
+                    }}
                   />
                 </div>
                 <h5 className="mt-2 text-center text-xs font-medium">{card.name}</h5>
@@ -164,6 +211,10 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
                       src={cardDetails.image} 
                       alt={cardDetails.name} 
                       className="w-full h-full object-contain" 
+                      onError={(e) => {
+                        // Fallback to a default image if the path is incorrect
+                        e.currentTarget.src = "/img/cards/deck1/0_TheDegen.png";
+                      }}
                     />
                   </div>
                 </div>

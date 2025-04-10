@@ -118,12 +118,50 @@ export const callLoginWebhook = async (
 /**
  * Parse user data from webhook response
  */
-export const parseUserData = (data: any): { userId: string; runsToday: boolean } | null => {
+export const parseUserData = (data: any): { userId: string; runsToday: boolean; selectedDeck?: string } | null => {
   if (data && Array.isArray(data) && data.length > 0) {
     return {
       userId: data[0].userid,
       runsToday: data[0].runs_today === true,
+      selectedDeck: data[0].selected_deck || 'deck1'
     };
   }
   return null;
 };
+
+/**
+ * Call deck webhook to fetch available decks
+ */
+export const fetchAvailableDecks = async (
+  webhookUrl: string,
+  userId: string,
+  environment: string
+): Promise<any[]> => {
+  try {
+    console.log(`Calling deck webhook for user: ${userId}`);
+    
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        date: new Date().toISOString(),
+        userid: userId
+      }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Deck webhook response:', data);
+    
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Error fetching decks:", error);
+    return [];
+  }
+};
+

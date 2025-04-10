@@ -1,6 +1,7 @@
 
 import React from 'react';
 import '../styles/glitch.css';
+import GoldGlitchText from './core/GoldGlitchText';
 
 interface GlitchTextProps {
   text: string;
@@ -21,8 +22,17 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
   neonEffect = 'none',
   intensity = 'normal'
 }) => {
-  const baseColor = goldEffect ? 'gold-text' : 'text-gray-900';
-  const glitchColor = goldEffect ? 'gold-text' : 'text-gray-900';
+  // If gold effect is requested, use the specialized component
+  if (goldEffect) {
+    return (
+      <GoldGlitchText 
+        text={text} 
+        className={className} 
+        fontSize={fontSize} 
+        lineHeight={lineHeight} 
+      />
+    );
+  }
   
   // Apply neon effect if requested
   let neonClass = '';
@@ -67,18 +77,18 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
       className={`text-container ${className} ${intensityClass}`} 
       style={containerStyle}
     >
-      <span className={`text-base ${baseColor} ${neonClass}`} style={textStyle}>
+      <span className={`text-base ${neonClass}`} style={textStyle}>
         {text}
       </span>
       <span 
-        className={`text-glitch-effect-1 ${glitchColor} ${neonClass}`} 
+        className={`text-glitch-effect-1 ${neonClass}`} 
         aria-hidden="true"
         style={glitchStyle}
       >
         {text}
       </span>
       <span 
-        className={`text-glitch-effect-2 ${glitchColor} ${neonClass}`} 
+        className={`text-glitch-effect-2 ${neonClass}`} 
         aria-hidden="true"
         style={glitchStyle}
       >

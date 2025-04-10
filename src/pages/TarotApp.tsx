@@ -14,47 +14,56 @@ import { toast } from 'sonner';
 import GlitchLogo from '@/components/GlitchLogo';
 import Footer from '@/components/Footer';
 import CommitSHA from '@/components/CommitSHA';
-import DevToolPanel from '@/components/DevToolPanel';
+import DevToolPanel from '@/components/dev/DevToolPanel';
 import TarotHeader from '@/components/tarot/TarotHeader';
+import { fetchAvailableDecks } from '@/utils/wallet-connection-utils';
+import { convertApiDeckToInternal, DeckInfo } from '@/utils/deck-utils';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
   const { t } = useTranslation();
-  const { webhooks } = useEnvironment();
+  const { webhooks, environment } = useEnvironment();
   const [activeTab, setActiveTab] = useState('reading');
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [availableDecks, setAvailableDecks] = useState<DeckInfo[]>([]);
+  const [isLoadingDecks, setIsLoadingDecks] = useState(false);
+
+  // Fetch decks when user connects
+  useEffect(() => {
+    if (connected && userData?.userId) {
+      fetchUserDecks();
+    }
+  }, [connected, userData]);
+
+  const fetchUserDecks = async () => {
+    if (!userData?.userId) return;
+    
+    setIsLoadingDecks(true);
+    try {
+      const decksData = await fetchAvailableDecks(webhooks.deck, userData.userId, environment);
+      
+      if (Array.isArray(decksData) && decksData.length > 0) {
+        // Convert API deck format to internal format
+        const formattedDecks = decksData.map(deck => convertApiDeckToInternal(deck));
+        setAvailableDecks(formattedDecks);
+        console.log("Available decks:", formattedDecks);
+      }
+    } catch (error) {
+      console.error('Error fetching decks:', error);
+      toast.error(t('errors.deckLoadFailed'), {
+        position: 'bottom-center',
+      });
+    } finally {
+      setIsLoadingDecks(false);
+    }
+  };
 
   const handleTabChange = async (value: string) => {
     setActiveTab(value);
     
-    if (value === 'decks' && userData?.userId) {
-      try {
-        console.log("Calling deck webhook with userid:", userData.userId);
-        const response = await fetch(webhooks.deck, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            date: new Date().toISOString(),
-            userid: userData.userId
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log('Deck webhook response:', data);
-        
-      } catch (error) {
-        console.error('Error calling deck webhook:', error);
-        toast.error(t('errors.deckLoadFailed'), {
-          position: 'bottom-center',
-        });
-      }
+    if (value === 'decks' && userData?.userId && availableDecks.length === 0) {
+      await fetchUserDecks();
     } else if (value === 'history' && userData?.userId) {
       setIsLoadingHistory(true);
       try {
@@ -147,7 +156,11 @@ const TarotApp: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="decks" className="mt-0">
-                <DeckSelector className="w-full" />
+                <DeckSelector 
+                  className="w-full" 
+                  availableDecks={availableDecks}
+                  isLoading={isLoadingDecks}
+                />
               </TabsContent>
             </Tabs>
           </div>
