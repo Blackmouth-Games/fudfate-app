@@ -1,6 +1,26 @@
 
 import { WebhookResponse } from '@/types/tarot';
 import { toast } from 'sonner';
+import { v4 as uuidv4 } from 'nanoid';
+
+const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number) => {
+  const logEntry = {
+    id: uuidv4(),
+    timestamp: new Date().toISOString(),
+    type,
+    url,
+    request: requestData,
+    response: responseData,
+    error: error ? (error.message || String(error)) : undefined,
+    status
+  };
+
+  // Dispatch custom event with the log data
+  window.dispatchEvent(new CustomEvent('webhook-log', { detail: logEntry }));
+  
+  // Also log to console for debugging
+  console.log('Webhook log:', logEntry);
+};
 
 export const callReadingWebhook = async (
   webhookUrl: string, 
@@ -13,6 +33,12 @@ export const callReadingWebhook = async (
     return null;
   }
 
+  const requestData = {
+    date: new Date().toISOString(),
+    userid: userId,
+    intention: intention
+  };
+
   try {
     console.log("Calling reading webhook with userid:", userId);
     console.log("Using webhook URL:", webhookUrl);
@@ -22,23 +48,30 @@ export const callReadingWebhook = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        date: new Date().toISOString(),
-        userid: userId,
-        intention: intention
-      }),
+      body: JSON.stringify(requestData),
     });
     
+    const status = response.status;
+    
     if (!response.ok) {
-      console.error(`Webhook error! status: ${response.status}`);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      console.error(`Webhook error! status: ${status}`);
+      const errorText = await response.text();
+      logWebhookCall('Reading', webhookUrl, requestData, null, `HTTP error! status: ${status}`, status);
+      throw new Error(`HTTP error! status: ${status}`);
     }
     
     const data = await response.json();
     console.log('Reading webhook response:', data);
+    
+    // Log successful webhook call
+    logWebhookCall('Reading', webhookUrl, requestData, data, undefined, status);
+    
     return data;
   } catch (error) {
     console.error('Error calling reading webhook:', error);
+    
+    // Log failed webhook call
+    logWebhookCall('Reading', webhookUrl, requestData, null, error);
     
     // In development, we allow continuing without the webhook
     if (environment === 'development') {

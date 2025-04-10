@@ -1,6 +1,6 @@
 
 import React from 'react';
-import DevToolPanel from './DevToolPanel';
+import DevToolPanel from './dev/DevToolPanel';
 
 interface DevToolProps {
   routes: Array<{
