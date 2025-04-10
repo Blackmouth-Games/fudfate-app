@@ -68,7 +68,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
               key={deck.id}
               deck={deck}
               isSelected={selectedDeck === deck.name}
-              isSelecting={selectingDeck === deck.name}
+              isSelecting={selectingDeck}
               onSelect={handleServerSelectDeck}
               onDetailsOpen={openDeckDetails}
               loadedImages={loadedImages}
