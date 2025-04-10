@@ -21,7 +21,7 @@ export const connectMetamask = async (): Promise<{ address: string | null; netwo
       };
     }
     
-    // Request accounts
+    // Always request accounts to ensure user can switch accounts
     const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     if (accounts && accounts.length > 0) {
       const address = accounts[0];
@@ -50,6 +50,11 @@ export const connectPhantom = async (): Promise<{ address: string | null; networ
   }
   
   try {
+    // Force reconnect to allow switching accounts
+    if (window.solana.isConnected) {
+      await window.solana.disconnect();
+    }
+    
     const response = await window.solana.connect();
     const address = response.publicKey.toString();
     return { address, networkId: 'solana' };

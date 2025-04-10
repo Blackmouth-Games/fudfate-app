@@ -23,6 +23,12 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
     
     try {
+      // If a wallet is already connected, disconnect it first
+      if (walletAddress) {
+        disconnectWallet();
+        addConnectionLog('Reconnect', `Disconnected previous wallet to reconnect with ${walletType}`);
+      }
+      
       let connectionResult;
       
       // Connect to the appropriate wallet type
