@@ -7,7 +7,8 @@ import {
   connectMetamask, 
   connectPhantom, 
   callLoginWebhook,
-  parseUserData
+  parseUserData,
+  fetchAvailableDecks
 } from '@/utils/wallet-connection-utils';
 import { useWalletStorage } from '@/hooks/useWalletStorage';
 
@@ -20,6 +21,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
   const [userData, setUserData] = useState<UserData | null>(null);
   
   const connectWallet = async (walletType: string): Promise<boolean> => {
+    // Add connection log
     addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
     
     try {
@@ -38,6 +40,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         connectionResult = await connectPhantom();
       } else {
         addConnectionLog('Connect Failed', `Unknown wallet type: ${walletType}`);
+        toast.error(`Unknown wallet type: ${walletType}`);
         return false;
       }
       
@@ -52,6 +55,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       
       if (!address) {
         addConnectionLog('Connect Failed', `No address returned from ${walletType}`);
+        toast.error(`No address returned from ${walletType}`);
         return false;
       }
 
@@ -60,6 +64,9 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       setWalletType(walletType);
       setNetwork(networkId);
       saveWalletData(address, walletType, networkId);
+      
+      // Log the connection success
+      addConnectionLog('Connection Success', `Connected to ${walletType}: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`);
       
       // Call login webhook
       try {
@@ -78,40 +85,53 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
           addConnectionLog('Login Success', `User ID: ${userDataObj.userId}`);
           setUserData(userDataObj);
           saveUserData(userDataObj);
+          
+          // Fetch available decks after successful login
+          try {
+            await fetchAvailableDecks(webhooks.deck, userDataObj.userId, environment);
+            addConnectionLog('Decks Fetched', `Successfully fetched available decks`);
+          } catch (deckError) {
+            addConnectionLog('Decks Error', `Failed to fetch decks: ${deckError instanceof Error ? deckError.message : String(deckError)}`);
+          }
         } else {
           addConnectionLog('Login Error', 'Invalid webhook response format');
           console.error("Invalid webhook response format:", data);
-          toast.error('Invalid webhook response format', {
-            position: 'bottom-center',
-          });
+          toast.error('Invalid webhook response format');
           return false;
         }
       } catch (error) {
         addConnectionLog('Login Error', `Webhook error: ${error instanceof Error ? error.message : String(error)}`);
         console.error("Error calling login webhook:", error);
-        toast.error('Error connecting to login webhook. Please try again later.', {
-          position: 'bottom-center',
-        });
+        toast.error('Error connecting to login webhook. Please try again later.');
         return false;
       }
 
-      addConnectionLog('Connection Success', `Connected with ${walletType}, ${address}`);
       console.log(`Connected with ${walletType}:`, address);
       
       return true;
     } catch (error) {
       addConnectionLog('Connect Error', `Error: ${error instanceof Error ? error.message : String(error)}`);
       console.error("Error connecting wallet:", error);
-      toast.error('Failed to connect wallet. Please try again.', {
-        position: 'bottom-center',
-      });
+      toast.error('Failed to connect wallet. Please try again.');
       return false;
     }
   };
   
   const disconnectWallet = () => {
+    // Only log if there's actually a wallet to disconnect
     if (walletAddress) {
-      addConnectionLog('Disconnect', `Disconnected ${walletType} wallet: ${walletAddress}`);
+      addConnectionLog('Disconnect', `Disconnected ${walletType} wallet: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`);
+      
+      // If phantom is connected, try to disconnect from it
+      if (walletType === 'phantom' && window.solana?.isConnected) {
+        try {
+          window.solana.disconnect();
+        } catch (error) {
+          console.error("Error disconnecting from Phantom:", error);
+        }
+      }
+      
+      toast.info(`Disconnected from wallet`);
     }
     
     setWalletAddress(null);

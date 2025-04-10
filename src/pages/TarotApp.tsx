@@ -16,7 +16,7 @@ import Footer from '@/components/Footer';
 import CommitSHA from '@/components/CommitSHA';
 import DevToolPanel from '@/components/dev/DevToolPanel';
 import TarotHeader from '@/components/tarot/TarotHeader';
-import { fetchAvailableDecks } from '@/utils/wallet-connection-utils';
+import { fetchAvailableDecks, processDecksFromApi } from '@/utils/wallet-connection-utils';
 import { convertApiDeckToInternal, DeckInfo } from '@/utils/deck-utils';
 
 const TarotApp: React.FC = () => {
@@ -29,7 +29,7 @@ const TarotApp: React.FC = () => {
   const [availableDecks, setAvailableDecks] = useState<DeckInfo[]>([]);
   const [isLoadingDecks, setIsLoadingDecks] = useState(false);
 
-  // Fetch decks when user connects
+  // Fetch decks when app loads or when user connects
   useEffect(() => {
     if (connected && userData?.userId) {
       fetchUserDecks();
@@ -41,19 +41,48 @@ const TarotApp: React.FC = () => {
     
     setIsLoadingDecks(true);
     try {
+      // Get decks from webhook
       const decksData = await fetchAvailableDecks(webhooks.deck, userData.userId, environment);
+      console.log("Raw decks data from API:", decksData);
       
       if (Array.isArray(decksData) && decksData.length > 0) {
+        // Process API response
+        const processedDecks = processDecksFromApi(decksData);
+        console.log("Processed decks data:", processedDecks);
+        
         // Convert API deck format to internal format
-        const formattedDecks = decksData.map(deck => convertApiDeckToInternal(deck));
+        const formattedDecks = processedDecks.map(deck => convertApiDeckToInternal(deck));
         setAvailableDecks(formattedDecks);
-        console.log("Available decks:", formattedDecks);
+        console.log("Available decks for UI:", formattedDecks);
+      } else {
+        // If no decks or error, use deck1 as fallback
+        console.log("No decks returned from API, using fallback");
+        const defaultDeck = convertApiDeckToInternal({
+          id: "1",
+          name: "deck_1",
+          description: "Crypto Classics",
+          created_at: new Date().toISOString(),
+          url: "",
+          is_active: true
+        });
+        setAvailableDecks([defaultDeck]);
       }
     } catch (error) {
       console.error('Error fetching decks:', error);
       toast.error(t('errors.deckLoadFailed'), {
         position: 'bottom-center',
       });
+      
+      // Fallback to showing deck1 only
+      const defaultDeck = convertApiDeckToInternal({
+        id: "1",
+        name: "deck_1",
+        description: "Crypto Classics",
+        created_at: new Date().toISOString(),
+        url: "",
+        is_active: true
+      });
+      setAvailableDecks([defaultDeck]);
     } finally {
       setIsLoadingDecks(false);
     }

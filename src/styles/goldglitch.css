@@ -1,5 +1,5 @@
 
-/* Gold Glitch Animation */
+/* Gold Glitch Animation - Enhanced version */
 .gold-text-container {
   position: relative;
   display: inline-block;
@@ -38,60 +38,82 @@
 @keyframes gold-glitch-anim-1 {
   0% {
     transform: translate(0, 0);
-    filter: hue-rotate(45deg) brightness(1.2);
+    filter: hue-rotate(45deg) brightness(1.2) contrast(1.5);
     text-shadow: 1px 0 0 goldenrod, -1px 0 0 gold;
+    letter-spacing: normal;
   }
-  30% {
+  20% {
     transform: translate(1px, -1px);
-    filter: hue-rotate(70deg) brightness(1.4);
+    filter: hue-rotate(70deg) brightness(1.4) contrast(1.7);
     text-shadow: 1.5px 0 0 goldenrod, -1.5px 0 0 gold;
+    letter-spacing: 0.5px;
   }
-  50% {
+  40% {
     transform: translate(-0.5px, 0.5px);
-    filter: hue-rotate(90deg) brightness(1.6);
+    filter: hue-rotate(90deg) brightness(1.6) contrast(1.9);
     text-shadow: 2px 0 0 goldenrod, -2px 0 0 gold;
+    letter-spacing: normal;
   }
-  70% {
+  60% {
     transform: translate(1.5px, 1.5px);
-    filter: hue-rotate(60deg) brightness(1.4);
+    filter: hue-rotate(60deg) brightness(1.4) contrast(1.7);
     text-shadow: 1.5px 0 0 goldenrod, -1.5px 0 0 gold;
+    letter-spacing: -0.5px;
+  }
+  80% {
+    transform: translate(-1px, -1px);
+    filter: hue-rotate(30deg) brightness(1.3) contrast(1.6);
+    text-shadow: 1.2px 0 0 goldenrod, -1.2px 0 0 gold;
+    letter-spacing: normal;
   }
   100% {
-    transform: translate(-1px, -1px);
-    filter: hue-rotate(30deg) brightness(1.2);
+    transform: translate(1px, 1px);
+    filter: hue-rotate(45deg) brightness(1.2) contrast(1.5);
     text-shadow: 1px 0 0 goldenrod, -1px 0 0 gold;
+    letter-spacing: 0.2px;
   }
 }
 
 @keyframes gold-glitch-anim-2 {
   0% {
     transform: translate(0, 0);
-    filter: hue-rotate(30deg) brightness(1.2);
+    filter: hue-rotate(30deg) brightness(1.2) saturate(1.5);
     text-shadow: 1px 0 0 gold, -1px 0 0 goldenrod;
+    letter-spacing: normal;
   }
-  30% {
+  20% {
     transform: translate(-1px, 1px);
-    filter: hue-rotate(60deg) brightness(1.3);
+    filter: hue-rotate(60deg) brightness(1.3) saturate(1.7);
     text-shadow: 1.5px 0 0 gold, -1.5px 0 0 goldenrod;
+    letter-spacing: -0.3px;
   }
-  50% {
+  40% {
     transform: translate(0.5px, -0.5px);
-    filter: hue-rotate(90deg) brightness(1.5);
+    filter: hue-rotate(90deg) brightness(1.5) saturate(1.9);
     text-shadow: 2px 0 0 gold, -2px 0 0 goldenrod;
+    letter-spacing: normal;
   }
-  70% {
+  60% {
     transform: translate(-1.5px, -1.5px);
-    filter: hue-rotate(60deg) brightness(1.3);
+    filter: hue-rotate(60deg) brightness(1.3) saturate(1.7);
     text-shadow: 1.5px 0 0 gold, -1.5px 0 0 goldenrod;
+    letter-spacing: 0.3px;
+  }
+  80% {
+    transform: translate(1px, 0.5px);
+    filter: hue-rotate(45deg) brightness(1.25) saturate(1.6);
+    text-shadow: 1.2px 0 0 gold, -1.2px 0 0 goldenrod;
+    letter-spacing: normal;
   }
   100% {
-    transform: translate(1px, 1px);
-    filter: hue-rotate(30deg) brightness(1.2);
+    transform: translate(0.5px, 1px);
+    filter: hue-rotate(30deg) brightness(1.2) saturate(1.5);
     text-shadow: 1px 0 0 gold, -1px 0 0 goldenrod;
+    letter-spacing: -0.2px;
   }
 }
 
-/* Gold text effect */
+/* Gold text effect - Enhanced version */
 .gold-text {
   color: #FFD700;
   text-shadow: 
@@ -103,6 +125,21 @@
   background-clip: text;
   color: transparent;
   animation: gold-shine 3s linear infinite;
+  position: relative;
+  z-index: 1;
+}
+
+.gold-text::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(255,215,0,0) 45%, rgba(255,215,0,0.5) 50%, rgba(255,215,0,0) 55%);
+  background-size: 200% 200%;
+  animation: gold-shimmer 2.5s infinite;
+  z-index: -1;
 }
 
 @keyframes gold-shine {
@@ -114,5 +151,14 @@
   }
   100% {
     background-position: 0% 50%;
+  }
+}
+
+@keyframes gold-shimmer {
+  0% {
+    background-position: 200% 0%;
+  }
+  100% {
+    background-position: -200% 0%;
   }
 }

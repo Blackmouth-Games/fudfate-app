@@ -50,13 +50,18 @@ export const connectPhantom = async (): Promise<{ address: string | null; networ
   }
   
   try {
-    // Force reconnect to allow switching accounts
+    // Always force reconnect to allow switching accounts and prevent auto-connect
     if (window.solana.isConnected) {
       await window.solana.disconnect();
+      // Add a small delay to ensure disconnection completes
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
     
-    const response = await window.solana.connect();
+    // Explicitly request connection
+    const response = await window.solana.connect({ onlyIfTrusted: false });
     const address = response.publicKey.toString();
+    
+    console.log("Connected to Phantom wallet:", address);
     return { address, networkId: 'solana' };
   } catch (error) {
     console.error('Phantom connection error:', error);
@@ -111,6 +116,8 @@ export const callLoginWebhook = async (
     
     return data;
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    addConnectionLog('Login Error', `Error: ${errorMsg}`);
     throw error;
   }
 };
@@ -165,3 +172,21 @@ export const fetchAvailableDecks = async (
   }
 };
 
+/**
+ * Process decks from API response
+ */
+export const processDecksFromApi = (decksData: any[]): any[] => {
+  if (!Array.isArray(decksData) || decksData.length === 0) {
+    return [];
+  }
+
+  // Map API response to expected format
+  return decksData.map(deck => ({
+    id: deck.id,
+    name: deck.name,
+    description: deck.description || '',
+    created_at: deck.created_at,
+    url: deck.url || '',
+    is_active: deck.is_active === true
+  }));
+};

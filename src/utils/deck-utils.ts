@@ -63,17 +63,21 @@ export const mapDeckIdFromApi = (apiName: string): string => {
  * Convert API deck data to our internal format
  */
 export const convertApiDeckToInternal = (apiDeck: any): DeckInfo => {
-  const internalId = mapDeckIdFromApi(apiDeck.name);
+  // Ensure we have all required fields with fallbacks
+  const id = apiDeck.id || '1';
+  const name = apiDeck.name || 'deck_1';
+  const internalId = mapDeckIdFromApi(name);
+  
   return {
     id: internalId, 
-    name: apiDeck.name,
+    name: name,
     displayName: apiDeck.description || getDeckDisplayName(internalId),
     backImage: getDeckBackPath(internalId),
     unlocked: apiDeck.is_active === true,
     description: apiDeck.description || '',
-    createdAt: apiDeck.created_at,
+    createdAt: apiDeck.created_at || new Date().toISOString(),
     url: apiDeck.url || '',
-    isActive: apiDeck.is_active
+    isActive: apiDeck.is_active === true
   };
 };
 
@@ -94,6 +98,7 @@ export const getDeckDisplayName = (deckId: string): string => {
 
 /**
  * Get available decks with their information
+ * This is a fallback in case the webhook fails
  */
 export const getAvailableDecks = (): DeckInfo[] => {
   return [
@@ -134,4 +139,3 @@ export const getAvailableDecks = (): DeckInfo[] => {
     }
   ];
 };
-
