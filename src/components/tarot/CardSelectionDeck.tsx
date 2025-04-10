@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +28,7 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
   handleCardSelect
 }) => {
   const { t } = useTranslation();
-  const { phase, setPhase } = useTarot();
+  const { phase } = useTarot();
 
   if (loading) {
     return (
@@ -71,7 +70,8 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
 
   const handleContinue = () => {
     if (selectedCards.length === 3) {
-      setPhase('reading');
+      // The parent component should handle this navigation
+      // We don't need to do anything here - the parent component manages phase transitions
     }
   };
 
@@ -97,21 +97,16 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
         <div className="flex flex-wrap justify-center">
           <AnimatePresence>
             {allDeckCards.map((card, index) => {
-              // Calculate offset for fan-like arrangement
               const isSelected = card.id === selectedCardId;
               
-              // Calculate the angle spread based on the number of cards
               const spreadFactor = Math.min(40 / allDeckCards.length, 2);
               const angle = ((index - allDeckCards.length / 2) / allDeckCards.length) * 40;
               
               const baseZIndex = index;
               
-              // Calculate the target position for animation (if this card is being animated to a slot)
               const isAnimating = isSelected && animatingToSlot !== null;
               
-              // Calculate positions in the fan arrangement
               let xPos = 50 + (index - allDeckCards.length / 2) * spreadFactor;
-              // Ensure the position stays within visible bounds
               xPos = Math.max(10, Math.min(90, xPos));
               
               const yVariation = Math.sin(index * 0.5) * 10;
@@ -175,7 +170,6 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
         </div>
       </div>
       
-      {/* Continue button if exactly 3 cards are selected */}
       {selectedCards.length === 3 && (
         <motion.div 
           className="absolute bottom-0 left-0 right-0 pb-4 flex justify-center"

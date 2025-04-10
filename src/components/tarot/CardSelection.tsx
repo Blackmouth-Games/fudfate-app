@@ -15,7 +15,7 @@ interface CardSelectionProps {
 }
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
-  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase } = useTarot();
+  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase, setPhase } = useTarot();
   const { userData } = useWallet();
   const { t } = useTranslation();
   
@@ -75,6 +75,13 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
       setSelectedCardId(null);
       setAnimatingToSlot(null);
       setHighlightedSlot(null);
+      
+      // If this was the 3rd card, transition to reading phase after a delay
+      if (selectedCards.length === 2) {
+        setTimeout(() => {
+          setPhase('reading');
+        }, 500);
+      }
     }, 500); // Match this to the animation duration
   };
 

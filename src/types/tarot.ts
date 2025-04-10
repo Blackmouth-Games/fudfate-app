@@ -38,6 +38,7 @@ export interface TarotContextType {
   intention: string;
   setIntention: (intention: string) => void;
   phase: ReadingPhase;
+  setPhase: (phase: ReadingPhase) => void;
   availableCards: Card[];
   selectedCards: ReadingCard[];
   setSelectedCards: (cards: ReadingCard[]) => void;
