@@ -19,15 +19,26 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       let address: string | null = null;
       let networkId: string | null = null;
       
-      // Intenta conectar con la wallet real
+      // Conexión a Metamask
       if (walletType === 'metamask') {
         if (!window.ethereum?.isMetaMask) {
           toast.error('Metamask not installed or not unlocked');
-          addConnectionLog('Connect Failed', 'Metamask not installed or not unlocked');
+          addConnectionLog('Connect Failed', 'Metamask not installed');
           return false;
         }
         
         try {
+          // Verificar primero si Metamask está desbloqueado
+          const isUnlocked = await window.ethereum._metamask?.isUnlocked();
+          if (!isUnlocked) {
+            toast.error('Metamask is locked. Please unlock your wallet first.', {
+              description: "You need to unlock your wallet before connecting."
+            });
+            addConnectionLog('Connect Failed', 'Metamask is locked');
+            return false;
+          }
+          
+          // Intentar obtener cuentas - esto también fallaría si Metamask está bloqueado
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
           if (accounts && accounts.length > 0) {
             address = accounts[0];
@@ -47,14 +58,15 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       } else if (walletType === 'phantom') {
         if (!window.solana?.isPhantom) {
           toast.error('Phantom not installed or not unlocked');
-          addConnectionLog('Connect Failed', 'Phantom not installed or not unlocked');
+          addConnectionLog('Connect Failed', 'Phantom not installed');
           return false;
         }
         
         try {
+          // Phantom tiene un comportamiento diferente, intenta conectar directamente
           const response = await window.solana.connect();
           address = response.publicKey.toString();
-          networkId = 'solana'; // Phantom no expone directamente la red actual de la misma manera que Metamask
+          networkId = 'solana';
         } catch (error) {
           console.error('Phantom connection error:', error);
           toast.error('Failed to connect with Phantom. Please make sure it is unlocked');
@@ -119,25 +131,17 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         } else {
           addConnectionLog('Login Error', 'Invalid webhook response format');
           console.error("Invalid webhook response format:", data);
-          
-          if (environment === 'development') {
-            // Incluso en desarrollo, no generamos datos falsos automáticamente
-            toast.error('Invalid webhook response format', {
-              position: 'bottom-center',
-            });
-            return false;
-          }
+          toast.error('Invalid webhook response format', {
+            position: 'bottom-center',
+          });
+          return false;
         }
       } catch (error) {
         addConnectionLog('Login Error', `Webhook error: ${error instanceof Error ? error.message : String(error)}`);
         console.error("Error calling login webhook:", error);
-        
-        if (environment === 'development') {
-          // Solo en modo desarrollo mostramos un error más amigable
-          toast.error('Error connecting to login webhook. Please try again later.', {
-            position: 'bottom-center',
-          });
-        }
+        toast.error('Error connecting to login webhook. Please try again later.', {
+          position: 'bottom-center',
+        });
         return false;
       }
 
