@@ -32,7 +32,7 @@ const WebhookLogTab: React.FC = () => {
     }
 
     // Set up event listener for new webhook logs
-    const handleNewLog = (event: CustomEvent) => {
+    const handleNewLog = (event: CustomEvent<WebhookLog>) => {
       const newLog = event.detail;
       setLogs(prevLogs => {
         const updatedLogs = [newLog, ...prevLogs].slice(0, 50); // Keep last 50 logs
@@ -41,10 +41,10 @@ const WebhookLogTab: React.FC = () => {
       });
     };
 
-    window.addEventListener('webhook-log' as any, handleNewLog as EventListener);
+    window.addEventListener('webhook-log', handleNewLog as EventListener);
 
     return () => {
-      window.removeEventListener('webhook-log' as any, handleNewLog as EventListener);
+      window.removeEventListener('webhook-log', handleNewLog as EventListener);
     };
   }, []);
 

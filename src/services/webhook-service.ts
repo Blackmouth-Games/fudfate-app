@@ -16,6 +16,17 @@ const logWebhookCall = (type: string, url: string, requestData: any, responseDat
     environment // Add environment to the log entry
   };
 
+  // Store in localStorage first to ensure persistence
+  try {
+    const existingLogs = localStorage.getItem('webhookLogs');
+    const logs = existingLogs ? JSON.parse(existingLogs) : [];
+    logs.unshift(logEntry); // Add to the beginning
+    const trimmedLogs = logs.slice(0, 50); // Keep only the last 50 logs
+    localStorage.setItem('webhookLogs', JSON.stringify(trimmedLogs));
+  } catch (err) {
+    console.error('Error storing webhook log:', err);
+  }
+
   // Dispatch custom event with the log data
   window.dispatchEvent(new CustomEvent('webhook-log', { detail: logEntry }));
   
