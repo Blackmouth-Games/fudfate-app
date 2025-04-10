@@ -1,431 +1,243 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { toast } from 'sonner';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { logLoginWebhook } from '@/services/webhook-service';
-
-// Define types for our wallet providers
-export type WalletType = 'phantom' | 'metamask' | null;
-export type Network = 'solana' | 'ethereum' | null;
 
 interface UserData {
   userId: string;
   runsToday: boolean;
+  [key: string]: any;
 }
 
-interface UserDataOverride {
-  userId?: string;
-  runsToday?: boolean;
+interface ConnectionLog {
+  timestamp: string;
+  action: string;
+  details: string;
 }
 
 interface WalletContextType {
   connected: boolean;
-  walletType: WalletType;
   walletAddress: string | null;
-  network: Network;
+  walletType: string | null;
+  network: string | null;
   userData: UserData | null;
-  connectWallet: (type: WalletType) => Promise<boolean>;
+  connectWallet: (walletType: string) => Promise<boolean>;
   disconnectWallet: () => void;
-  signMessage: (message: string) => Promise<string | null>;
-  overrideUserData: (override: UserDataOverride) => void;
+  overrideUserData: (data: Partial<UserData>) => void;
+  connectionLogs: ConnectionLog[];
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
-  const [connected, setConnected] = useState(false);
-  const [walletType, setWalletType] = useState<WalletType>(null);
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [network, setNetwork] = useState<Network>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [userDataOverride, setUserDataOverride] = useState<UserDataOverride>({});
   const { webhooks, environment } = useEnvironment();
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletType, setWalletType] = useState<string | null>(null);
+  const [network, setNetwork] = useState<string | null>(null);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [connectionLogs, setConnectionLogs] = useState<ConnectionLog[]>([]);
+  
+  // Add a log function
+  const addConnectionLog = (action: string, details: string) => {
+    setConnectionLogs(prev => {
+      const newLogs = [
+        {
+          timestamp: new Date().toISOString(),
+          action,
+          details
+        },
+        ...prev
+      ];
+      
+      // Keep only the last 50 logs
+      return newLogs.slice(0, 50);
+    });
+  };
 
+  // Load wallet from localStorage on mount
   useEffect(() => {
-    // Only check for mock data overrides
-    const mockRunsToday = localStorage.getItem('mockRunsToday');
-    if (mockRunsToday) {
-      setUserDataOverride(prev => ({
-        ...prev,
-        runsToday: mockRunsToday === 'true'
-      }));
-    }
+    const savedWalletAddress = localStorage.getItem('walletAddress');
+    const savedWalletType = localStorage.getItem('walletType');
+    const savedNetwork = localStorage.getItem('network');
+    const savedUserData = localStorage.getItem('userData');
     
-    const mockUserId = localStorage.getItem('mockUserId');
-    if (mockUserId) {
-      setUserDataOverride(prev => ({
-        ...prev,
-        userId: mockUserId
-      }));
+    if (savedWalletAddress && savedWalletType) {
+      setWalletAddress(savedWalletAddress);
+      setWalletType(savedWalletType);
+      setNetwork(savedNetwork);
+      
+      if (savedUserData) {
+        try {
+          setUserData(JSON.parse(savedUserData));
+        } catch (error) {
+          console.error("Error parsing saved user data:", error);
+        }
+      }
+      
+      addConnectionLog('Restore Session', `Restored wallet session: ${savedWalletType}, ${savedWalletAddress}`);
     }
   }, []);
 
-  const isWalletAvailable = (type: WalletType): boolean => {
-    if (type === 'phantom') {
-      return window.solana && window.solana.isPhantom || false;
-    } else if (type === 'metamask') {
-      return window.ethereum && window.ethereum.isMetaMask || false;
-    }
-    return false;
-  };
-
-  const isWalletConnected = async (type: WalletType): Promise<boolean> => {
+  const connectWallet = async (walletType: string): Promise<boolean> => {
+    addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
+    
     try {
-      if (type === 'phantom') {
-        if (!window.solana) return false;
-        return window.solana.isConnected;
-      } else if (type === 'metamask') {
-        if (!window.ethereum) return false;
-        const accounts = await window.ethereum.request({ 
-          method: 'eth_accounts'
-        });
-        return accounts && accounts.length > 0;
-      }
-      return false;
-    } catch (error) {
-      console.error(`Error checking if wallet is connected:`, error);
-      return false;
-    }
-  };
-
-  const callLoginWebhook = async (walletType: WalletType, walletAddress: string): Promise<UserData | null> => {
-    try {
-      console.log(`Calling login webhook with ${walletType}, ${walletAddress}`);
+      // Simulate wallet connection
+      const address = `0x${Math.random().toString(16).substring(2, 14)}`;
+      const networkId = 'mainnet';
       
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-      
-      const requestData = {
-        date: new Date().toISOString(),
-        wallet: walletAddress,
-        walletType: walletType
-      };
-
-      const response = await fetch(webhooks.login, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      const status = response.status;
-
-      if (!response.ok) {
-        const error = `HTTP error! status: ${status}`;
-        logLoginWebhook(webhooks.login, requestData, null, error, status, environment);
-        throw new Error(error);
-      }
-
-      const data = await response.json();
-      console.log("Login webhook response:", data);
-      
-      // Log successful login webhook call
-      logLoginWebhook(webhooks.login, requestData, data, undefined, status, environment);
-      
-      if (!data) {
-        throw new Error('Empty response from login webhook');
-      }
-      
-      if (Array.isArray(data) && data.length > 0) {
-        const userInfo = data[0];
-        
-        if (!userInfo || !userInfo.userid) {
-          throw new Error('User ID not found in response');
-        }
-        
-        return {
-          userId: userInfo.userid || 'unknown',
-          runsToday: userInfo.runs_today === true || userInfo.runs_today === 'true'
-        };
-      } else if (data.userid) {
-        return {
-          userId: data.userid || 'unknown',
-          runsToday: data.runs_today === true || data.runs_today === 'true'
-        };
-      } else {
-        throw new Error('Invalid response format from login webhook');
-      }
-    } catch (error) {
-      console.error('Error calling login webhook:', error);
-      
-      // Log failed login webhook call
-      logLoginWebhook(webhooks.login, { wallet: walletAddress, walletType }, null, error, undefined, environment);
-      
-      toast.error('Error registering wallet session');
-      return null;
-    }
-  };
-
-  const connectWallet = async (type: WalletType): Promise<boolean> => {
-    try {
-      if (!isWalletAvailable(type)) {
-        const walletName = type === 'phantom' ? 'Phantom' : 'MetaMask';
-        toast.error(`${walletName} ${t('errors.walletNotInstalled')}`);
+      if (!address) {
+        addConnectionLog('Connect Failed', `No address returned from ${walletType}`);
         return false;
       }
 
-      // Always try to connect, don't check if already connected
-      if (type === 'phantom') {
-        try {
-          if (!window.solana) {
-            toast.error(t('errors.phantomNotAvailable'));
-            return false;
-          }
-          await window.solana.connect();
-        } catch (error: any) {
-          if (error.code === 4001) {
-            toast.error(t('errors.connectionRejected'));
-          } else {
-            toast.error(t('errors.phantomConnectionFailed'));
-            console.error("Phantom connection error:", error);
-          }
-          return false;
-        }
-      } else if (type === 'metamask') {
-        try {
-          if (!window.ethereum) {
-            toast.error(t('errors.metamaskNotAvailable'));
-            return false;
-          }
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-        } catch (error: any) {
-          if (error.code === 4001) {
-            toast.error(t('errors.connectionRejected'));
-          } else {
-            toast.error(t('errors.metamaskConnectionFailed'));
-            console.error("MetaMask connection error:", error);
-          }
-          return false;
-        }
-      }
-      
-      const isNowConnected = await isWalletConnected(type);
-      if (!isNowConnected) {
-        toast.error(t('errors.walletConnectionFailed'));
-        return false;
-      }
-      
-      let address = '';
-      let currentNetwork: Network = null;
-
-      if (type === 'phantom') {
-        if (!window.solana || !window.solana.isConnected) {
-          toast.error(t('errors.phantomNotConnected'));
-          return false;
-        }
-        address = window.solana.publicKey.toString();
-        currentNetwork = 'solana';
-      } else if (type === 'metamask') {
-        if (!window.ethereum) {
-          toast.error(t('errors.metamaskNotConnected'));
-          return false;
-        }
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (!accounts || accounts.length === 0) {
-          toast.error(t('errors.metamaskNoAccounts'));
-          return false;
-        }
-        address = accounts[0];
-        currentNetwork = 'ethereum';
-      }
-
-      const userDataResponse = await callLoginWebhook(type, address);
-      
-      if (!userDataResponse) {
-        setConnected(false);
-        setWalletType(null);
-        setWalletAddress(null);
-        setNetwork(null);
-        setUserData(null);
-        return false;
-      }
-      
-      const finalUserData = {
-        userId: userDataOverride.userId || userDataResponse.userId,
-        runsToday: userDataOverride.runsToday !== undefined ? 
-          userDataOverride.runsToday : userDataResponse.runsToday
-      };
-      
-      setConnected(true);
-      setWalletType(type);
       setWalletAddress(address);
-      setNetwork(currentNetwork);
-      setUserData(finalUserData);
+      setWalletType(walletType);
+      setNetwork(networkId);
       
-      trackWalletConnection(type, address);
+      // Save to localStorage
+      localStorage.setItem('walletAddress', address);
+      localStorage.setItem('walletType', walletType);
+      localStorage.setItem('network', networkId);
       
-      toast.success(t('wallet.connectSuccess'));
+      addConnectionLog('Login WebhookCall', `Calling login webhook with ${walletType}, ${address}`);
+      console.log(`Calling login webhook with ${walletType}, ${address}`);
+      
+      try {
+        const response = await fetch(webhooks.login, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            date: new Date().toISOString(),
+            wallet: address,
+            type: walletType
+          }),
+        });
+        
+        const status = response.status;
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          addConnectionLog('Login Error', `HTTP error! status: ${status}, ${errorText}`);
+          logLoginWebhook(webhooks.login, { wallet: address, type: walletType }, null, `HTTP error! status: ${status}`, status, environment);
+          throw new Error(`HTTP error! status: ${status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Login webhook response:', data);
+        
+        // Log successful webhook call
+        logLoginWebhook(webhooks.login, { wallet: address, type: walletType }, data, undefined, status, environment);
+        
+        // Handle the webhook response
+        if (data && Array.isArray(data) && data.length > 0) {
+          addConnectionLog('Login Success', `User ID: ${data[0].userid}`);
+          
+          const userDataObj: UserData = {
+            userId: data[0].userid,
+            runsToday: data[0].runs_today === true,
+          };
+          
+          setUserData(userDataObj);
+          localStorage.setItem('userData', JSON.stringify(userDataObj));
+        } else {
+          addConnectionLog('Login Error', 'Invalid webhook response format');
+          console.error("Invalid webhook response format:", data);
+          
+          // In development, we can create mock data
+          if (environment === 'development') {
+            const mockUserData: UserData = {
+              userId: `mock_${Math.random().toString(16).substring(2, 10)}`,
+              runsToday: true
+            };
+            
+            setUserData(mockUserData);
+            localStorage.setItem('userData', JSON.stringify(mockUserData));
+            addConnectionLog('Mock Data', `Created mock user data: ${JSON.stringify(mockUserData)}`);
+          }
+        }
+      } catch (error) {
+        addConnectionLog('Login Error', `Webhook error: ${error instanceof Error ? error.message : String(error)}`);
+        console.error("Error calling login webhook:", error);
+        
+        // In development, we can create mock data
+        if (environment === 'development') {
+          const mockUserData: UserData = {
+            userId: `mock_${Math.random().toString(16).substring(2, 10)}`,
+            runsToday: true
+          };
+          
+          setUserData(mockUserData);
+          localStorage.setItem('userData', JSON.stringify(mockUserData));
+          addConnectionLog('Mock Data', `Created mock user data: ${JSON.stringify(mockUserData)}`);
+        }
+      }
+
+      // Track the connection
+      addConnectionLog('Connection Success', `Connected with ${walletType}, ${address}`);
+      console.log(`Connected with ${walletType}:`, address);
+      
       return true;
     } catch (error) {
-      console.error(`Error connecting to ${type}:`, error);
-      toast.error(t('errors.connectionFailed'));
-      
-      setConnected(false);
-      setWalletType(null);
-      setWalletAddress(null);
-      setNetwork(null);
-      setUserData(null);
-      
+      addConnectionLog('Connect Error', `Error: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Error connecting wallet:", error);
       return false;
     }
   };
-
+  
   const disconnectWallet = () => {
-    if (walletType === 'phantom' && window.solana) {
-      window.solana.disconnect().catch(console.error);
+    if (walletAddress) {
+      addConnectionLog('Disconnect', `Disconnected ${walletType} wallet: ${walletAddress}`);
     }
     
-    setConnected(false);
-    setWalletType(null);
     setWalletAddress(null);
+    setWalletType(null);
     setNetwork(null);
     setUserData(null);
     
-    toast.success(t('wallet.disconnectSuccess'));
-  };
-
-  const signMessage = async (message: string): Promise<string | null> => {
-    try {
-      if (!connected || !walletType) {
-        toast.error(t('errors.walletNotConnected'));
-        return null;
-      }
-
-      let signature: string | null = null;
-
-      if (walletType === 'phantom') {
-        const encodedMessage = new TextEncoder().encode(message);
-        const signedMessage = await window.solana.signMessage(encodedMessage, 'utf8');
-        signature = Buffer.from(signedMessage.signature).toString('hex');
-      } else if (walletType === 'metamask') {
-        signature = await window.ethereum.request({
-          method: 'personal_sign',
-          params: [message, walletAddress]
-        });
-      }
-
-      return signature;
-    } catch (error) {
-      console.error("Error signing message:", error);
-      toast.error(t('errors.signatureFailed'));
-      return null;
-    }
-  };
-
-  const overrideUserData = (override: UserDataOverride) => {
-    setUserDataOverride(prev => ({
-      ...prev,
-      ...override
-    }));
+    localStorage.removeItem('walletAddress');
+    localStorage.removeItem('walletType');
+    localStorage.removeItem('network');
+    localStorage.removeItem('userData');
     
-    if (connected && userData) {
-      setUserData(prev => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          ...(override.userId !== undefined ? { userId: override.userId } : {}),
-          ...(override.runsToday !== undefined ? { runsToday: override.runsToday } : {})
-        };
-      });
+    console.log("Wallet disconnected");
+  };
+  
+  const overrideUserData = (data: Partial<UserData>) => {
+    addConnectionLog('Override UserData', `Updated user data: ${JSON.stringify(data)}`);
+    
+    if (!userData) {
+      const newUserData = {
+        userId: data.userId || `mock_${Math.random().toString(16).substring(2, 10)}`,
+        runsToday: data.runsToday !== undefined ? data.runsToday : false,
+        ...data
+      };
+      
+      setUserData(newUserData);
+      localStorage.setItem('userData', JSON.stringify(newUserData));
+      return;
     }
     
-    if (override.userId !== undefined) {
-      localStorage.setItem('mockUserId', override.userId);
-    }
-    if (override.runsToday !== undefined) {
-      localStorage.setItem('mockRunsToday', String(override.runsToday));
-    }
-  };
-
-  const trackWalletConnection = (type: WalletType, address: string) => {
-    console.log(`Tracked connection: ${type}, ${address}`);
-    
-    const metrics = {
-      walletType: type,
-      platform: detectPlatform(),
-      walletHash: hashAddress(address),
-      timestamp: new Date().toISOString(),
-      language: navigator.language
-    };
-
-    console.log("Connection metrics:", metrics);
-  };
-
-  const detectPlatform = (): string => {
-    const userAgent = navigator.userAgent;
-    if (/Mobi|Android/i.test(userAgent)) return 'mobile';
-    return 'desktop';
-  };
-
-  const hashAddress = (address: string): string => {
-    let hash = 0;
-    for (let i = 0; i < address.length; i++) {
-      const char = address.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return hash.toString(16);
-  };
-
-  const t = (key: string): string => {
-    const translations: Record<string, Record<string, string>> = {
-      en: {
-        'errors.walletNotInstalled': 'wallet is not installed. Please install it to continue.',
-        'errors.connectionRejected': 'Connection rejected by user',
-        'errors.phantomConnectionFailed': 'Error connecting to Phantom. Verify your wallet is open.',
-        'errors.metamaskConnectionFailed': 'Error connecting to MetaMask. Verify your wallet is open.',
-        'errors.connectionFailed': 'Error connecting wallet. Please try again.',
-        'errors.walletNotConnected': 'Wallet not connected',
-        'errors.signatureFailed': 'Error signing message',
-        'errors.phantomNotAvailable': 'Phantom wallet is not available',
-        'errors.metamaskNotAvailable': 'MetaMask wallet is not available',
-        'errors.phantomNotConnected': 'Phantom wallet is not connected',
-        'errors.metamaskNotConnected': 'MetaMask wallet is not connected',
-        'errors.metamaskNoAccounts': 'No accounts found in MetaMask',
-        'errors.walletConnectionFailed': 'Wallet connection failed',
-        'wallet.connectSuccess': 'Wallet connected successfully',
-        'wallet.disconnectSuccess': 'Wallet disconnected successfully',
-        'wallet.phantomNotInstalled': 'Phantom wallet is not installed',
-        'wallet.metamaskNotInstalled': 'MetaMask wallet is not installed'
-      },
-      es: {
-        'errors.walletNotInstalled': 'no está instalado. Por favor instálalo para continuar.',
-        'errors.connectionRejected': 'Conexión rechazada por el usuario',
-        'errors.phantomConnectionFailed': 'Error al conectar con Phantom. Verifica que tengas la wallet abierta.',
-        'errors.metamaskConnectionFailed': 'Error al conectar con MetaMask. Verifica que tengas la wallet abierta.',
-        'errors.connectionFailed': 'Error al conectar wallet. Inténtalo de nuevo.',
-        'errors.walletNotConnected': 'Wallet no conectada',
-        'errors.signatureFailed': 'Error al firmar mensaje',
-        'errors.phantomNotAvailable': 'La wallet Phantom no está disponible',
-        'errors.metamaskNotAvailable': 'La wallet MetaMask no está disponible',
-        'errors.phantomNotConnected': 'La wallet Phantom no está conectada',
-        'errors.metamaskNotConnected': 'La wallet MetaMask no está conectada',
-        'errors.metamaskNoAccounts': 'No se encontraron cuentas en MetaMask',
-        'errors.walletConnectionFailed': 'Conexión de wallet fallida',
-        'wallet.connectSuccess': 'Wallet conectada correctamente',
-        'wallet.disconnectSuccess': 'Wallet desconectada correctamente',
-        'wallet.phantomNotInstalled': 'La wallet Phantom no está instalada',
-        'wallet.metamaskNotInstalled': 'La wallet MetaMask no está instalada'
-      }
+    const updatedUserData = {
+      ...userData,
+      ...data
     };
     
-    const lang = localStorage.getItem('i18nextLng') || 'en';
-    return translations[lang as 'en' | 'es']?.[key] || key;
+    setUserData(updatedUserData);
+    localStorage.setItem('userData', JSON.stringify(updatedUserData));
   };
-
+  
   const value = {
-    connected,
-    walletType,
+    connected: !!walletAddress,
     walletAddress,
+    walletType,
     network,
     userData,
     connectWallet,
     disconnectWallet,
-    signMessage,
-    overrideUserData
+    overrideUserData,
+    connectionLogs
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;
@@ -438,21 +250,3 @@ export const useWallet = (): WalletContextType => {
   }
   return context;
 };
-
-declare global {
-  interface Window {
-    solana?: {
-      isPhantom?: boolean;
-      isConnected?: boolean;
-      publicKey?: { toString: () => string };
-      connect: () => Promise<{ publicKey: { toString: () => string } }>;
-      disconnect: () => Promise<void>;
-      signMessage: (message: Uint8Array, encoding: string) => Promise<{ signature: Uint8Array }>;
-      connection: any;
-    };
-    ethereum?: {
-      isMetaMask?: boolean;
-      request: (request: { method: string; params?: any[] }) => Promise<any>;
-    };
-  }
-}

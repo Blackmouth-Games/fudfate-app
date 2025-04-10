@@ -24,7 +24,8 @@ export interface Interpretation {
 export interface WebhookResponse {
   selected_cards?: number[];
   message?: string;
-  selected_deck?: Deck;
+  selected_deck?: string;
+  returnwebhoock?: string;
 }
 
 export interface TarotContextType {
@@ -45,4 +46,5 @@ export interface TarotContextType {
   resetReading: () => void;
   loading: boolean;
   interpretation: Interpretation | null;
+  webhookResponse: WebhookResponse | null;
 }

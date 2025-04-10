@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
@@ -25,9 +26,22 @@ export const useTarotOperations = () => {
       const intro = await generateIntroMessage(intention);
       setIntroMessage(intro);
       
+      // Parse webhook response if available
+      let parsedWebhookResponse = webhookResponse;
+      if (webhookResponse && typeof webhookResponse.returnwebhoock === 'string') {
+        try {
+          console.log("Parsing webhook response:", webhookResponse.returnwebhoock);
+          const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+          parsedWebhookResponse = parsedData;
+          console.log("Parsed webhook data:", parsedData);
+        } catch (error) {
+          console.error("Error parsing webhook response:", error);
+        }
+      }
+      
       // Get cards for selection
       let randomCards;
-      if (webhookResponse && Array.isArray(webhookResponse.selected_cards) && webhookResponse.selected_cards.length > 0) {
+      if (parsedWebhookResponse && Array.isArray(parsedWebhookResponse.selected_cards) && parsedWebhookResponse.selected_cards.length > 0) {
         // We'll use webhook cards when revealed, but for selection we show random ones
         randomCards = getRandomCards(selectedDeck, 6);
       } else {
@@ -58,14 +72,25 @@ export const useTarotOperations = () => {
     try {
       setLoading(true);
       
+      // Parse webhook response if available
+      let parsedWebhookResponse = webhookResponse;
+      if (webhookResponse && typeof webhookResponse.returnwebhoock === 'string') {
+        try {
+          const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+          parsedWebhookResponse = parsedData;
+        } catch (error) {
+          console.error("Error parsing webhook response:", error);
+        }
+      }
+      
       // If we have webhook data with selected cards, and this is the first card reveal,
       // replace the selected cards with the ones from the webhook
-      if (webhookResponse && 
-          Array.isArray(webhookResponse.selected_cards) && 
-          webhookResponse.selected_cards.length > 0 &&
+      if (parsedWebhookResponse && 
+          Array.isArray(parsedWebhookResponse.selected_cards) && 
+          parsedWebhookResponse.selected_cards.length > 0 &&
           selectedCards.every(c => !c.revealed)) {
         
-        const webhookCards = getCardsByIndices(selectedDeck, webhookResponse.selected_cards);
+        const webhookCards = getCardsByIndices(selectedDeck, parsedWebhookResponse.selected_cards);
         if (webhookCards.length > 0) {
           // Replace all cards but keep the current request to reveal
           const newSelectedCards = webhookCards.map((card, i) => ({
@@ -108,15 +133,36 @@ export const useTarotOperations = () => {
   const generateInterpretation = async (
     selectedCards: ReadingCard[],
     intention: string,
-    webhookMessage?: string
+    webhookMessage?: string | WebhookResponse | null
   ): Promise<Interpretation> => {
     setLoading(true);
     try {
-      const message = await generateFinalMessage(selectedCards, intention, webhookMessage);
+      // Parse webhook message if it's a complex object with returnwebhoock
+      let message = '';
+      
+      if (webhookMessage) {
+        if (typeof webhookMessage === 'string') {
+          message = webhookMessage;
+        } else if (typeof webhookMessage === 'object') {
+          // Try to parse returnwebhoock if available
+          if (webhookMessage.returnwebhoock && typeof webhookMessage.returnwebhoock === 'string') {
+            try {
+              const parsedData = JSON.parse(webhookMessage.returnwebhoock);
+              message = parsedData.message || '';
+            } catch (error) {
+              console.error("Error parsing webhook message:", error);
+            }
+          } else if (webhookMessage.message) {
+            message = webhookMessage.message;
+          }
+        }
+      }
+      
+      const finalMessage = await generateFinalMessage(selectedCards, intention, message);
       
       // Create interpretation object
       const interpretation: Interpretation = {
-        summary: message,
+        summary: finalMessage,
         cards: selectedCards.reduce((acc, card) => {
           if (card.interpretation) {
             acc[card.id] = card.interpretation;

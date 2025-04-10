@@ -6,23 +6,14 @@ import { useEnvironment } from '@/hooks/useEnvironment';
 import { Environment } from '@/config/webhooks';
 
 const ConfigTab: React.FC = () => {
-  const [environment, setEnvironment] = React.useState<Environment>('production');
-  const { webhooks } = useEnvironment();
+  const { environment, setEnvironment, webhooks } = useEnvironment();
 
-  // Load stored values
-  React.useEffect(() => {
-    const savedEnvironment = localStorage.getItem('appEnvironment') as Environment | null;
-    if (savedEnvironment && (savedEnvironment === 'development' || savedEnvironment === 'production')) {
-      setEnvironment(savedEnvironment);
+  // Handle environment change
+  const handleEnvironmentChange = (value: string) => {
+    if (value === 'development' || value === 'production') {
+      setEnvironment(value as Environment);
     }
-  }, []);
-
-  // Save environment to localStorage when it changes
-  React.useEffect(() => {
-    localStorage.setItem('appEnvironment', environment);
-    // Broadcast the environment change
-    window.dispatchEvent(new CustomEvent('environment-changed', { detail: { environment } }));
-  }, [environment]);
+  };
 
   return (
     <div className="space-y-3">
@@ -30,16 +21,16 @@ const ConfigTab: React.FC = () => {
         <Label className="text-xs font-medium block">Environment</Label>
         <RadioGroup 
           value={environment} 
-          onValueChange={(value) => setEnvironment(value as Environment)}
+          onValueChange={handleEnvironmentChange}
           className="flex gap-4"
         >
           <div className="flex items-center space-x-1">
-            <RadioGroupItem value="development" id="development" className="scale-75" />
-            <Label htmlFor="development" className="cursor-pointer text-xs">Dev</Label>
+            <RadioGroupItem value="development" id="development-config" className="scale-75" />
+            <Label htmlFor="development-config" className="cursor-pointer text-xs">Dev</Label>
           </div>
           <div className="flex items-center space-x-1">
-            <RadioGroupItem value="production" id="production" className="scale-75" />
-            <Label htmlFor="production" className="cursor-pointer text-xs">Prod</Label>
+            <RadioGroupItem value="production" id="production-config" className="scale-75" />
+            <Label htmlFor="production-config" className="cursor-pointer text-xs">Prod</Label>
           </div>
         </RadioGroup>
       </div>

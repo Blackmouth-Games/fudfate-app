@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -11,11 +11,30 @@ interface CardReadingProps {
 }
 
 const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
-  const { selectedCards, revealCard, loading, finalMessage, resetReading } = useTarot();
+  const { selectedCards, revealCard, loading, finalMessage, resetReading, introMessage, webhookResponse, selectedDeck } = useTarot();
   const { t } = useTranslation();
   
-  // Card back images
-  const cardBackImage = "/img/cards/carddeck1/card_back.jpg";
+  // State for webhook message
+  const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
+  
+  // Parse webhook message if available
+  useEffect(() => {
+    if (webhookResponse && typeof webhookResponse === 'object') {
+      try {
+        if (typeof webhookResponse.returnwebhoock === 'string') {
+          const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+          if (parsedData && parsedData.message) {
+            setWebhookMessage(parsedData.message);
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing webhook message in CardReading:", error);
+      }
+    }
+  }, [webhookResponse]);
+  
+  // Card back image based on selected deck
+  const cardBackImage = `/img/cards/deck_${selectedDeck}/99_BACK.png`;
   
   // Track flipping state for animation
   const [flippingCards, setFlippingCards] = useState<{[key: number]: boolean}>({});
@@ -41,15 +60,20 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
     <div className={`space-y-6 ${className}`}>
       <div className="text-center space-y-2">
         <h3 className="text-xl font-bold text-gray-800">
-          <GlitchText text={finalMessage 
-            ? t('tarot.readingComplete') 
-            : t('tarot.revealYourDestiny')} 
+          <GlitchText 
+            text={finalMessage 
+              ? t('tarot.readingComplete') 
+              : t('tarot.revealYourDestiny')} 
+            intensity="normal"
+            neonEffect="purple"
           />
         </h3>
         <p className="text-gray-600 text-sm">
           {finalMessage 
             ? t('tarot.readingCompleteDescription') 
-            : t('tarot.tapToReveal')}
+            : webhookMessage 
+              ? webhookMessage 
+              : t('tarot.tapToReveal')}
         </p>
       </div>
       
@@ -124,7 +148,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         <div className="space-y-6">
           <div className="bg-white p-4 sm:p-6 rounded-lg border border-amber-200 shadow-md">
             <h4 className="font-bold mb-3 text-center text-gray-800">
-              <GlitchText text={t('tarot.finalMessage')} />
+              <GlitchText text={t('tarot.finalMessage')} intensity="normal" neonEffect="purple" />
             </h4>
             <p className="italic text-gray-700 text-center">
               "{finalMessage}"

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   PanelLeft, Code, X
 } from 'lucide-react';
@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useEnvironment } from '@/hooks/useEnvironment';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import WalletTab from './TabsContent/WalletTab';
 import ConfigTab from './TabsContent/ConfigTab';
 import DebugTab from './TabsContent/DebugTab';
@@ -23,7 +25,12 @@ interface DevToolPanelProps {
 
 const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { environment } = useEnvironment();
+  const { environment, setEnvironment } = useEnvironment();
+
+  const toggleEnvironment = () => {
+    const newEnvironment = environment === 'production' ? 'development' : 'production';
+    setEnvironment(newEnvironment);
+  };
 
   return (
     <TooltipProvider>
@@ -57,11 +64,28 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
                 <div className="flex items-center">
                   <PanelLeft className="h-4 w-4 text-amber-600 mr-2" />
                   <h3 className="font-pixel text-amber-800 text-sm">Developer Tools</h3>
-                  <span className={`ml-2 text-[10px] px-1.5 py-0.5 rounded ${
-                    environment === 'production' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {environment === 'production' ? 'PROD' : 'DEV'}
-                  </span>
+                  <div className="flex items-center ml-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div 
+                          className={`cursor-pointer flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded ${
+                            environment === 'production' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                          }`}
+                          onClick={toggleEnvironment}
+                        >
+                          {environment === 'production' ? 'PROD' : 'DEV'}
+                          <Switch 
+                            checked={environment === 'development'}
+                            onCheckedChange={toggleEnvironment}
+                            className="scale-50 ml-1" 
+                          />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        <p className="text-xs">Click to toggle environment</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
                 <Button 
                   variant="ghost" 

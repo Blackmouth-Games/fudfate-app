@@ -79,10 +79,22 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       }
       
       setWebhookResponse(webhookData);
+      console.log("Webhook response set:", webhookData);
+      
+      // Parse the webhook response if needed to extract deck information
+      let selectedDeckFromWebhook: Deck | undefined;
+      if (webhookData?.returnwebhoock) {
+        try {
+          const parsedData = JSON.parse(webhookData.returnwebhoock);
+          selectedDeckFromWebhook = parsedData.selected_deck;
+        } catch (error) {
+          console.error("Error parsing webhook response for deck:", error);
+        }
+      }
       
       // If webhook returned a selected deck, use it
-      if (webhookData?.selected_deck) {
-        setSelectedDeck(webhookData.selected_deck);
+      if (selectedDeckFromWebhook) {
+        setSelectedDeck(`deck${selectedDeckFromWebhook}` as Deck);
       }
       
       // Prepare cards for selection
@@ -169,7 +181,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
           const interpretationResult = await generateInterpretation(
             updatedCards, 
             intention, 
-            webhookResponse?.message
+            webhookResponse
           );
           
           setInterpretation(interpretationResult);
@@ -217,7 +229,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     revealCard,
     resetReading,
     loading,
-    interpretation
+    interpretation,
+    webhookResponse
   };
 
   return <TarotContext.Provider value={value}>{children}</TarotContext.Provider>;

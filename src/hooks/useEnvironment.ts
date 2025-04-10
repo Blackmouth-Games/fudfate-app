@@ -1,32 +1,49 @@
 
 import { useState, useEffect } from 'react';
-import { Environment, webhooks } from '@/config/webhooks';
+import { getWebhookUrls, Environment } from '@/config/webhooks';
 
 export const useEnvironment = () => {
-  const [environment, setEnvironment] = useState<Environment>('production'); // Changed default to production
-
-  useEffect(() => {
-    // Load environment from localStorage
+  const [environment, setEnvironmentState] = useState<Environment>(() => {
     const savedEnvironment = localStorage.getItem('appEnvironment') as Environment | null;
-    if (savedEnvironment && (savedEnvironment === 'development' || savedEnvironment === 'production')) {
-      setEnvironment(savedEnvironment);
-    } else {
-      // If no environment is saved, default to production
-      localStorage.setItem('appEnvironment', 'production');
-    }
+    return (savedEnvironment && (savedEnvironment === 'development' || savedEnvironment === 'production')) 
+      ? savedEnvironment 
+      : 'production';
+  });
 
-    // Listen for environment changes
-    const handleEnvironmentChange = (event: CustomEvent) => {
-      const { environment } = event.detail;
-      setEnvironment(environment);
+  const [webhooks, setWebhooks] = useState(getWebhookUrls(environment));
+
+  // Update webhooks when environment changes
+  useEffect(() => {
+    setWebhooks(getWebhookUrls(environment));
+  }, [environment]);
+
+  // Set environment and save to localStorage
+  const setEnvironment = (newEnvironment: Environment) => {
+    setEnvironmentState(newEnvironment);
+    localStorage.setItem('appEnvironment', newEnvironment);
+    
+    // Broadcast the environment change
+    window.dispatchEvent(new CustomEvent('environment-changed', { 
+      detail: { environment: newEnvironment } 
+    }));
+  };
+
+  // Listen for environment changes from other components
+  useEffect(() => {
+    const handleEnvironmentChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ environment: Environment }>;
+      if (customEvent.detail && customEvent.detail.environment) {
+        setEnvironmentState(customEvent.detail.environment);
+      }
     };
 
-    window.addEventListener('environment-changed', handleEnvironmentChange as EventListener);
-
+    window.addEventListener('environment-changed', handleEnvironmentChange);
     return () => {
-      window.removeEventListener('environment-changed', handleEnvironmentChange as EventListener);
+      window.removeEventListener('environment-changed', handleEnvironmentChange);
     };
   }, []);
 
-  return { environment, webhooks: webhooks[environment] };
+  return { environment, webhooks, setEnvironment };
 };
+
+export default useEnvironment;
