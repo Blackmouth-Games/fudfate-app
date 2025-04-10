@@ -4,12 +4,16 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
 import { Dialog, DialogContent, DialogTitle, DialogClose, DialogHeader } from '@/components/ui/dialog';
-import { X, LockIcon } from 'lucide-react';
+import { X, LockIcon, CheckCircle2 } from 'lucide-react';
 import tarotCards from '@/data/tarotCards';
 import { DeckInfo, getAvailableDecks } from '@/utils/deck-utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTarot } from '@/contexts/TarotContext';
 import { Deck } from '@/types/tarot';
+import { Button } from '@/components/ui/button';
+import { callSelectDeckWebhook } from '@/services/webhook-service';
+import { useEnvironment } from '@/hooks/useEnvironment';
+import { useWallet } from '@/contexts/WalletContext';
 
 interface DeckSelectorProps {
   className?: string;
@@ -27,6 +31,9 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  const [selectingDeck, setSelectingDeck] = useState<string | null>(null);
+  const { webhooks, environment } = useEnvironment();
+  const { userData } = useWallet();
   
   // Get decks from props if available, otherwise use default decks
   const decks = availableDecks.length > 0 ? availableDecks : getAvailableDecks();
@@ -58,15 +65,49 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   const handleSelectDeck = (deckId: string) => {
     // Only allow selecting unlocked decks
     const deck = decks.find(d => d.id === deckId);
-    if (deck && deck.unlocked) {
+    if (deck && deck.unlocked && deck.isActive) {
       // Convert the string to the Deck type before passing to setSelectedDeck
-      setSelectedDeck(deckId as Deck);
+      setSelectedDeck(deck.name as Deck);
+    }
+  };
+
+  const handleServerSelectDeck = async (deckName: string) => {
+    if (!userData?.userId) {
+      return;
+    }
+    
+    setSelectingDeck(deckName);
+    
+    try {
+      // Determine which webhook URL to use based on environment
+      const webhookUrl = environment === 'development' 
+        ? 'https://primary-production-fe05.up.railway.app/webhook-test/f5891d06-7565-4582-bb27-de1f0c3db08e'
+        : 'https://primary-production-fe05.up.railway.app/webhook/f5891d06-7565-4582-bb27-de1f0c3db08e';
+      
+      const success = await callSelectDeckWebhook(
+        webhookUrl,
+        userData.userId,
+        deckName,
+        environment
+      );
+      
+      if (success) {
+        // Find the deck by name to get the full deck info
+        const selectedDeckInfo = decks.find(d => d.name === deckName);
+        if (selectedDeckInfo) {
+          setSelectedDeck(deckName as Deck);
+        }
+      }
+    } catch (error) {
+      console.error('Error selecting deck:', error);
+    } finally {
+      setSelectingDeck(null);
     }
   };
 
   const openDeckDetails = (deckId: string) => {
     const deck = decks.find(d => d.id === deckId);
-    if (deck && deck.unlocked) {
+    if (deck && deck.unlocked && deck.isActive) {
       setOpenDeckId(deckId);
     }
   };
@@ -133,59 +174,74 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {decks.map((deck) => (
-            <div key={deck.id} className="flex flex-col items-center">
-              <div 
-                className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[120px] h-[170px] mx-auto
-                  ${selectedDeck === deck.id ? 'border-amber-500 shadow-amber-200' : 'border-gray-200'}
-                  ${!deck.unlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
-                onClick={() => {
-                  handleSelectDeck(deck.id);
-                  if (deck.unlocked) {
-                    openDeckDetails(deck.id);
-                  }
-                }}
-              >
-                <img 
-                  src={loadedImages[deck.id] ? deck.backImage : getFallbackDeckImage(deck.id)} 
-                  alt={deck.displayName} 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    // Log the error
-                    console.warn(`Failed to load deck image: ${deck.backImage}, using fallback`);
-                    // Fallback to a default image if the path is incorrect
-                    e.currentTarget.src = "/img/cards/deck_1/99_BACK.png";
+          {decks.map((deck) => {
+            // Check if deck is unlocked (based on isActive flag)
+            const isUnlocked = deck.isActive;
+            return (
+              <div key={deck.id} className="flex flex-col items-center">
+                <div 
+                  className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[120px] h-[170px] mx-auto
+                    ${selectedDeck === deck.name ? 'border-amber-500 shadow-amber-200' : 'border-gray-200'}
+                    ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
+                  onClick={() => {
+                    if (isUnlocked) {
+                      handleSelectDeck(deck.id);
+                      openDeckDetails(deck.id);
+                    }
                   }}
-                />
-                {!deck.unlocked && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
-                    <div className="bg-black bg-opacity-50 px-2 py-1 rounded flex items-center gap-1">
-                      <LockIcon className="h-3 w-3 text-white" />
-                      <span className="text-white font-medium text-sm">
-                        {t('tarot.locked')}
-                      </span>
+                >
+                  <img 
+                    src={loadedImages[deck.id] ? deck.backImage : getFallbackDeckImage(deck.id)} 
+                    alt={deck.displayName} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Log the error
+                      console.warn(`Failed to load deck image: ${deck.backImage}, using fallback`);
+                      // Fallback to a default image if the path is incorrect
+                      e.currentTarget.src = "/img/cards/deck_1/99_BACK.png";
+                    }}
+                  />
+                  {!isUnlocked && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+                      <div className="bg-black bg-opacity-50 px-2 py-1 rounded flex items-center gap-1">
+                        <LockIcon className="h-3 w-3 text-white" />
+                        <span className="text-white font-medium text-sm">
+                          {t('tarot.locked')}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {selectedDeck === deck.id && (
-                  <div className="absolute top-1 right-1 bg-amber-500 w-3 h-3 rounded-full border border-white"></div>
-                )}
+                  )}
+                  {selectedDeck === deck.name && (
+                    <div className="absolute top-1 right-1 bg-amber-500 w-3 h-3 rounded-full border border-white"></div>
+                  )}
+                </div>
+                <h4 className="mt-2 text-center text-sm font-medium">
+                  {deck.displayName}
+                </h4>
+                <div className="flex flex-col items-center">
+                  {selectedDeck === deck.name ? (
+                    <span className="text-xs text-amber-600 font-medium mb-1 flex items-center">
+                      <CheckCircle2 className="h-3 w-3 mr-1" /> {t('tarot.selected')}
+                    </span>
+                  ) : isUnlocked ? (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs h-6 px-2 mt-1"
+                      disabled={selectingDeck === deck.name}
+                      onClick={() => handleServerSelectDeck(deck.name)}
+                    >
+                      {selectingDeck === deck.name ? 'Selecting...' : 'Select'}
+                    </Button>
+                  ) : (
+                    <span className="text-xs text-gray-400 italic">
+                      {t('tarot.comingSoon')}
+                    </span>
+                  )}
+                </div>
               </div>
-              <h4 className="mt-2 text-center text-sm font-medium">
-                {deck.displayName}
-              </h4>
-              {selectedDeck === deck.id && (
-                <span className="text-xs text-amber-600 font-medium">
-                  {t('tarot.selected')}
-                </span>
-              )}
-              {!deck.unlocked && (
-                <span className="text-xs text-gray-400 italic">
-                  {t('tarot.comingSoon')}
-                </span>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
 

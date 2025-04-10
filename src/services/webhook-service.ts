@@ -9,6 +9,7 @@ export interface WebhookLog {
   timestamp: string;
   type: string;
   url: string;
+  method?: string;
   request: any;
   response?: any;
   error?: string;
@@ -16,7 +17,7 @@ export interface WebhookLog {
   environment: string;
 }
 
-const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production', method: string = 'POST') => {
   // Filter out pushLogs to Grafana to prevent infinite logging
   if (url.includes('pushLogsToGrafana')) {
     return; // Skip logging for Grafana push logs
@@ -27,6 +28,7 @@ const logWebhookCall = (type: string, url: string, requestData: any, responseDat
     timestamp: new Date().toISOString(),
     type,
     url,
+    method,
     request: requestData,
     response: responseData,
     error: error ? (error.message || String(error)) : undefined,
@@ -74,7 +76,7 @@ export const callReadingWebhook = async (
     console.log("Using webhook URL:", webhookUrl);
     
     // Log the attempt before actually making the call
-    logWebhookCall('Reading', webhookUrl, requestData, null, undefined, undefined, environment);
+    logWebhookCall('Reading', webhookUrl, requestData, null, undefined, undefined, environment, 'POST');
     
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -89,7 +91,7 @@ export const callReadingWebhook = async (
     if (!response.ok) {
       console.error(`Webhook error! status: ${status}`);
       const errorText = await response.text();
-      logWebhookCall('Reading', webhookUrl, requestData, null, `HTTP error! status: ${status}`, status, environment);
+      logWebhookCall('Reading', webhookUrl, requestData, null, `HTTP error! status: ${status}`, status, environment, 'POST');
       
       // For development environment, return mock data
       if (environment === 'development') {
@@ -104,7 +106,7 @@ export const callReadingWebhook = async (
         };
         
         // Log the mock response
-        logWebhookCall('Reading', webhookUrl, requestData, mockData, undefined, 200, environment);
+        logWebhookCall('Reading', webhookUrl, requestData, mockData, undefined, 200, environment, 'POST');
         
         toast.warning("Using mock reading data for development", {
           description: "Webhook call failed, but continuing with mock data"
@@ -120,14 +122,14 @@ export const callReadingWebhook = async (
     console.log('Reading webhook response:', data);
     
     // Log successful webhook call
-    logWebhookCall('Reading', webhookUrl, requestData, data, undefined, status, environment);
+    logWebhookCall('Reading', webhookUrl, requestData, data, undefined, status, environment, 'POST');
     
     return data;
   } catch (error) {
     console.error('Error calling reading webhook:', error);
     
     // Log failed webhook call
-    logWebhookCall('Reading', webhookUrl, requestData, null, error, undefined, environment);
+    logWebhookCall('Reading', webhookUrl, requestData, null, error, undefined, environment, 'POST');
     
     // For development environment, return mock data
     if (environment === 'development') {
@@ -142,7 +144,7 @@ export const callReadingWebhook = async (
       };
       
       // Log the mock response
-      logWebhookCall('Reading', webhookUrl, requestData, mockData, undefined, 200, environment);
+      logWebhookCall('Reading', webhookUrl, requestData, mockData, undefined, 200, environment, 'POST');
       
       toast.warning("Using mock reading data for development", {
         description: "Webhook call failed, but continuing with mock data"
@@ -162,12 +164,74 @@ export const callReadingWebhook = async (
 
 // Add export for the logWebhookCall function to be used in WalletContext for login logging
 export const logLoginWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
-  logWebhookCall('Login', url, requestData, responseData, error, status, environment);
+  logWebhookCall('Login', url, requestData, responseData, error, status, environment, 'POST');
 };
 
 // Add specific logging for deck webhook calls
 export const logDeckWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
-  logWebhookCall('Deck', url, requestData, responseData, error, status, environment);
+  logWebhookCall('Deck', url, requestData, responseData, error, status, environment, 'POST');
+};
+
+// New function to call the select deck webhook
+export const callSelectDeckWebhook = async (
+  webhookUrl: string,
+  userId: string,
+  deckToSelect: string,
+  environment: string = 'production'
+): Promise<boolean> => {
+  try {
+    const requestData = {
+      date: new Date().toISOString(),
+      userid: userId,
+      deck_to_select: deckToSelect
+    };
+
+    console.log(`Calling select deck webhook with userid: ${userId}, deck: ${deckToSelect}`);
+
+    // Log the attempt before actually making the call
+    logWebhookCall('DeckSelect', webhookUrl, requestData, null, undefined, undefined, environment, 'POST');
+
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    });
+
+    const status = response.status;
+    let responseData;
+
+    try {
+      responseData = await response.json();
+    } catch (e) {
+      responseData = await response.text();
+    }
+
+    // Log the response
+    logWebhookCall('DeckSelect', webhookUrl, requestData, responseData, undefined, status, environment, 'POST');
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${status}`);
+    }
+
+    toast.success("Deck selected successfully", {
+      description: `You've selected ${deckToSelect}`
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error calling select deck webhook:', error);
+    
+    // Log failed webhook call
+    logWebhookCall('DeckSelect', webhookUrl, { userid: userId, deck_to_select: deckToSelect }, null, error, undefined, environment, 'POST');
+    
+    toast.error("Error selecting deck. Please try again later.", {
+      description: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
+    return false;
+  }
 };
 
 // Make the general webhook logger available for export

@@ -1,5 +1,5 @@
 
-export type Deck = 'deck1' | 'deck2';
+export type Deck = 'deck1' | 'deck2' | 'deck_1' | 'deck_2' | 'deck_3' | string;
 export type ReadingPhase = 'intention' | 'preparing' | 'selection' | 'reading' | 'complete';
 
 export interface Card {

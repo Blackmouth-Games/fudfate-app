@@ -20,7 +20,7 @@ const WebhookLogTab: React.FC = () => {
         setLogs([]);
       }
     } catch (err) {
-      console.error('Error loading webhook logs:', err);
+      console.error('Error loading webhook logs from localStorage:', err);
       setLogs([]);
     }
   };
@@ -70,6 +70,18 @@ const WebhookLogTab: React.FC = () => {
     return 'text-yellow-600';
   };
 
+  // Get method color class
+  const getMethodColor = (method?: string) => {
+    if (!method) return 'bg-gray-500';
+    switch (method.toUpperCase()) {
+      case 'POST': return 'bg-green-600';
+      case 'GET': return 'bg-blue-600';
+      case 'PUT': return 'bg-yellow-600'; 
+      case 'DELETE': return 'bg-red-600';
+      default: return 'bg-gray-500';
+    }
+  };
+
   // Filter out pushlogs to grafana from logging view
   const filteredLogs = logs.filter(log => !log.url.includes('pushLogsToGrafana'));
   
@@ -106,13 +118,20 @@ const WebhookLogTab: React.FC = () => {
           filteredLogs.map((log) => (
             <div 
               key={log.id} 
-              className="border border-gray-200 rounded bg-white p-1.5 text-[10px] space-y-1 hover:border-gray-300 transition-colors"
+              className="border border-gray-200 rounded bg-white p-1.5 text-[10px] space-y-1 hover:border-gray-300 transition-colors cursor-pointer"
               onClick={() => toggleLogExpand(log.id)}
             >
-              <div className="flex justify-between">
-                <span className={`font-semibold ${log.type === 'Reading' ? 'text-purple-600' : log.type === 'Login' ? 'text-blue-600' : log.type === 'Deck' ? 'text-amber-600' : 'text-gray-600'}`}>
-                  {log.type}
-                </span>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                  {log.method && (
+                    <span className={`text-[8px] font-semibold text-white px-1.5 py-0.5 rounded ${getMethodColor(log.method)}`}>
+                      {log.method.toUpperCase()}
+                    </span>
+                  )}
+                  <span className={`font-semibold ${log.type === 'Reading' ? 'text-purple-600' : log.type === 'Login' ? 'text-blue-600' : log.type === 'Deck' ? 'text-amber-600' : 'text-gray-600'}`}>
+                    {log.type}
+                  </span>
+                </div>
                 <span className="text-gray-500">{formatDate(log.timestamp)}</span>
               </div>
               
@@ -155,7 +174,7 @@ const WebhookLogTab: React.FC = () => {
               )}
               
               {expandedLogId !== log.id && !log.error && (
-                <div className="text-center text-blue-500 text-[9px] cursor-pointer">
+                <div className="text-center text-blue-500 text-[9px]">
                   Click to show details <ExternalLink className="inline h-2 w-2" />
                 </div>
               )}

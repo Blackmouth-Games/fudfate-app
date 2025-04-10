@@ -26,8 +26,16 @@ export interface DeckInfo {
  * Get the path to the card back image for a given deck
  */
 export const getCardBackPath = (deck: Deck): string => {
-  // Make sure we use the correct format: '/img/cards/deck_1/99_BACK.png'
-  const deckNumber = deck.replace('deck', '');
+  // Handle deck format: either 'deck1' or 'deck_1'
+  let deckNumber;
+  if (deck.includes('_')) {
+    // For format: 'deck_1'
+    deckNumber = deck.replace('deck_', '');
+  } else {
+    // For legacy format: 'deck1'
+    deckNumber = deck.replace('deck', '');
+  }
+  
   const backPath = `/img/cards/deck_${deckNumber}/99_BACK.png`;
   console.log(`getCardBackPath: ${deck} -> ${backPath}`);
   return backPath;
@@ -37,8 +45,16 @@ export const getCardBackPath = (deck: Deck): string => {
  * Get the path to a specific card image in a deck
  */
 export const getCardPath = (deck: Deck, cardId: string): string => {
-  // Make sure we use the correct format: '/img/cards/deck_1/0_TheDegen.png'
-  const deckNumber = deck.replace('deck', '');
+  // Handle deck format: either 'deck1' or 'deck_1'
+  let deckNumber;
+  if (deck.includes('_')) {
+    // For format: 'deck_1'
+    deckNumber = deck.replace('deck_', '');
+  } else {
+    // For legacy format: 'deck1'
+    deckNumber = deck.replace('deck', '');
+  }
+  
   const path = `/img/cards/deck_${deckNumber}/${cardId}.png`;
   return path;
 };
@@ -47,8 +63,11 @@ export const getCardPath = (deck: Deck, cardId: string): string => {
  * Convert API deck format to internal format
  */
 export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => {
+  // The API already provides deck_X format, so use it directly
+  const deckName = apiDeck.name;
+  
   // Extract the deck number from the name (e.g., "deck_1" → "1")
-  const deckNumber = apiDeck.name.replace('deck_', '');
+  const deckNumber = deckName.replace('deck_', '');
   
   // Format display name to be more user friendly
   const displayName = apiDeck.description || `Deck ${deckNumber}`;
@@ -61,14 +80,14 @@ export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => 
   
   return {
     id: apiDeck.id,
-    name: `deck${deckNumber}`,
+    name: deckName,
     displayName,
     description: apiDeck.description,
     isActive: apiDeck.is_active,
     createdAt: apiDeck.created_at,
     directory,
     backImage,
-    unlocked: true // Default to unlocked
+    unlocked: apiDeck.is_active // Only unlocked if active
   };
 };
 
@@ -79,7 +98,7 @@ export const getAllDecks = (): DeckInfo[] => {
   return [
     {
       id: '1',
-      name: 'deck1',
+      name: 'deck_1',
       displayName: 'Crypto Classics',
       description: 'The original crypto-themed tarot deck',
       isActive: true,
@@ -90,7 +109,7 @@ export const getAllDecks = (): DeckInfo[] => {
     },
     {
       id: '2',
-      name: 'deck2',
+      name: 'deck_2',
       displayName: 'Traditional Tarot',
       description: 'Classic tarot images with a modern twist',
       isActive: true, 
@@ -111,7 +130,7 @@ export const getAvailableDecks = (): DeckInfo[] => {
   // this might filter based on user permissions/ownership
   return getAllDecks().map(deck => ({
     ...deck,
-    unlocked: true
+    unlocked: deck.isActive
   }));
 };
 
