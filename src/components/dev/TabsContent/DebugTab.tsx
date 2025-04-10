@@ -10,48 +10,82 @@ const DebugTab = () => {
   const { webhookResponse, selectedCards, selectedDeck, phase } = useTarot();
   const [webhookCards, setWebhookCards] = useState<number[]>([]);
   const [parsedWebhook, setParsedWebhook] = useState<any>(null);
+  const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
   
   useEffect(() => {
     if (webhookResponse) {
+      console.log("Debug tab processing webhook response:", webhookResponse);
+      
       // Try to parse the webhook response
       try {
-        console.log("Debug tab parsing webhook response:", webhookResponse);
-        
         // Handle case where webhookResponse is an array
         if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
           const firstResponse = webhookResponse[0];
           
-          // Try to parse returnwebhoock
-          if (firstResponse.returnwebhoock && typeof firstResponse.returnwebhoock === 'string') {
-            const parsed = JSON.parse(firstResponse.returnwebhoock);
-            setParsedWebhook(parsed);
-            
-            if (Array.isArray(parsed.selected_cards)) {
-              console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
-              setWebhookCards(parsed.selected_cards);
-            }
-          } else if (firstResponse.selected_cards && Array.isArray(firstResponse.selected_cards)) {
-            console.log("Found selected_cards directly in webhook:", firstResponse.selected_cards);
+          // Try to get message directly
+          if (firstResponse.message) {
+            setWebhookMessage(firstResponse.message);
+          }
+          
+          // Try to get selected_cards directly
+          if (Array.isArray(firstResponse.selected_cards)) {
+            console.log("Found selected_cards directly in webhook array:", firstResponse.selected_cards);
             setWebhookCards(firstResponse.selected_cards);
+          }
+          
+          // Try to parse returnwebhoock
+          if (typeof firstResponse.returnwebhoock === 'string') {
+            try {
+              const parsed = JSON.parse(firstResponse.returnwebhoock);
+              setParsedWebhook(parsed);
+              
+              if (!webhookMessage && parsed.message) {
+                setWebhookMessage(parsed.message);
+              }
+              
+              if (Array.isArray(parsed.selected_cards)) {
+                console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
+                setWebhookCards(parsed.selected_cards);
+              }
+            } catch (error) {
+              console.error("Error parsing webhook in debug tab:", error);
+            }
           }
         } 
         // Handle case where webhookResponse is an object 
         else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
-          if (webhookResponse.returnwebhoock && typeof webhookResponse.returnwebhoock === 'string') {
-            const parsed = JSON.parse(webhookResponse.returnwebhoock);
-            setParsedWebhook(parsed);
-            
-            if (Array.isArray(parsed.selected_cards)) {
-              console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
-              setWebhookCards(parsed.selected_cards);
-            }
-          } else if (webhookResponse.selected_cards && Array.isArray(webhookResponse.selected_cards)) {
-            console.log("Found selected_cards directly in webhook:", webhookResponse.selected_cards);
+          // Try to get message directly
+          if (webhookResponse.message) {
+            setWebhookMessage(webhookResponse.message);
+          }
+          
+          // Try to get selected_cards directly
+          if (Array.isArray(webhookResponse.selected_cards)) {
+            console.log("Found selected_cards directly in webhook object:", webhookResponse.selected_cards);
             setWebhookCards(webhookResponse.selected_cards);
+          }
+          
+          // Try to parse returnwebhoock
+          if (typeof webhookResponse.returnwebhoock === 'string') {
+            try {
+              const parsed = JSON.parse(webhookResponse.returnwebhoock);
+              setParsedWebhook(parsed);
+              
+              if (!webhookMessage && parsed.message) {
+                setWebhookMessage(parsed.message);
+              }
+              
+              if (Array.isArray(parsed.selected_cards)) {
+                console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
+                setWebhookCards(parsed.selected_cards);
+              }
+            } catch (error) {
+              console.error("Error parsing webhook in debug tab:", error);
+            }
           }
         }
       } catch (error) {
-        console.error("Error parsing webhook in debug tab:", error);
+        console.error("General error processing webhook in debug tab:", error);
       }
     }
   }, [webhookResponse]);
@@ -77,6 +111,19 @@ const DebugTab = () => {
       <div>
         <h3 className="text-sm font-semibold mb-2">Selected Deck</h3>
         <Badge variant="outline" className="bg-blue-50">{selectedDeck}</Badge>
+      </div>
+      
+      <Separator />
+      
+      <div>
+        <h3 className="text-sm font-semibold mb-2">Webhook Message</h3>
+        {webhookMessage ? (
+          <div className="p-2 bg-amber-50 border border-amber-200 rounded text-sm">
+            {webhookMessage}
+          </div>
+        ) : (
+          <div className="text-xs text-gray-500 italic">No message in webhook response</div>
+        )}
       </div>
       
       <Separator />

@@ -25,7 +25,7 @@ const CardItem: React.FC<CardItemProps> = ({
     <div className="flex flex-col items-center space-y-3">
       <motion.div 
         className="perspective-1000 w-full"
-        whileHover={{ scale: isRevealed ? 1 : 1.05, transition: { duration: 0.2 } }}
+        whileHover={{ scale: isRevealed ? 1.02 : 1.05, transition: { duration: 0.2 } }}
       >
         <AspectRatio ratio={2/3} className="w-full">
           <motion.div 
@@ -38,7 +38,7 @@ const CardItem: React.FC<CardItemProps> = ({
           >
             {/* Card Back */}
             <div 
-              className="absolute w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 border border-amber-200 rounded-lg backface-hidden card-fullview"
+              className="absolute w-full h-full bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-300 rounded-lg backface-hidden card-fullview shadow-lg"
               style={{ backfaceVisibility: "hidden" }}
             >
               <img 
@@ -54,7 +54,7 @@ const CardItem: React.FC<CardItemProps> = ({
             
             {/* Card Front */}
             <div 
-              className="absolute w-full h-full bg-gradient-to-br from-amber-100 to-white border-2 border-amber-300 rounded-lg backface-hidden card-fullview"
+              className="absolute w-full h-full bg-white border-2 border-amber-400 rounded-lg backface-hidden card-fullview shadow-xl"
               style={{ 
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)"
@@ -62,14 +62,17 @@ const CardItem: React.FC<CardItemProps> = ({
             >
               {card && (
                 <div className="p-3 h-full flex flex-col">
-                  <div className="text-center font-bold text-amber-700 mb-2 bg-amber-50/50 py-1 rounded truncate">
+                  <div className="text-center font-bold text-amber-800 mb-2 bg-amber-50 py-1.5 px-2 rounded-md truncate">
                     {card.name}
                   </div>
-                  <div className="flex-1 flex items-center justify-center p-2">
-                    <img 
+                  <div className="flex-1 flex items-center justify-center p-2 overflow-hidden">
+                    <motion.img 
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.3, duration: 0.5 }}
                       src={card.image} 
                       alt={card.name} 
-                      className="max-h-full max-w-full object-contain"
+                      className="max-h-full max-w-full object-contain rounded-md"
                       onError={(e) => {
                         console.warn(`Failed to load card image: ${card.image}, using fallback`);
                         e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;

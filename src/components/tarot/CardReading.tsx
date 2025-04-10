@@ -6,6 +6,7 @@ import GlitchText from '@/components/GlitchText';
 import { getCardBackPath } from '@/utils/deck-utils';
 import CompletedReading from './CompletedReading';
 import CardRevealContainer from './CardRevealContainer';
+import ShareReading from './ShareReading';
 
 interface CardReadingProps {
   className?: string;
@@ -106,11 +107,14 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           cardBackImage={cardBackImage}
         />
       ) : (
-        <CompletedReading 
-          finalMessage={finalMessage}
-          selectedCards={selectedCards}
-          resetReading={resetReading}
-        />
+        <>
+          <CompletedReading 
+            finalMessage={finalMessage}
+            selectedCards={selectedCards}
+            resetReading={resetReading}
+          />
+          <ShareReading className="mt-6" />
+        </>
       )}
     </div>
   );

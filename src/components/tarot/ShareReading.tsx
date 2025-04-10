@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, Twitter } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTarot } from '@/contexts/TarotContext';
+import { motion } from 'framer-motion';
 
 interface ShareReadingProps {
   className?: string;
@@ -12,19 +13,55 @@ interface ShareReadingProps {
 
 const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
   const { t } = useTranslation();
-  const { intention, selectedCards, interpretation } = useTarot();
+  const { intention, selectedCards, interpretation, finalMessage, webhookResponse } = useTarot();
+
+  // Extract webhook message for sharing
+  const getWebhookMessage = (): string => {
+    if (finalMessage) return finalMessage;
+    
+    if (webhookResponse) {
+      // Try to extract message from webhookResponse
+      if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
+        if (webhookResponse[0].message) return webhookResponse[0].message;
+        
+        if (webhookResponse[0].returnwebhoock) {
+          try {
+            const parsedData = JSON.parse(webhookResponse[0].returnwebhoock);
+            if (parsedData && parsedData.message) return parsedData.message;
+          } catch (e) {
+            console.error("Error parsing webhook message for sharing:", e);
+          }
+        }
+      } else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
+        if (webhookResponse.message) return webhookResponse.message;
+        
+        if (webhookResponse.returnwebhoock) {
+          try {
+            const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+            if (parsedData && parsedData.message) return parsedData.message;
+          } catch (e) {
+            console.error("Error parsing webhook message for sharing:", e);
+          }
+        }
+      }
+    }
+    
+    return interpretation?.summary || "";
+  };
 
   const shareOnTwitter = () => {
-    if (!interpretation) return;
+    if (!selectedCards.length) return;
     
     const cardNames = selectedCards
-      .slice(0, 3)
       .map(card => card.name)
       .join(', ');
+    
+    const shareMessage = getWebhookMessage();
     
     const text = t('tarot.shareText', {
       cards: cardNames,
       intention: intention.length > 30 ? intention.substring(0, 30) + '...' : intention,
+      message: shareMessage ? `"${shareMessage.substring(0, 60)}${shareMessage.length >.citeText.length ? '...' : ''}"` : ''
     });
     
     const url = 'https://app-fudfate.blackmouthgames.com/';
@@ -36,17 +73,18 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
   };
 
   const copyToClipboard = () => {
-    if (!interpretation) return;
+    if (!selectedCards.length) return;
     
     const cardNames = selectedCards
-      .slice(0, 3)
       .map(card => card.name)
       .join(', ');
+    
+    const shareMessage = getWebhookMessage();
     
     const text = t('tarot.shareClipboardText', {
       cards: cardNames,
       intention: intention,
-      interpretation: interpretation.summary || ''
+      interpretation: shareMessage || ''
     });
     
     navigator.clipboard.writeText(text)
@@ -59,29 +97,30 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
       });
   };
 
-  if (!interpretation) return null;
-
   return (
-    <div className={`flex flex-col sm:flex-row items-center justify-center gap-2 mt-4 ${className}`}>
+    <motion.div 
+      className={`flex flex-col sm:flex-row items-center justify-center gap-3 ${className}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.2, duration: 0.5 }}
+    >
       <Button
         variant="outline"
-        size="sm"
         onClick={copyToClipboard}
-        className="w-full sm:w-auto flex items-center gap-1.5"
+        className="w-full sm:w-auto flex items-center gap-2 border-amber-300 hover:bg-amber-50"
       >
         <Share2 className="h-4 w-4" />
         {t('tarot.copyReading')}
       </Button>
       
       <Button
-        size="sm"
         onClick={shareOnTwitter}
-        className="w-full sm:w-auto flex items-center gap-1.5 bg-[#1DA1F2] hover:bg-[#0c85d0]"
+        className="w-full sm:w-auto flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#0c85d0]"
       >
         <Twitter className="h-4 w-4" />
         {t('tarot.shareOnX')}
       </Button>
-    </div>
+    </motion.div>
   );
 };
 
