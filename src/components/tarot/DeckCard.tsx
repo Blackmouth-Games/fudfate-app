@@ -7,7 +7,7 @@ import { DeckInfo } from '@/utils/deck-utils';
 interface DeckCardProps {
   deck: DeckInfo;
   isSelected: boolean;
-  isSelecting: boolean;
+  isSelecting: string | null;
   onSelect: (deckName: string) => void;
   onDetailsOpen: (deckId: string) => void;
   loadedImages: Record<string, boolean>;
