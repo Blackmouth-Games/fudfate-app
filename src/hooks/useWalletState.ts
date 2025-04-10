@@ -1,10 +1,10 @@
 
 import { useEffect } from 'react';
-import { UserData } from '@/types/walletTypes';
+import { UserData, WalletType } from '@/types/walletTypes';
 
 export const useWalletState = (
   setWalletAddress: (address: string | null) => void,
-  setWalletType: (type: string | null) => void,
+  setWalletType: (type: WalletType) => void,
   setNetwork: (network: string | null) => void,
   setUserData: (data: UserData | null) => void,
   addConnectionLog: (action: string, details: string) => void
@@ -17,7 +17,7 @@ export const useWalletState = (
     
     if (savedWalletAddress && savedWalletType) {
       setWalletAddress(savedWalletAddress);
-      setWalletType(savedWalletType);
+      setWalletType(savedWalletType as WalletType);
       setNetwork(savedNetwork);
       
       if (savedUserData) {

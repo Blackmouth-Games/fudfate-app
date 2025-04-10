@@ -1,5 +1,7 @@
+
 import { toast } from 'sonner';
 import { logLoginWebhook } from '@/services/webhook-service';
+import { UserData } from '@/types/walletTypes';
 
 /**
  * Connect to Metamask wallet

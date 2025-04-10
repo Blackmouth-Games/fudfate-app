@@ -6,7 +6,13 @@ export type WalletType = 'metamask' | 'phantom' | null;
 export interface UserData {
   userId: string;
   runsToday: boolean;
-  selectedDeck?: string; // Add selectedDeck to UserData type
+  selectedDeck?: string;
+}
+
+export interface ConnectionLog {
+  timestamp: string;
+  action: string;
+  details: string;
 }
 
 export interface WalletContextType {
@@ -18,7 +24,7 @@ export interface WalletContextType {
   connectWallet: (walletType: string) => Promise<boolean>;
   disconnectWallet: () => void;
   overrideUserData: (data: Partial<UserData>) => void;
-  connectionLogs: { timestamp: number; action: string; details: string }[];
+  connectionLogs: ConnectionLog[];
   clearLogs: () => void;
 }
 

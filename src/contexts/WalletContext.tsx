@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState } from 'react';
-import { WalletContextType, WalletProviderProps } from '@/types/walletTypes';
+import { WalletContextType, WalletProviderProps, WalletType } from '@/types/walletTypes';
 import { useConnectionLogs } from '@/hooks/useConnectionLogs';
 import { useWalletConnection } from '@/hooks/useWalletConnection';
 import { useWalletState } from '@/hooks/useWalletState';
@@ -22,7 +22,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   
   // Get the state-setting functions for useWalletState
   const [, setWalletAddress] = useState<string | null>(null);
-  const [, setWalletType] = useState<string | null>(null);
+  const [, setWalletType] = useState<WalletType>(null);
   const [, setNetwork] = useState<string | null>(null);
   const [, setUserData] = useState(null);
   
@@ -35,7 +35,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     addConnectionLog
   );
   
-  const value = {
+  const value: WalletContextType = {
     connected,
     walletAddress,
     walletType,
@@ -45,7 +45,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     disconnectWallet,
     overrideUserData,
     connectionLogs,
-    clearLogs // Add clearLogs to context
+    clearLogs
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

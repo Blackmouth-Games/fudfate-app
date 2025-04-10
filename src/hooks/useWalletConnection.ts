@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useEnvironment } from '@/hooks/useEnvironment';
-import { UserData } from '@/types/walletTypes';
+import { UserData, WalletType } from '@/types/walletTypes';
 import { toast } from 'sonner';
 import { 
   connectMetamask, 
@@ -16,7 +16,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
   const { webhooks, environment } = useEnvironment();
   const { saveWalletData, clearWalletData, saveUserData } = useWalletStorage();
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [walletType, setWalletType] = useState<string | null>(null);
+  const [walletType, setWalletType] = useState<WalletType>(null);
   const [network, setNetwork] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   
@@ -56,7 +56,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       }
 
       setWalletAddress(address);
-      setWalletType(walletType);
+      setWalletType(walletType as WalletType);
       setNetwork(networkId);
       saveWalletData(address, walletType, networkId);
       
