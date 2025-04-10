@@ -114,7 +114,28 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       } catch (error) {
         addConnectionLog('Login Error', `Webhook error: ${error instanceof Error ? error.message : String(error)}`);
         console.error("Error calling login webhook:", error);
+        
+        // Generate a mock user ID for development environment
+        if (environment === 'development') {
+          const mockUserData = {
+            userId: `mock_${Math.random().toString(16).substring(2, 8)}`,
+            runsToday: false
+          };
+          
+          addConnectionLog('Login Mock', `Using mock user data in development: ${mockUserData.userId}`);
+          setUserData(mockUserData);
+          saveUserData(mockUserData);
+          
+          toast.warning('Using mock user data for development', {
+            description: 'Login webhook failed, but continuing with mock data'
+          });
+          
+          return true;
+        }
+        
+        // For production, show error and fail
         toast.error('Error connecting to login webhook. Please try again later.');
+        disconnectWallet(); // Disconnect if login webhook fails
         return false;
       }
 

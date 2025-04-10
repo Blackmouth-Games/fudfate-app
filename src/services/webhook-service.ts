@@ -3,7 +3,7 @@ import { WebhookResponse } from '@/types/tarot';
 import { toast } from 'sonner';
 import { nanoid } from 'nanoid';
 
-// Interfaz para el log de webhook
+// Interface for the webhook log
 export interface WebhookLog {
   id: string;
   timestamp: string;
@@ -68,6 +68,9 @@ export const callReadingWebhook = async (
     console.log("Calling reading webhook with userid:", userId);
     console.log("Using webhook URL:", webhookUrl);
     
+    // Log the attempt before actually making the call
+    logWebhookCall('Reading', webhookUrl, requestData, null, undefined, undefined, environment);
+    
     const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
@@ -82,6 +85,31 @@ export const callReadingWebhook = async (
       console.error(`Webhook error! status: ${status}`);
       const errorText = await response.text();
       logWebhookCall('Reading', webhookUrl, requestData, null, `HTTP error! status: ${status}`, status, environment);
+      
+      // For development environment, return mock data
+      if (environment === 'development') {
+        console.log("Using mock data for development environment");
+        const mockData = {
+          userid: userId,
+          intention: intention || "What does the future hold?",
+          cards: [
+            { id: "0_TheDegen", position: "past" },
+            { id: "1_TheMiner", position: "present" },
+            { id: "2_TheOracle", position: "future" }
+          ],
+          reading: "This is a mock reading for development purposes."
+        };
+        
+        // Log the mock response
+        logWebhookCall('Reading', webhookUrl, requestData, mockData, undefined, 200, environment);
+        
+        toast.warning("Using mock reading data for development", {
+          description: "Webhook call failed, but continuing with mock data"
+        });
+        
+        return mockData;
+      }
+      
       throw new Error(`HTTP error! status: ${status}`);
     }
     
@@ -98,12 +126,35 @@ export const callReadingWebhook = async (
     // Log failed webhook call
     logWebhookCall('Reading', webhookUrl, requestData, null, error, undefined, environment);
     
-    // No damos respuesta automática ni en desarrollo
+    // For development environment, return mock data
+    if (environment === 'development') {
+      console.log("Using mock data for development environment");
+      const mockData = {
+        userid: userId,
+        intention: intention || "What does the future hold?",
+        cards: [
+          { id: "0_TheDegen", position: "past" },
+          { id: "1_TheMiner", position: "present" },
+          { id: "2_TheOracle", position: "future" }
+        ],
+        reading: "This is a mock reading for development purposes."
+      };
+      
+      // Log the mock response
+      logWebhookCall('Reading', webhookUrl, requestData, mockData, undefined, 200, environment);
+      
+      toast.warning("Using mock reading data for development", {
+        description: "Webhook call failed, but continuing with mock data"
+      });
+      
+      return mockData;
+    }
+    
     toast.error("Error calling reading webhook. Please try again later.", {
       style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
     });
     
-    // En ambos casos, fallamos la lectura
+    // In production, fail the reading
     throw error;
   }
 };

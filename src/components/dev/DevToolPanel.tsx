@@ -16,6 +16,8 @@ import DebugTab from './TabsContent/DebugTab';
 import RoutesTab from './TabsContent/RoutesTab';
 import WebhookLogTab from './TabsContent/WebhookLogTab';
 import ConnectionLogsTab from './TabsContent/ConnectionLogsTab';
+import DecksTab from './TabsContent/DecksTab';
+import { useTarot } from '@/contexts/TarotContext';
 
 interface DevToolPanelProps {
   routes?: Array<{
@@ -27,6 +29,7 @@ interface DevToolPanelProps {
 const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { environment, setEnvironment } = useEnvironment();
+  const { selectedDeck } = useTarot();
 
   const toggleEnvironment = () => {
     const newEnvironment = environment === 'production' ? 'development' : 'production';
@@ -87,6 +90,11 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
                       </TooltipContent>
                     </Tooltip>
                   </div>
+                  {selectedDeck && (
+                    <div className="ml-2 text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded">
+                      Deck: {selectedDeck}
+                    </div>
+                  )}
                 </div>
                 <Button 
                   variant="ghost" 
@@ -108,6 +116,9 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
                   </TabsTrigger>
                   <TabsTrigger value="debug" className="text-xs py-1 px-1.5 h-7">
                     Debug
+                  </TabsTrigger>
+                  <TabsTrigger value="decks" className="text-xs py-1 px-1.5 h-7">
+                    Decks
                   </TabsTrigger>
                   <TabsTrigger value="logs" className="text-xs py-1 px-1.5 h-7">
                     Conn Logs
@@ -133,6 +144,10 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
                   
                   <TabsContent value="debug" className="mt-0">
                     <DebugTab />
+                  </TabsContent>
+                  
+                  <TabsContent value="decks" className="mt-0">
+                    <DecksTab />
                   </TabsContent>
                   
                   <TabsContent value="logs" className="mt-0">

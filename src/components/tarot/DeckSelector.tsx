@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
 import GlitchText from '@/components/GlitchText';
@@ -26,11 +26,34 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   const { selectedDeck, setSelectedDeck } = useTarot();
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   
   // Get decks from props if available, otherwise use default decks
   const decks = availableDecks.length > 0 ? availableDecks : getAvailableDecks();
   
-  console.log("DeckSelector - Available decks:", decks);
+  // Pre-check image paths
+  useEffect(() => {
+    const checkImageExists = (imagePath: string) => {
+      return new Promise<boolean>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = imagePath;
+      });
+    };
+
+    const verifyImages = async () => {
+      const results: Record<string, boolean> = {};
+      
+      for (const deck of decks) {
+        results[deck.id] = await checkImageExists(deck.backImage);
+      }
+      
+      setLoadedImages(results);
+    };
+
+    verifyImages();
+  }, [decks]);
 
   const handleSelectDeck = (deckId: string) => {
     // Only allow selecting unlocked decks
@@ -59,6 +82,12 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   
   const closeCardView = () => {
     setSelectedCard(null);
+  };
+
+  // Get a fallback path for a deck image
+  const getFallbackDeckImage = (deckId: string): string => {
+    // Always fallback to deck_1 which should exist
+    return `/img/cards/deck_1/99_BACK.png`;
   };
 
   // Filter cards for the selected deck
@@ -118,7 +147,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                 }}
               >
                 <img 
-                  src={deck.backImage} 
+                  src={loadedImages[deck.id] ? deck.backImage : getFallbackDeckImage(deck.id)} 
                   alt={deck.displayName} 
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -184,9 +213,11 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                     src={card.image} 
                     alt={card.name} 
                     className="w-full h-full object-cover"
+                    loading="lazy"
                     onError={(e) => {
                       // Fallback to a default image if the path is incorrect
-                      e.currentTarget.src = "/img/cards/deck1/0_TheDegen.png";
+                      console.warn(`Failed to load card image: ${card.image}, using fallback`);
+                      e.currentTarget.src = "/img/cards/deck_1/0_TheDegen.png";
                     }}
                   />
                 </div>
@@ -219,7 +250,8 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                       className="w-full h-full object-contain" 
                       onError={(e) => {
                         // Fallback to a default image if the path is incorrect
-                        e.currentTarget.src = "/img/cards/deck1/0_TheDegen.png";
+                        console.warn(`Failed to load card detail image: ${cardDetails.image}, using fallback`);
+                        e.currentTarget.src = "/img/cards/deck_1/0_TheDegen.png";
                       }}
                     />
                   </div>
