@@ -9,22 +9,12 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export const WalletProvider = ({ children }: WalletProviderProps) => {
   const { connectionLogs, addConnectionLog, clearLogs } = useConnectionLogs();
-  const {
-    connected,
-    walletAddress,
-    walletType,
-    network,
-    userData,
-    connectWallet,
-    disconnectWallet,
-    overrideUserData
-  } = useWalletConnection(addConnectionLog);
   
-  // Get the state-setting functions for useWalletState
-  const [, setWalletAddress] = useState<string | null>(null);
-  const [, setWalletType] = useState<WalletType>(null);
-  const [, setNetwork] = useState<string | null>(null);
-  const [, setUserData] = useState(null);
+  // Define state variables once
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [walletType, setWalletType] = useState<WalletType>(null);
+  const [network, setNetwork] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
   
   // Initialize wallet state from localStorage
   useWalletState(
@@ -32,6 +22,24 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     setWalletType, 
     setNetwork, 
     setUserData, 
+    addConnectionLog
+  );
+  
+  // Use the same state setters in the wallet connection hook
+  const {
+    connected,
+    connectWallet,
+    disconnectWallet,
+    overrideUserData
+  } = useWalletConnection(
+    walletAddress,
+    walletType,
+    network,
+    userData,
+    setWalletAddress,
+    setWalletType,
+    setNetwork,
+    setUserData,
     addConnectionLog
   );
   

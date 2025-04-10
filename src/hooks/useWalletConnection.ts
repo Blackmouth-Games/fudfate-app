@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { UserData, WalletType } from '@/types/walletTypes';
 import { toast } from 'sonner';
@@ -12,32 +13,38 @@ import {
 import { useWalletStorage } from '@/hooks/useWalletStorage';
 import { logLoginWebhook } from '@/services/webhook';
 
-export const useWalletConnection = (addConnectionLog: (action: string, details: string) => void) => {
+export const useWalletConnection = (
+  walletAddress: string | null,
+  walletType: WalletType,
+  network: string | null,
+  userData: UserData | null,
+  setWalletAddress: (address: string | null) => void,
+  setWalletType: (type: WalletType) => void,
+  setNetwork: (network: string | null) => void,
+  setUserData: (data: UserData | null) => void,
+  addConnectionLog: (action: string, details: string) => void
+) => {
   const { webhooks, environment } = useEnvironment();
   const { saveWalletData, clearWalletData, saveUserData } = useWalletStorage();
-  const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [walletType, setWalletType] = useState<WalletType>(null);
-  const [network, setNetwork] = useState<string | null>(null);
-  const [userData, setUserData] = useState<UserData | null>(null);
   
-  const connectWallet = async (walletType: string): Promise<boolean> => {
-    addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
+  const connectWallet = async (type: string): Promise<boolean> => {
+    addConnectionLog('Connect Attempt', `Attempting to connect ${type} wallet`);
     
     try {
       if (walletAddress) {
         disconnectWallet();
-        addConnectionLog('Reconnect', `Disconnected previous wallet to reconnect with ${walletType}`);
+        addConnectionLog('Reconnect', `Disconnected previous wallet to reconnect with ${type}`);
       }
       
       let connectionResult;
       
-      if (walletType === 'metamask') {
+      if (type === 'metamask') {
         connectionResult = await connectMetamask();
-      } else if (walletType === 'phantom') {
+      } else if (type === 'phantom') {
         connectionResult = await connectPhantom();
       } else {
-        addConnectionLog('Connect Failed', `Unknown wallet type: ${walletType}`);
-        toast.error(`Unknown wallet type: ${walletType}`);
+        addConnectionLog('Connect Failed', `Unknown wallet type: ${type}`);
+        toast.error(`Unknown wallet type: ${type}`);
         return false;
       }
       
@@ -50,23 +57,23 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       const { address, networkId } = connectionResult;
       
       if (!address) {
-        addConnectionLog('Connect Failed', `No address returned from ${walletType}`);
-        toast.error(`No address returned from ${walletType}`);
+        addConnectionLog('Connect Failed', `No address returned from ${type}`);
+        toast.error(`No address returned from ${type}`);
         return false;
       }
 
       setWalletAddress(address);
-      setWalletType(walletType as WalletType);
+      setWalletType(type as WalletType);
       setNetwork(networkId);
-      saveWalletData(address, walletType, networkId);
+      saveWalletData(address, type, networkId);
       
-      addConnectionLog('Connection Success', `Connected to ${walletType}: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`);
+      addConnectionLog('Connection Success', `Connected to ${type}: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`);
       
       try {
         const data = await callLoginWebhook(
           webhooks.login, 
           address, 
-          walletType, 
+          type, 
           environment,
           addConnectionLog
         );
@@ -125,7 +132,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         return false;
       }
 
-      console.log(`Connected with ${walletType}:`, address);
+      console.log(`Connected with ${type}:`, address);
       
       return true;
     } catch (error) {
@@ -136,7 +143,7 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     }
   };
   
-  const disconnectWallet = () => {
+  const disconnectWallet = useCallback(() => {
     if (walletAddress) {
       addConnectionLog('Disconnect', `Disconnected ${walletType} wallet: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`);
       
@@ -157,8 +164,11 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     setUserData(null);
     clearWalletData();
     
+    // Also clear the session restoration flag
+    sessionStorage.removeItem('walletSessionRestored');
+    
     console.log("Wallet disconnected");
-  };
+  }, [walletAddress, walletType, setWalletAddress, setWalletType, setNetwork, setUserData, clearWalletData, addConnectionLog]);
   
   const overrideUserData = (data: Partial<UserData>) => {
     addConnectionLog('Override UserData', `Updated user data: ${JSON.stringify(data)}`);
@@ -186,10 +196,6 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
 
   return {
     connected: !!walletAddress,
-    walletAddress,
-    walletType,
-    network,
-    userData,
     connectWallet,
     disconnectWallet,
     overrideUserData

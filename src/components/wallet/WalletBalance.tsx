@@ -7,7 +7,7 @@ import { getVisibleTokensForNetwork } from '@/config/tokenConfig';
 
 interface WalletBalanceProps {
   className?: string;
-  tokenMint?: string; // Permitir especificar un token específico
+  tokenMint?: string; // Allow specifying a specific token
 }
 
 const WalletBalance: React.FC<WalletBalanceProps> = ({ 
@@ -18,13 +18,19 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   const [balance, setBalance] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentToken, setCurrentToken] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
+
+  // Reset error state when wallet changes
+  useEffect(() => {
+    setHasError(false);
+  }, [walletAddress, walletType]);
 
   useEffect(() => {
-    // Determinar qué token mostrar
+    // Determine which token to show
     if (tokenMint) {
       setCurrentToken(tokenMint);
     } else if (network) {
-      // Usar el primer token visible para la red actual
+      // Use the first visible token for the current network
       const visibleTokens = getVisibleTokensForNetwork(network);
       setCurrentToken(visibleTokens.length > 0 ? visibleTokens[0] : null);
     } else {
@@ -33,18 +39,25 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   }, [tokenMint, network]);
 
   useEffect(() => {
+    // If there was a previous error, don't try to fetch more often than every 30 seconds
     const fetchBalance = async () => {
       if (!walletAddress || !walletType || !currentToken) {
         setBalance(null);
         return;
       }
       
+      if (hasError) {
+        return; // Don't fetch if we've had an error recently
+      }
+      
       setLoading(true);
       try {
         const tokenBalance = await getTokenBalance(walletAddress, currentToken);
         setBalance(tokenBalance);
+        setHasError(false);
       } catch (error) {
         console.error('Error fetching balance:', error);
+        setHasError(true);
         setBalance(null);
       } finally {
         setLoading(false);
@@ -53,14 +66,14 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
 
     fetchBalance();
     
-    // Actualizar cada 30 segundos
+    // Update every 30 seconds
     const intervalId = setInterval(fetchBalance, 30000);
     return () => clearInterval(intervalId);
-  }, [walletAddress, walletType, currentToken]);
+  }, [walletAddress, walletType, currentToken, hasError]);
 
   if (!walletAddress || !walletType || !currentToken) return null;
 
-  // Información del token para mostrar
+  // Token info for display
   const tokenInfo = getTokenInfo(currentToken);
   const symbol = tokenInfo?.symbol || '???';
 

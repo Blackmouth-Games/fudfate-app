@@ -10,6 +10,12 @@ export const useWalletState = (
   addConnectionLog: (action: string, details: string) => void
 ) => {
   useEffect(() => {
+    // Use a flag in sessionStorage to prevent multiple restorations
+    const alreadyRestored = sessionStorage.getItem('walletSessionRestored');
+    if (alreadyRestored === 'true') {
+      return;
+    }
+    
     const savedWalletAddress = localStorage.getItem('walletAddress');
     const savedWalletType = localStorage.getItem('walletType');
     const savedNetwork = localStorage.getItem('network');
@@ -29,6 +35,9 @@ export const useWalletState = (
       }
       
       addConnectionLog('Restore Session', `Restored wallet session: ${savedWalletType}, ${savedWalletAddress}`);
+      
+      // Set the flag to prevent multiple restorations
+      sessionStorage.setItem('walletSessionRestored', 'true');
     }
   }, [setWalletAddress, setWalletType, setNetwork, setUserData, addConnectionLog]);
 };
