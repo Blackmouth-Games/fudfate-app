@@ -1,4 +1,3 @@
-
 // Token utilities for handling balances and token info
 
 // Mapping of token mint addresses to token info
@@ -42,9 +41,9 @@ export const getSolanaBalance = async (walletAddress: string): Promise<string> =
 
     // Check for non-OK responses
     if (!response.ok) {
-      // If we get a 403, use a mock balance instead of throwing an error
+      // If we get a 403 or other error, return 0 instead of mock value
       console.warn(`Error accessing Solana API: ${response.status} ${response.statusText}`);
-      return '42.69'; // Return a mock balance to avoid UI disruption
+      return '0.0000'; // Return 0 balance when API access fails
     }
 
     const data = await response.json();
@@ -52,7 +51,7 @@ export const getSolanaBalance = async (walletAddress: string): Promise<string> =
     // Handle API errors
     if (data.error) {
       console.error('Error getting SOL balance:', data.error);
-      return '42.69'; // Return a mock balance
+      return '0.0000'; // Return 0 balance for API errors
     }
 
     // The balance is returned in lamports (1 SOL = 1,000,000,000 lamports)
@@ -62,8 +61,8 @@ export const getSolanaBalance = async (walletAddress: string): Promise<string> =
     return solBalance;
   } catch (error) {
     console.error('Error fetching SOL balance:', error);
-    // Return a mock balance instead of throwing an error
-    return '42.69';
+    // Return 0 instead of a mock balance
+    return '0.0000';
   }
 };
 
@@ -80,7 +79,7 @@ export const getTokenBalance = async (
   
   // Here you would implement the logic to get the balance of other tokens
   // Using SPL Token Program for Solana tokens
-  return null;
+  return '0.0000'; // Default to 0 for other tokens
 };
 
 /**

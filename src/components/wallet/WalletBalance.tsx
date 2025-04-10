@@ -1,9 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
-import { Coins } from 'lucide-react';
+import { Coins, AlertCircle } from 'lucide-react';
 import { getTokenBalance, getTokenInfo } from '@/utils/token-utils';
 import { getVisibleTokensForNetwork } from '@/config/tokenConfig';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface WalletBalanceProps {
   className?: string;
@@ -19,10 +20,12 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
   const [loading, setLoading] = useState(false);
   const [currentToken, setCurrentToken] = useState<string | null>(null);
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Reset error state when wallet changes
   useEffect(() => {
     setHasError(false);
+    setErrorMessage(null);
   }, [walletAddress, walletType]);
 
   useEffect(() => {
@@ -46,19 +49,17 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
         return;
       }
       
-      if (hasError) {
-        return; // Don't fetch if we've had an error recently
-      }
-      
       setLoading(true);
       try {
         const tokenBalance = await getTokenBalance(walletAddress, currentToken);
         setBalance(tokenBalance);
         setHasError(false);
+        setErrorMessage(null);
       } catch (error) {
         console.error('Error fetching balance:', error);
         setHasError(true);
-        setBalance(null);
+        setErrorMessage('API access denied');
+        setBalance('0.0000');
       } finally {
         setLoading(false);
       }
@@ -85,6 +86,16 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       ) : (
         <span>
           {balance || '0'} {symbol}
+          {hasError && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <AlertCircle className="h-3.5 w-3.5 ml-1 text-amber-500 inline" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="text-xs">API access denied. Showing default balance.</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </span>
       )}
     </div>
