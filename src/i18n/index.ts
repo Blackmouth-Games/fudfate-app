@@ -6,11 +6,6 @@ import LanguageDetector from "i18next-browser-languagedetector";
 // Import all language translations
 import enTranslation from "./locales/en.json";
 import esTranslation from "./locales/es.json";
-// Import placeholder translations for new languages
-// In a real app, you would have actual translation files
-const frTranslation = { ...enTranslation }; // Fallback to English
-const deTranslation = { ...enTranslation }; // Fallback to English
-const itTranslation = { ...enTranslation }; // Fallback to English
 
 const resources = {
   en: {
@@ -18,15 +13,6 @@ const resources = {
   },
   es: {
     translation: esTranslation
-  },
-  fr: {
-    translation: frTranslation
-  },
-  de: {
-    translation: deTranslation
-  },
-  it: {
-    translation: itTranslation
   }
 };
 

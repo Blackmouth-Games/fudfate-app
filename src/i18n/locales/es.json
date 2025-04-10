@@ -28,7 +28,8 @@
     "history": "Historial",
     "decks": "Mazos de Tarot",
     "profile": "Perfil",
-    "contactUs": "Contacto"
+    "contactUs": "Contacto",
+    "app": "Iniciar App"
   },
   "wallet": {
     "connectWallet": "Conectar Wallet",
@@ -66,6 +67,10 @@
     "allCardsRevealed": "Todas las cartas reveladas. Generando lectura final...",
     "continueToReading": "Continuar a la Lectura",
     "revealCards": "Revela Tus Cartas",
+    "readingComplete": "Tu Lectura está Completa",
+    "readingCompleteDescription": "Explora las ideas de tus cartas",
+    "finalMessage": "Tu Lectura de Tarot",
+    "startNewReading": "Iniciar Nueva Lectura",
     "tapToReveal": "Toca para revelar",
     "shareYourReading": "Comparte Tu Lectura",
     "shareDescription": "Copia o comparte tu lectura de tarot con otros",
@@ -78,7 +83,11 @@
     "comeBackTomorrow": "Has usado todas tus lecturas de hoy. ¡Vuelve mañana para más predicciones!",
     "noReadingsAvailable": "No tienes lecturas disponibles hoy",
     "interpretationLoading": "Interpretando las cartas...",
-    "shareYourJourney": "Comparte tu viaje por el reino crypto"
+    "shareYourJourney": "Comparte tu viaje por el reino crypto",
+    "reading": "Lectura",
+    "history": "Historial",
+    "decks": "Mazos",
+    "revealYourDestiny": "Revela Tu Destino"
   },
   "errors": {
     "readingFailed": "Error al iniciar la lectura. Por favor, inténtalo de nuevo más tarde.",
@@ -99,7 +108,9 @@
     "unlockDeck": "Desbloquear este Mazo",
     "decksDescription": "Elige entre nuestra colección de mazos de tarot únicos",
     "back": "Reverso de la Carta",
-    "viewFullsize": "Ver Tamaño Completo"
+    "viewFullsize": "Ver Tamaño Completo",
+    "cryptoDeck": "Mazo de Tarot Crypto",
+    "classicDeck": "Mazo de Tarot Clásico"
   },
   "history": {
     "title": "Historial de Lecturas",

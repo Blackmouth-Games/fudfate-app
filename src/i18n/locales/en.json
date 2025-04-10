@@ -28,7 +28,8 @@
     "history": "History",
     "decks": "Tarot Decks",
     "profile": "Profile",
-    "contactUs": "Contact Us"
+    "contactUs": "Contact Us",
+    "app": "Launch App"
   },
   "wallet": {
     "connectWallet": "Connect Wallet",
@@ -66,6 +67,10 @@
     "allCardsRevealed": "All cards revealed. Generating final reading...",
     "continueToReading": "Continue to Reading",
     "revealCards": "Reveal Your Cards",
+    "readingComplete": "Your Reading is Complete",
+    "readingCompleteDescription": "Explore the insights from your cards",
+    "finalMessage": "Your Tarot Reading",
+    "startNewReading": "Start New Reading",
     "tapToReveal": "Tap to reveal",
     "shareYourReading": "Share Your Reading",
     "shareDescription": "Copy or share your tarot reading with others",
@@ -78,7 +83,11 @@
     "comeBackTomorrow": "You've used all your readings for today. Come back tomorrow for more insights!",
     "noReadingsAvailable": "You don't have any readings available today",
     "interpretationLoading": "Interpreting the cards...",
-    "shareYourJourney": "Share your journey through the crypto realm"
+    "shareYourJourney": "Share your journey through the crypto realm",
+    "reading": "Reading",
+    "history": "History",
+    "decks": "Decks",
+    "revealYourDestiny": "Reveal Your Destiny"
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",
@@ -99,7 +108,9 @@
     "unlockDeck": "Unlock This Deck",
     "decksDescription": "Choose from our collection of unique tarot decks",
     "back": "Back of Card",
-    "viewFullsize": "View Fullsize"
+    "viewFullsize": "View Fullsize",
+    "cryptoDeck": "Crypto Tarot Deck",
+    "classicDeck": "Classic Tarot Deck"
   },
   "history": {
     "title": "Reading History",

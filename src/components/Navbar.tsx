@@ -41,18 +41,13 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <a 
-              href="https://app-fudfate.blackmouthgames.com/" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0"
-            >
+            <Link to="/" className="flex-shrink-0">
               <img 
                 src="/img/logos/FUDFATE_logo.png" 
                 alt="FUDfate Logo" 
                 className="h-10 w-auto"
               />
-            </a>
+            </Link>
           </div>
           
           {!isMobile ? (
@@ -77,9 +72,7 @@ const Navbar = () => {
                   {t('nav.cards')}
                 </button>
                 <Link 
-                  to="https://app-fudfate.blackmouthgames.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                  to="/" 
                   className="text-black font-bold px-4 py-2 rounded transition-colors pixel-btn pixel-btn-accent"
                 >
                   {t('nav.app')}
@@ -124,9 +117,7 @@ const Navbar = () => {
               {t('nav.cards')}
             </button>
             <Link 
-              to="https://app-fudfate.blackmouthgames.com/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+              to="/" 
               className="block w-full text-center text-black font-bold px-4 py-2 rounded transition-colors mt-4 pixel-btn pixel-btn-accent"
             >
               {t('nav.app')}

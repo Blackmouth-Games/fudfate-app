@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WalletBalance from '@/components/wallet/WalletBalance';
 import WalletConnector from '@/components/wallet/WalletConnector';
+import { Link } from 'react-router-dom';
 
 interface TarotHeaderProps {
   connected: boolean;
@@ -24,17 +25,13 @@ const TarotHeader: React.FC<TarotHeaderProps> = ({
     <header className="sticky top-0 z-50 bg-white shadow-md">
       <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="flex items-center">
-          <a 
-            href="https://app-fudfate.blackmouthgames.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <Link to="/">
             <img 
               src="/img/logos/FUDFATE_logo.png" 
               alt="FUDFATE" 
               className="h-12"
             />
-          </a>
+          </Link>
         </div>
         
         {connected && (

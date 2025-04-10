@@ -15,6 +15,7 @@ import tarotCards from '@/data/tarotCards';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { X } from 'lucide-react';
 import { getCardBackPath } from '@/utils/deck-utils';
+import DeckDetailsDialog from '@/components/tarot/DeckDetailsDialog';
 
 // Example cards for the carousel - updated paths to proper format
 const exampleCards = [
@@ -31,7 +32,7 @@ interface TarotCardSectionProps {
 const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   const { t } = useTranslation();
   const cards = exampleCards;
-  const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
+  const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
   // Function to get all cards from a specific deck
@@ -40,7 +41,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   };
   
   // Get all cards from the selected deck
-  const selectedDeckCards = selectedDeck ? getCardsFromDeck(selectedDeck) : [];
+  const openDeckCards = openDeckId ? getCardsFromDeck(openDeckId === '4' ? 'deck_2' : 'deck_1') : [];
 
   // Function to handle viewing a specific card in full screen
   const viewCard = (cardId: string) => {
@@ -57,7 +58,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
 
   // Opens the deck dialog when clicking on a deck preview
   const handleDeckClick = (deckId: string) => {
-    setSelectedDeck(deckId);
+    setOpenDeckId(deckId);
   };
 
   return (
@@ -89,7 +90,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
                 <div 
                   className="floating cursor-pointer" 
                   style={{ animationDelay: `${0.2 * index}s` }}
-                  onClick={() => handleDeckClick(index < 3 ? 'deck_1' : 'deck_2')}
+                  onClick={() => handleDeckClick(index < 3 ? '1' : '4')}
                 >
                   <TarotCard 
                     imageUrl={card.imageUrl}
@@ -106,34 +107,19 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
         </Carousel>
       </div>
 
-      {/* Dialog to show all cards in a deck */}
-      <Dialog open={!!selectedDeck} onOpenChange={(open) => !open && setSelectedDeck(null)}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-center">
-              <GlitchText text={selectedDeck === 'deck_1' ? t('cards.cryptoDeck') : t('cards.classicDeck')} className="text-xl" />
-            </DialogTitle>
-            <DialogClose className="absolute right-4 top-4">
-              <X className="h-4 w-4" />
-            </DialogClose>
-          </DialogHeader>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-            {selectedDeckCards.map((card) => (
-              <div 
-                key={card.id} 
-                className="aspect-[2/3] cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => viewCard(card.id)}
-              >
-                <TarotCard 
-                  imageUrl={card.image}
-                  title={card.name} 
-                  className="w-full h-full" 
-                />
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Use the DeckDetailsDialog component for displaying all cards in a deck */}
+      <DeckDetailsDialog
+        open={!!openDeckId}
+        onOpenChange={(open) => !open && setOpenDeckId(null)}
+        deckId={openDeckId}
+        decks={[
+          { id: '1', name: 'deck_1', displayName: t('cards.cryptoDeck'), isActive: true, backImage: '/img/cards/deck_1/99_BACK.png' },
+          { id: '4', name: 'deck_2', displayName: t('cards.classicDeck'), isActive: true, backImage: '/img/cards/deck_2/99_BACK.png' }
+        ]}
+        deckCards={openDeckCards}
+        onCardClick={viewCard}
+        t={t}
+      />
 
       {/* Dialog for individual card view */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && closeCardView()}>

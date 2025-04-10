@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
@@ -74,7 +75,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           <GlitchText 
             text={finalMessage 
               ? t('tarot.readingComplete') 
-              : t('tarot.revealYourDestiny')} 
+              : t('tarot.revealCards')} 
             intensity="normal"
             neonEffect="purple"
           />
@@ -149,19 +150,6 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                   </div>
                 </motion.div>
               </div>
-              
-              {card?.revealed && card?.interpretation && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="bg-white p-4 rounded-lg border border-amber-200 shadow-md"
-                >
-                  <p className="text-sm italic text-gray-700">
-                    "{card.interpretation}"
-                  </p>
-                </motion.div>
-              )}
             </div>
           ))}
         </div>

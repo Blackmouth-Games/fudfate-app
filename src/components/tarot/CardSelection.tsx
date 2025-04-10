@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getCardBackPath } from '@/utils/deck-utils';
+import tarotCards from '@/data/tarotCards';
 
 interface CardSelectionProps {
   className?: string;
@@ -19,12 +20,21 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   const { userData } = useWallet();
   const { t } = useTranslation();
   
+  const [allDeckCards, setAllDeckCards] = useState<any[]>([]);
+  
   // Use the correct path format for card back images
   const cardBackImage = getCardBackPath(selectedDeck);
   
+  // Load all cards from the current deck on component mount or deck change
+  useEffect(() => {
+    // Get all cards for the selected deck
+    const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
+    setAllDeckCards(deckCards);
+  }, [selectedDeck]);
+  
   // Check if user can make readings (userData.runsToday should be true for "can read")
   // Empty state - no cards available or user can't read
-  if ((availableCards.length === 0 && !loading) || (userData && !userData.runsToday)) {
+  if ((allDeckCards.length === 0 && !loading) || (userData && !userData.runsToday)) {
     return (
       <div className={`text-center py-12 ${className}`}>
         <div className="bg-amber-50 border border-amber-100 rounded-lg p-6 max-w-md mx-auto">
@@ -44,7 +54,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
     );
   }
 
-  const handleCardSelect = (cardId) => {
+  const handleCardSelect = (cardId: string) => {
     selectCard(cardId);
   };
 
@@ -160,7 +170,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
             <div className="absolute inset-0">
               <div className="grid grid-cols-7 sm:grid-cols-11 gap-1 h-full">
                 <AnimatePresence>
-                  {availableCards.map((card, index) => {
+                  {allDeckCards.map((card, index) => {
                     // Calculate offset for staggered card display
                     const rowOffset = index % 2 === 0 ? "10%" : "0";
                     
