@@ -1,6 +1,6 @@
 
 import React from 'react';
-import '../styles/goldglitch.css';
+import '../../styles/goldglitch.css';
 
 interface GoldGlitchTextProps {
   text: string;
