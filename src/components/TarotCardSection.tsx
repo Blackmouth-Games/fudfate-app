@@ -14,7 +14,7 @@ import {
 import tarotCards from '@/data/tarotCards';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { X } from 'lucide-react';
-import { getCardBackPath } from '@/utils/deck-utils';
+import { getCardBackPath, getAvailableDecks } from '@/utils/deck-utils';
 import DeckDetailsDialog from '@/components/tarot/DeckDetailsDialog';
 
 // Example cards for the carousel - updated paths to proper format
@@ -35,13 +35,21 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
+  // Get all available decks
+  const availableDecks = getAvailableDecks();
+  
   // Function to get all cards from a specific deck
   const getCardsFromDeck = (deckId: string) => {
-    return tarotCards.filter(card => card.deck === deckId);
+    // Find the deck name from the deck ID
+    const deck = availableDecks.find(d => d.id === deckId);
+    if (!deck) return [];
+    
+    // Filter cards by the deck name
+    return tarotCards.filter(card => card.deck === deck.name);
   };
   
   // Get all cards from the selected deck
-  const openDeckCards = openDeckId ? getCardsFromDeck(openDeckId === '4' ? 'deck_2' : 'deck_1') : [];
+  const openDeckCards = openDeckId ? getCardsFromDeck(openDeckId) : [];
 
   // Function to handle viewing a specific card in full screen
   const viewCard = (cardId: string) => {
@@ -90,7 +98,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
                 <div 
                   className="floating cursor-pointer" 
                   style={{ animationDelay: `${0.2 * index}s` }}
-                  onClick={() => handleDeckClick(index < 3 ? '1' : '4')}
+                  onClick={() => handleDeckClick(index < 3 ? '1' : '2')}
                 >
                   <TarotCard 
                     imageUrl={card.imageUrl}
@@ -112,28 +120,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
         open={!!openDeckId}
         onOpenChange={(open) => !open && setOpenDeckId(null)}
         deckId={openDeckId}
-        decks={[
-          { 
-            id: '1', 
-            name: 'deck_1', 
-            displayName: t('cards.cryptoDeck'), 
-            description: 'The original crypto-themed tarot deck',
-            isActive: true, 
-            createdAt: new Date().toISOString(),
-            directory: '/img/cards/deck_1/',
-            backImage: '/img/cards/deck_1/99_BACK.png' 
-          },
-          { 
-            id: '4', 
-            name: 'deck_2', 
-            displayName: t('cards.classicDeck'), 
-            description: 'Classic tarot images with a modern twist',
-            isActive: true, 
-            createdAt: new Date().toISOString(),
-            directory: '/img/cards/deck_2/',
-            backImage: '/img/cards/deck_2/99_BACK.png' 
-          }
-        ]}
+        decks={availableDecks}
         deckCards={openDeckCards}
         onCardClick={viewCard}
         t={t}
