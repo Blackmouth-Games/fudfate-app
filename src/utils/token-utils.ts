@@ -22,24 +22,48 @@ export const TOKEN_LIST: Record<string, TokenInfo> = {
 
 /**
  * Get the balance of SOL for a given wallet address
- * In a real app, this would connect to the Solana blockchain
+ * Uses the Solana blockchain API
  */
 export const getSolanaBalance = async (walletAddress: string): Promise<string> => {
-  // In a real implementation, this would use web3.js to fetch the actual balance
-  // For now, we'll simulate a realistic balance
-  
-  // Mock implementation
-  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-  
-  // Generate a realistic SOL balance (between 0.1 and 10 SOL)
-  const balance = (Math.random() * 9.9 + 0.1).toFixed(4);
-  
-  return balance;
+  try {
+    // Usar la API pública de Solana para obtener el balance
+    const response = await fetch(`https://api.mainnet-beta.solana.com`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getBalance',
+        params: [walletAddress]
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error fetching balance: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Error getting SOL balance:', data.error);
+      return '0';
+    }
+
+    // The balance is returned in lamports (1 SOL = 1,000,000,000 lamports)
+    const lamports = data.result?.value || 0;
+    const solBalance = (lamports / 1000000000).toFixed(4);
+    
+    return solBalance;
+  } catch (error) {
+    console.error('Error fetching SOL balance:', error);
+    return '0';
+  }
 };
 
 /**
  * Get a specific token's balance by mint address
- * This is a placeholder for future implementation
  */
 export const getTokenBalance = async (
   walletAddress: string, 
@@ -49,7 +73,8 @@ export const getTokenBalance = async (
     return await getSolanaBalance(walletAddress);
   }
   
-  // Here you would implement the actual token balance fetching logic for other tokens
+  // Aquí implementarías la lógica para obtener el balance de otros tokens
+  // Usando SPL Token Program para tokens de Solana
   return null;
 };
 
