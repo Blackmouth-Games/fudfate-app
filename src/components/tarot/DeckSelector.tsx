@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTarot } from '@/contexts/TarotContext';
 import { Deck } from '@/types/tarot';
 import { Button } from '@/components/ui/button';
-import { callSelectDeckWebhook } from '@/services/webhook-service';
+import { callSelectDeckWebhook } from '@/services/webhook';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { useWallet } from '@/contexts/WalletContext';
 
@@ -35,10 +34,8 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   const { webhooks, environment } = useEnvironment();
   const { userData } = useWallet();
   
-  // Get decks from props if available, otherwise use default decks
   const decks = availableDecks.length > 0 ? availableDecks : getAvailableDecks();
   
-  // Pre-check image paths
   useEffect(() => {
     const checkImageExists = (imagePath: string) => {
       return new Promise<boolean>((resolve) => {
@@ -63,10 +60,8 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   }, [decks]);
 
   const handleSelectDeck = (deckId: string) => {
-    // Only allow selecting unlocked decks
     const deck = decks.find(d => d.id === deckId);
     if (deck && deck.unlocked && deck.isActive) {
-      // Convert the string to the Deck type before passing to setSelectedDeck
       setSelectedDeck(deck.name as Deck);
     }
   };
@@ -79,7 +74,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
     setSelectingDeck(deckName);
     
     try {
-      // Determine which webhook URL to use based on environment
       const webhookUrl = environment === 'development' 
         ? 'https://primary-production-fe05.up.railway.app/webhook-test/f5891d06-7565-4582-bb27-de1f0c3db08e'
         : 'https://primary-production-fe05.up.railway.app/webhook/f5891d06-7565-4582-bb27-de1f0c3db08e';
@@ -92,7 +86,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
       );
       
       if (success) {
-        // Find the deck by name to get the full deck info
         const selectedDeckInfo = decks.find(d => d.name === deckName);
         if (selectedDeckInfo) {
           setSelectedDeck(deckName as Deck);
@@ -116,7 +109,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
     setOpenDeckId(null);
   };
   
-  // Function to view a specific card
   const viewCard = (cardId: string) => {
     setSelectedCard(cardId);
   };
@@ -125,20 +117,15 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
     setSelectedCard(null);
   };
 
-  // Get a fallback path for a deck image
   const getFallbackDeckImage = (deckId: string): string => {
-    // Always fallback to deck_1 which should exist
     return `/img/cards/deck_1/99_BACK.png`;
   };
 
-  // Filter cards for the selected deck
   const deckCards = tarotCards.filter(card => card.deck === openDeckId);
   
-  // Find the selected card details
   const cardDetails = selectedCard ? 
     deckCards.find(card => card.id === selectedCard) : null;
 
-  // Loading state
   if (isLoading) {
     return (
       <Card className={`border-amber-400/50 shadow-md ${className}`}>
@@ -175,7 +162,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {decks.map((deck) => {
-            // Check if deck is unlocked (based on isActive flag)
             const isUnlocked = deck.isActive;
             return (
               <div key={deck.id} className="flex flex-col items-center">
@@ -195,9 +181,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                     alt={deck.displayName} 
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Log the error
                       console.warn(`Failed to load deck image: ${deck.backImage}, using fallback`);
-                      // Fallback to a default image if the path is incorrect
                       e.currentTarget.src = "/img/cards/deck_1/99_BACK.png";
                     }}
                   />
@@ -245,7 +229,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
         </div>
       </CardContent>
 
-      {/* Dialog to show all cards in a deck */}
       <Dialog open={!!openDeckId} onOpenChange={(open) => !open && closeDeckDetails()}>
         <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
@@ -271,7 +254,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                     className="w-full h-full object-cover"
                     loading="lazy"
                     onError={(e) => {
-                      // Fallback to a default image if the path is incorrect
                       console.warn(`Failed to load card image: ${card.image}, using fallback`);
                       e.currentTarget.src = "/img/cards/deck_1/0_TheDegen.png";
                     }}
@@ -284,7 +266,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
         </DialogContent>
       </Dialog>
       
-      {/* Dialog for individual card view */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && closeCardView()}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -305,7 +286,6 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
                       alt={cardDetails.name} 
                       className="w-full h-full object-contain" 
                       onError={(e) => {
-                        // Fallback to a default image if the path is incorrect
                         console.warn(`Failed to load card detail image: ${cardDetails.image}, using fallback`);
                         e.currentTarget.src = "/img/cards/deck_1/0_TheDegen.png";
                       }}

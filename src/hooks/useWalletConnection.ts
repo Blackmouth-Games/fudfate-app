@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { UserData } from '@/types/walletTypes';
@@ -6,12 +5,12 @@ import { toast } from 'sonner';
 import { 
   connectMetamask, 
   connectPhantom, 
-  callLoginWebhook,
   parseUserData,
   fetchAvailableDecks,
   processDecksFromApi
 } from '@/utils/wallet-connection-utils';
 import { useWalletStorage } from '@/hooks/useWalletStorage';
+import { logLoginWebhook } from '@/services/webhook';
 
 export const useWalletConnection = (addConnectionLog: (action: string, details: string) => void) => {
   const { webhooks, environment } = useEnvironment();
@@ -22,11 +21,9 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
   const [userData, setUserData] = useState<UserData | null>(null);
   
   const connectWallet = async (walletType: string): Promise<boolean> => {
-    // Add connection log
     addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
     
     try {
-      // If a wallet is already connected, disconnect it first
       if (walletAddress) {
         disconnectWallet();
         addConnectionLog('Reconnect', `Disconnected previous wallet to reconnect with ${walletType}`);
@@ -34,7 +31,6 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
       
       let connectionResult;
       
-      // Connect to the appropriate wallet type
       if (walletType === 'metamask') {
         connectionResult = await connectMetamask();
       } else if (walletType === 'phantom') {
@@ -45,7 +41,6 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         return false;
       }
       
-      // Handle connection errors
       if (connectionResult.error) {
         addConnectionLog('Connect Failed', connectionResult.error);
         toast.error(connectionResult.error);
@@ -60,16 +55,13 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         return false;
       }
 
-      // Set state and save to localStorage
       setWalletAddress(address);
       setWalletType(walletType);
       setNetwork(networkId);
       saveWalletData(address, walletType, networkId);
       
-      // Log the connection success
       addConnectionLog('Connection Success', `Connected to ${walletType}: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`);
       
-      // Call login webhook
       try {
         const data = await callLoginWebhook(
           webhooks.login, 
@@ -79,7 +71,6 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
           addConnectionLog
         );
         
-        // Process user data from webhook response
         const userDataObj = parseUserData(data);
         
         if (userDataObj) {
@@ -87,13 +78,11 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
           setUserData(userDataObj);
           saveUserData(userDataObj);
           
-          // Immediately fetch available decks after successful login
           addConnectionLog('Decks Fetch', `Fetching available decks for user ${userDataObj.userId}`);
           try {
             const decksData = await fetchAvailableDecks(webhooks.deck, userDataObj.userId, environment);
             
             if (Array.isArray(decksData) && decksData.length > 0) {
-              // Process and log the decks data
               const processedDecks = processDecksFromApi(decksData);
               addConnectionLog('Decks Success', `Fetched ${processedDecks.length} decks`);
               console.log('Available decks:', processedDecks);
@@ -104,7 +93,6 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
             addConnectionLog('Decks Error', `Failed to fetch decks: ${deckError instanceof Error ? deckError.message : String(deckError)}`);
             console.error('Error fetching decks:', deckError);
           }
-          
         } else {
           addConnectionLog('Login Error', 'Invalid webhook response format');
           console.error("Invalid webhook response format:", data);
@@ -115,7 +103,6 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
         addConnectionLog('Login Error', `Webhook error: ${error instanceof Error ? error.message : String(error)}`);
         console.error("Error calling login webhook:", error);
         
-        // Generate a mock user ID for development environment
         if (environment === 'development') {
           const mockUserData = {
             userId: `mock_${Math.random().toString(16).substring(2, 8)}`,
@@ -133,9 +120,8 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
           return true;
         }
         
-        // For production, show error and fail
         toast.error('Error connecting to login webhook. Please try again later.');
-        disconnectWallet(); // Disconnect if login webhook fails
+        disconnectWallet();
         return false;
       }
 
@@ -151,11 +137,9 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
   };
   
   const disconnectWallet = () => {
-    // Only log if there's actually a wallet to disconnect
     if (walletAddress) {
       addConnectionLog('Disconnect', `Disconnected ${walletType} wallet: ${walletAddress.substring(0, 6)}...${walletAddress.substring(walletAddress.length - 4)}`);
       
-      // If phantom is connected, try to disconnect from it
       if (walletType === 'phantom' && window.solana?.isConnected) {
         try {
           window.solana.disconnect();
@@ -210,4 +194,50 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
     disconnectWallet,
     overrideUserData
   };
+};
+
+const callLoginWebhook = async (
+  webhookUrl: string,
+  address: string,
+  walletType: string,
+  environment: string,
+  addConnectionLog: (action: string, details: string) => void
+): Promise<any> => {
+  addConnectionLog('Login WebhookCall', `Calling login webhook with ${walletType}, ${address}`);
+  console.log(`Calling login webhook with ${walletType}, ${address}`);
+  
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        date: new Date().toISOString(),
+        wallet: address,
+        type: walletType
+      }),
+    });
+    
+    const status = response.status;
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      addConnectionLog('Login Error', `HTTP error! status: ${status}, ${errorText}`);
+      logLoginWebhook(webhookUrl, { wallet: address, type: walletType }, null, `HTTP error! status: ${status}`, status, environment);
+      throw new Error(`HTTP error! status: ${status}`);
+    }
+    
+    const data = await response.json();
+    console.log('Login webhook response:', data);
+    
+    addConnectionLog('Login Success', `Received response with status ${status}`);
+    logLoginWebhook(webhookUrl, { wallet: address, type: walletType }, data, undefined, status, environment);
+    
+    return data;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    addConnectionLog('Login Error', `Error: ${errorMsg}`);
+    throw error;
+  }
 };

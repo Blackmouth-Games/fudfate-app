@@ -1,9 +1,8 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash, RefreshCw, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
-import { WebhookLog } from '@/services/webhook-service';
+import { WebhookLog } from '@/types/webhook';
 
 const WebhookLogTab: React.FC = () => {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
