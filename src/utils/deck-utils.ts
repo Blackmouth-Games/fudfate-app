@@ -1,5 +1,5 @@
 
-import { Deck, DeckInfo } from '@/types/tarot';
+import { Deck } from '@/types/tarot';
 
 export interface ApiDeckResponse {
   id: string;
@@ -19,6 +19,7 @@ export interface DeckInfo {
   createdAt: string;
   directory: string;
   backImage: string;
+  unlocked?: boolean;
 }
 
 /**
@@ -66,7 +67,8 @@ export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => 
     isActive: apiDeck.is_active,
     createdAt: apiDeck.created_at,
     directory,
-    backImage
+    backImage,
+    unlocked: true // Default to unlocked
   };
 };
 
@@ -83,7 +85,8 @@ export const getAllDecks = (): DeckInfo[] => {
       isActive: true,
       createdAt: new Date().toISOString(),
       directory: '/img/cards/deck_1/',
-      backImage: '/img/cards/deck_1/99_BACK.png'
+      backImage: '/img/cards/deck_1/99_BACK.png',
+      unlocked: true
     },
     {
       id: '2',
@@ -93,9 +96,23 @@ export const getAllDecks = (): DeckInfo[] => {
       isActive: true, 
       createdAt: new Date().toISOString(),
       directory: '/img/cards/deck_2/',
-      backImage: '/img/cards/deck_2/99_BACK.png'
+      backImage: '/img/cards/deck_2/99_BACK.png',
+      unlocked: true
     }
   ];
+};
+
+/**
+ * Get available decks for user selection
+ * This is the missing function that was being imported
+ */
+export const getAvailableDecks = (): DeckInfo[] => {
+  // For now, just return all decks but in a real app
+  // this might filter based on user permissions/ownership
+  return getAllDecks().map(deck => ({
+    ...deck,
+    unlocked: true
+  }));
 };
 
 /**
