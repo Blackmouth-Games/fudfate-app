@@ -26,7 +26,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const { t } = useTranslation();
   const { loading, prepareCardSelection, handleCardReveal, generateInterpretation } = useTarotOperations();
   
-  // State variables - default to deck_1 instead of deck1
+  // State variables
   const [selectedDeck, setSelectedDeck] = useState<Deck>('deck_1');
   const [intention, setIntention] = useState<string>('');
   const [phase, setPhase] = useState<ReadingPhase>('intention');
@@ -138,7 +138,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     const card = availableCards.find(c => c.id === cardId);
     if (!card) return;
     
-    setAvailableCards(prev => prev.filter(c => c.id !== cardId));
+    // We no longer filter the availableCards - the CardSelectionDeck component
+    // will handle rendering only unselected cards
     
     const updatedSelectedCards = [
       ...selectedCards, 
@@ -146,16 +147,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     ];
     
     setSelectedCards(updatedSelectedCards);
-    
-    // Automatically advance to reading phase when 3 cards are selected
-    if (updatedSelectedCards.length === 3) {
-      setTimeout(() => {
-        setPhase('reading');
-        toast.success(t('tarot.selectionCompleted'), {
-          style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
-        });
-      }, 500);
-    }
   };
 
   const revealCard = async (index: number) => {
@@ -167,7 +158,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setSelectedCards,
       webhookResponse,
       intention,
-      selectedDeck
+      selectedDeck,
+      setFinalMessage
     );
     
     if (success) {
@@ -187,7 +179,13 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
           );
           
           setInterpretation(interpretationResult);
-          setFinalMessage(interpretationResult.summary);
+          
+          // If finalMessage hasn't been set yet by handleCardReveal,
+          // set it from the interpretation summary
+          if (!finalMessage) {
+            setFinalMessage(interpretationResult.summary);
+          }
+          
           setPhase('complete');
         } catch (error) {
           console.error("Error generating final interpretation:", error);
@@ -220,6 +218,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     intention,
     setIntention,
     phase,
+    setPhase,
     availableCards,
     selectedCards,
     setSelectedCards,

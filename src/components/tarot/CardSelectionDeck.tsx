@@ -6,6 +6,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/types/tarot';
+import { useTarot } from '@/contexts/TarotContext';
 
 interface CardSelectionDeckProps {
   allDeckCards: Card[];
@@ -27,6 +28,12 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
   handleCardSelect
 }) => {
   const { t } = useTranslation();
+  const { phase, setPhase } = useTarot();
+
+  // Function to continue to reading phase
+  const handleContinueToReading = () => {
+    setPhase('reading');
+  };
 
   if (loading) {
     return (
@@ -72,7 +79,11 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
         <div className="flex flex-wrap justify-center">
           <AnimatePresence>
             {allDeckCards.map((card, index) => {
-              // Calculate offset for fan-like arrangement
+              // Skip cards that have already been selected
+              if (selectedCards.some(sc => sc.id === card.id)) {
+                return null;
+              }
+              
               const isSelected = card.id === selectedCardId;
               const angle = ((index - allDeckCards.length / 2) / allDeckCards.length) * 40;
               const baseZIndex = index;
@@ -102,6 +113,7 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                     rotate: 0,
                     scale: 0.9,
                     zIndex: 100,
+                    opacity: 0,
                     transition: { duration: 0.5, ease: "easeInOut" }
                   } : {
                     left: `${xPos}%`, 
@@ -109,8 +121,10 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                     rotate: angle,
                     scale: 1,
                     zIndex: baseZIndex,
+                    opacity: 1,
                     transition: { duration: 0.3 }
                   }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.3 } }}
                   whileHover={!isAnimating ? { 
                     y: -20, 
                     scale: 1.1,
@@ -151,6 +165,7 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
             variant="default" 
             className="bg-amber-600 hover:bg-amber-700 px-6"
             disabled={loading}
+            onClick={handleContinueToReading}
           >
             {t('tarot.continueToReading')}
           </Button>

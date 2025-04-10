@@ -24,6 +24,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   
   // Track which cards have been flipped to prevent multiple flips
   const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
+  const [showingReadingMessage, setShowingReadingMessage] = useState(false);
   
   // Handle card click with animation - only allow one flip per card
   const handleCardReveal = async (index: number) => {
@@ -40,6 +41,17 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
       handleCardClick(index);
     }, 300);
   };
+
+  // Check if all cards are revealed to show the final message
+  useEffect(() => {
+    if (selectedCards.every(card => card.revealed) && webhookMessage) {
+      const timer = setTimeout(() => {
+        setShowingReadingMessage(true);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedCards, webhookMessage]);
   
   return (
     <>
@@ -52,9 +64,23 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
           />
         </h3>
         <p className="text-gray-600 text-sm">
-          {webhookMessage ? webhookMessage : t('tarot.tapToReveal')}
+          {!showingReadingMessage 
+            ? (webhookMessage && selectedCards.every(card => card.revealed)
+              ? t('tarot.allCardsRevealed')
+              : t('tarot.tapToReveal')) 
+            : ''}
         </p>
       </div>
+      
+      {showingReadingMessage && webhookMessage && (
+        <div className="my-6 p-5 bg-amber-50 border border-amber-200 rounded-lg text-center">
+          <GlitchText 
+            text={webhookMessage}
+            intensity="light"
+            className="text-lg font-medium text-amber-800"
+          />
+        </div>
+      )}
       
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         {selectedCards.map((card, index) => (

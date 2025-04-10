@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
@@ -38,8 +39,7 @@ export const useTarotOperations = () => {
         }
       }
       
-      // Get all 22 cards from the current deck for selection
-      // We're no longer only showing 6 cards, we're showing all deck cards
+      // Get all cards from the current deck for selection
       const randomCards = getRandomCards(selectedDeck, 22);
       setAvailableCards(randomCards);
       return true;
@@ -57,7 +57,8 @@ export const useTarotOperations = () => {
     setSelectedCards: (cards: ReadingCard[]) => void,
     webhookResponse: WebhookResponse | null,
     intention: string,
-    selectedDeck: Deck
+    selectedDeck: Deck,
+    setFinalMessage: (message: string | null) => void
   ) => {
     const card = selectedCards[index];
     if (!card || card.revealed) return false;
@@ -68,11 +69,17 @@ export const useTarotOperations = () => {
       // Parse webhook response if available
       let parsedWebhookResponse = webhookResponse;
       let webhookCards: number[] = [];
+      let webhookMessage: string | undefined;
       
       if (webhookResponse) {
         // Try to get selected_cards directly from the response
         if (Array.isArray(webhookResponse.selected_cards)) {
           webhookCards = webhookResponse.selected_cards;
+        }
+        
+        // Try to get message directly from the response
+        if (webhookResponse.message) {
+          webhookMessage = webhookResponse.message;
         }
         
         // Try to parse returnwebhoock if it exists
@@ -83,6 +90,10 @@ export const useTarotOperations = () => {
             
             if (Array.isArray(parsedData.selected_cards)) {
               webhookCards = parsedData.selected_cards;
+            }
+            
+            if (parsedData.message) {
+              webhookMessage = parsedData.message;
             }
           } catch (error) {
             console.error("Error parsing webhook response:", error);
@@ -124,6 +135,14 @@ export const useTarotOperations = () => {
       };
       
       setSelectedCards(updatedCards);
+      
+      // Check if all cards are revealed, and if so, show the final message from webhook
+      const allRevealed = updatedCards.every(c => c.revealed);
+      if (allRevealed && webhookMessage) {
+        console.log("All cards revealed, showing webhook message:", webhookMessage);
+        setFinalMessage(webhookMessage);
+      }
+      
       return true;
     } catch (error) {
       console.error("Error revealing card:", error);
@@ -150,16 +169,18 @@ export const useTarotOperations = () => {
         if (typeof webhookMessage === 'string') {
           message = webhookMessage;
         } else if (typeof webhookMessage === 'object') {
+          // Try to get message directly
+          if (webhookMessage.message) {
+            message = webhookMessage.message;
+          }
           // Try to parse returnwebhoock if available
-          if (webhookMessage.returnwebhoock && typeof webhookMessage.returnwebhoock === 'string') {
+          else if (webhookMessage.returnwebhoock && typeof webhookMessage.returnwebhoock === 'string') {
             try {
               const parsedData = JSON.parse(webhookMessage.returnwebhoock);
               message = parsedData.message || '';
             } catch (error) {
               console.error("Error parsing webhook message:", error);
             }
-          } else if (webhookMessage.message) {
-            message = webhookMessage.message;
           }
         }
       }
@@ -168,7 +189,7 @@ export const useTarotOperations = () => {
       
       // Create interpretation object
       const interpretation: Interpretation = {
-        summary: finalMessage,
+        summary: message || finalMessage, // Prioritize webhook message if available
         cards: selectedCards.reduce((acc, card) => {
           if (card.interpretation) {
             acc[card.id] = card.interpretation;
