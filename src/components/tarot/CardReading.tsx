@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +16,9 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   
   // State for webhook message
   const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
+  
+  // Track which cards have been flipped to prevent multiple flips
+  const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
   
   // Parse webhook message if available
   useEffect(() => {
@@ -44,24 +46,18 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   // Card back image based on selected deck
   const cardBackImage = getCardBackPath(selectedDeck);
   
-  // Track flipping state for animation
-  const [flippingCards, setFlippingCards] = useState<{[key: number]: boolean}>({});
-  
-  // Handle card click with animation
+  // Handle card click with animation - only allow one flip per card
   const handleCardClick = async (index: number) => {
-    if (selectedCards[index]?.revealed || loading) return;
+    // Check if card is already revealed or is currently being flipped
+    if (selectedCards[index]?.revealed || loading || flippedCards[index]) return;
     
-    // Set card as flipping
-    setFlippingCards(prev => ({ ...prev, [index]: true }));
+    // Mark this card as flipped to prevent multiple flips
+    setFlippedCards(prev => ({ ...prev, [index]: true }));
     
-    // Wait for flip animation before revealing
+    // Reveal the card
     setTimeout(() => {
       revealCard(index);
-      // Reset flipping state
-      setTimeout(() => {
-        setFlippingCards(prev => ({ ...prev, [index]: false }));
-      }, 600);
-    }, 600);
+    }, 300);
   };
 
   console.log("CardReading rendering with:", {
@@ -104,7 +100,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                   className={`relative w-full h-full transition-transform duration-1000 transform-style-3d cursor-pointer`}
                   style={{ 
                     transformStyle: "preserve-3d",
-                    transform: (card?.revealed || flippingCards[index]) ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    transform: card?.revealed ? 'rotateY(180deg)' : 'rotateY(0deg)'
                   }}
                   onClick={() => !card?.revealed && !loading && handleCardClick(index)}
                 >

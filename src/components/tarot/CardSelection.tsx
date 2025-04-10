@@ -115,7 +115,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
         </div>
       </div>
       
-      {/* All available cards for selection */}
+      {/* All available cards for selection - updated to display all 22 cards with overlap */}
       <div className="relative mt-8">
         <h4 className="text-center font-medium mb-4 text-gray-700">
           {t('tarot.availableCards')}
@@ -156,38 +156,54 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-            <AnimatePresence>
-              {availableCards.map((card, index) => (
-                <motion.div
-                  key={card.id}
-                  className="cursor-pointer hover:shadow-xl transition-all duration-300 transform aspect-[2/3]"
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ 
-                    opacity: 1, 
-                    scale: 1, 
-                    y: 0,
-                    transition: { duration: 0.3, delay: index * 0.02 }
-                  }}
-                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-                  whileHover={{ y: -10, scale: 1.05, transition: { duration: 0.2 } }}
-                  onClick={() => handleCardSelect(card.id)}
-                >
-                  <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 border-amber-200/50 hover:border-amber-400 transition-colors">
-                    <motion.img 
-                      src={cardBackImage} 
-                      alt="Tarot Card Back"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to default image if the dynamic path fails
-                        console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
-                        e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          <div className="relative h-[60vh] sm:h-[40vh] overflow-hidden">
+            <div className="absolute inset-0">
+              <div className="grid grid-cols-7 sm:grid-cols-11 gap-1 h-full">
+                <AnimatePresence>
+                  {availableCards.map((card, index) => {
+                    // Calculate offset for staggered card display
+                    const rowOffset = index % 2 === 0 ? "10%" : "0";
+                    
+                    return (
+                      <motion.div
+                        key={card.id}
+                        className="cursor-pointer transition-all duration-300 transform aspect-[2/3] hover:z-10"
+                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                        animate={{ 
+                          opacity: 1, 
+                          scale: 1, 
+                          y: 0,
+                          transition: { duration: 0.3, delay: index * 0.02 }
+                        }}
+                        exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
+                        whileHover={{ y: -20, scale: 1.1, transition: { duration: 0.2 } }}
+                        onClick={() => handleCardSelect(card.id)}
+                        style={{
+                          position: 'relative',
+                          top: rowOffset,
+                          marginLeft: `-${index > 0 ? 60 : 0}%`, // Create overlap for cards
+                          width: '100%',
+                          zIndex: index
+                        }}
+                      >
+                        <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 border-amber-200/50 hover:border-amber-400 transition-colors">
+                          <motion.img 
+                            src={cardBackImage} 
+                            alt="Tarot Card Back"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to default image if the dynamic path fails
+                              console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
+                              e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
+                            }}
+                          />
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
         )}
         

@@ -8,6 +8,7 @@ interface TarotCard {
 }
 
 const tarotCards: TarotCard[] = [
+  // Deck 1 - Crypto-themed cards
   {
     id: 'degen',
     name: 'The Degen',
@@ -161,6 +162,162 @@ const tarotCards: TarotCard[] = [
     image: '/img/cards/deck_1/21_TheDAO.png',
     description: 'Symbolizes community governance, collective wisdom, and decentralized organization.',
     deck: 'deck_1'
+  },
+  
+  // Deck 2 - Classic Tarot cards
+  {
+    id: 'fool',
+    name: 'The Fool',
+    image: '/img/cards/deck_2/0_the fool.png',
+    description: 'Represents new beginnings, innocence, and spontaneity.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'magician',
+    name: 'The Magician',
+    image: '/img/cards/deck_2/1_the magician.png',
+    description: 'Symbolizes manifestation, resourcefulness, and inspired action.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'highpriestess',
+    name: 'The High Priestess',
+    image: '/img/cards/deck_2/2_the high priestess.png',
+    description: 'Represents intuition, unconscious knowledge, and mystery.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'empress',
+    name: 'The Empress',
+    image: '/img/cards/deck_2/3_the empress.png',
+    description: 'Symbolizes abundance, nurturing, and fertility.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'emperor',
+    name: 'The Emperor',
+    image: '/img/cards/deck_2/4_the emperor.png',
+    description: 'Represents authority, structure, and control.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'hierophant',
+    name: 'The Hierophant',
+    image: '/img/cards/deck_2/5_the hierophant.png',
+    description: 'Symbolizes tradition, conformity, and spiritual wisdom.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'lovers',
+    name: 'The Lovers',
+    image: '/img/cards/deck_2/6_the lovers.png',
+    description: 'Represents choices, relationships, and alignment of values.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'chariot',
+    name: 'The Chariot',
+    image: '/img/cards/deck_2/7_the chariot.png',
+    description: 'Symbolizes determination, willpower, and victory.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'strength',
+    name: 'Strength',
+    image: '/img/cards/deck_2/8_strength.png',
+    description: 'Represents courage, persuasion, and inner strength.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'hermit',
+    name: 'The Hermit',
+    image: '/img/cards/deck_2/9_the hermit.png',
+    description: 'Symbolizes introspection, searching for truth, and inner guidance.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'wheel',
+    name: 'Wheel of Fortune',
+    image: '/img/cards/deck_2/10_wheel of fortune.png',
+    description: 'Represents cycles, fate, and turning points.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'justice',
+    name: 'Justice',
+    image: '/img/cards/deck_2/11_justice.png',
+    description: 'Symbolizes fairness, truth, and law.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'hangedman',
+    name: 'The Hanged Man',
+    image: '/img/cards/deck_2/12_the hanged man.png',
+    description: 'Represents surrender, new perspective, and suspension.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'death',
+    name: 'Death',
+    image: '/img/cards/deck_2/13_death.png',
+    description: 'Symbolizes endings, change, and transformation.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'temperance',
+    name: 'Temperance',
+    image: '/img/cards/deck_2/14_temperance.png',
+    description: 'Represents balance, moderation, and patience.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'devil',
+    name: 'The Devil',
+    image: '/img/cards/deck_2/15_the devil.png',
+    description: 'Symbolizes bondage, materialism, and ignorance.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'tower',
+    name: 'The Tower',
+    image: '/img/cards/deck_2/16_the tower.png',
+    description: 'Represents sudden change, upheaval, and revelation.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'star',
+    name: 'The Star',
+    image: '/img/cards/deck_2/17_the star.png',
+    description: 'Symbolizes hope, faith, and purpose.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'moon_deck2',
+    name: 'The Moon',
+    image: '/img/cards/deck_2/18_the moon.png',
+    description: 'Represents illusion, fear, and subconscious.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'sun',
+    name: 'The Sun',
+    image: '/img/cards/deck_2/19_the sun.png',
+    description: 'Symbolizes success, joy, and vitality.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'judgement',
+    name: 'Judgement',
+    image: '/img/cards/deck_2/20_judgement.png',
+    description: 'Represents rebirth, inner calling, and absolution.',
+    deck: 'deck_2'
+  },
+  {
+    id: 'world',
+    name: 'The World',
+    image: '/img/cards/deck_2/21_the world.png',
+    description: 'Symbolizes completion, accomplishment, and fulfillment.',
+    deck: 'deck_2'
   }
 ];
 

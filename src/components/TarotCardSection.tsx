@@ -21,7 +21,7 @@ const exampleCards = [
   { id: 1, title: "The Degen", imageUrl: "/img/cards/deck_1/0_TheDegen.png" },
   { id: 2, title: "The Miner", imageUrl: "/img/cards/deck_1/1_TheMiner.png" },
   { id: 3, title: "The Oracle", imageUrl: "/img/cards/deck_1/2_TheOracle.png" },
-  { id: 4, title: "The Whale", imageUrl: "/img/cards/deck_1/3_TheWhale.png" },
+  { id: 4, title: "The Wheel", imageUrl: "/img/cards/deck_2/10_wheel of fortune.png" },
 ];
 
 interface TarotCardSectionProps {
@@ -34,11 +34,13 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
-  // Get all cards from the selected deck - updated to use the correct deck format
-  // We need to handle both 'deck1' and 'deck_1' formats since tarotCards uses the old format
-  const selectedDeckCards = tarotCards.filter(card => 
-    card.deck === 'deck_1' || card.deck === 'deck1'
-  );
+  // Function to get all cards from a specific deck
+  const getCardsFromDeck = (deckId: string) => {
+    return tarotCards.filter(card => card.deck === deckId);
+  };
+  
+  // Get all cards from the selected deck
+  const selectedDeckCards = selectedDeck ? getCardsFromDeck(selectedDeck) : [];
 
   // Function to handle viewing a specific card in full screen
   const viewCard = (cardId: string) => {
@@ -51,7 +53,12 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
 
   // Find the selected card details
   const cardDetails = selectedCard ? 
-    selectedDeckCards.find(card => card.id === selectedCard) : null;
+    tarotCards.find(card => card.id === selectedCard) : null;
+
+  // Opens the deck dialog when clicking on a deck preview
+  const handleDeckClick = (deckId: string) => {
+    setSelectedDeck(deckId);
+  };
 
   return (
     <section id="cards" className="py-20 px-4 md:px-8 lg:px-16 relative">
@@ -82,7 +89,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
                 <div 
                   className="floating cursor-pointer" 
                   style={{ animationDelay: `${0.2 * index}s` }}
-                  onClick={() => setSelectedDeck(`deck_${index + 1}`)}
+                  onClick={() => handleDeckClick(index < 3 ? 'deck_1' : 'deck_2')}
                 >
                   <TarotCard 
                     imageUrl={card.imageUrl}
@@ -104,7 +111,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-center">
-              <GlitchText text={t('cards.deckCards')} className="text-xl" />
+              <GlitchText text={selectedDeck === 'deck_1' ? t('cards.cryptoDeck') : t('cards.classicDeck')} className="text-xl" />
             </DialogTitle>
             <DialogClose className="absolute right-4 top-4">
               <X className="h-4 w-4" />
