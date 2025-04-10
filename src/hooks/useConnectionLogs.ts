@@ -20,8 +20,14 @@ export const useConnectionLogs = () => {
     });
   };
 
+  const clearLogs = () => {
+    setConnectionLogs([]);
+  };
+
   return {
     connectionLogs,
-    addConnectionLog
+    logs: connectionLogs, // Add an alias for backward compatibility
+    addConnectionLog,
+    clearLogs // Add the new clearLogs function
   };
 };

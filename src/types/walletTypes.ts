@@ -25,6 +25,7 @@ export interface WalletContextType {
   disconnectWallet: () => void;
   overrideUserData: (data: Partial<UserData>) => void;
   connectionLogs: ConnectionLog[];
+  clearLogs?: () => void;
 }
 
 export interface WalletProviderProps {

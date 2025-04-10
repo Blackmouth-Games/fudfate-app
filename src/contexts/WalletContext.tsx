@@ -8,7 +8,7 @@ import { useWalletState } from '@/hooks/useWalletState';
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export const WalletProvider = ({ children }: WalletProviderProps) => {
-  const { connectionLogs, addConnectionLog } = useConnectionLogs();
+  const { connectionLogs, addConnectionLog, clearLogs } = useConnectionLogs();
   const {
     connected,
     walletAddress,
@@ -44,7 +44,8 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     connectWallet,
     disconnectWallet,
     overrideUserData,
-    connectionLogs
+    connectionLogs,
+    clearLogs // Add clearLogs to context
   };
 
   return <WalletContext.Provider value={value}>{children}</WalletContext.Provider>;

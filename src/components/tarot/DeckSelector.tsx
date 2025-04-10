@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +8,7 @@ import tarotCards from '@/data/tarotCards';
 import { DeckInfo, getAvailableDecks } from '@/utils/deck-utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTarot } from '@/contexts/TarotContext';
+import { Deck } from '@/types/tarot';
 
 interface DeckSelectorProps {
   className?: string;
@@ -33,7 +33,8 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
     // Only allow selecting unlocked decks
     const deck = decks.find(d => d.id === deckId);
     if (deck && deck.unlocked) {
-      setSelectedDeck(deckId);
+      // Convert the string to the Deck type before passing to setSelectedDeck
+      setSelectedDeck(deckId as Deck);
     }
   };
 

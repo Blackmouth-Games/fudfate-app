@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useConnectionLogs } from '@/hooks/useConnectionLogs';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import { Maximize2, Download, RefreshCw, X, CheckCircle, XCircle, Clock } from '
 import { format } from 'date-fns';
 
 const ConnectionLogsTab = () => {
-  const { logs, clearLogs } = useConnectionLogs();
+  const { connectionLogs, clearLogs } = useConnectionLogs();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
@@ -30,11 +29,11 @@ const ConnectionLogsTab = () => {
     if (logsContainerRef.current) {
       logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
     }
-  }, [logs]);
+  }, [connectionLogs]);
   
   // Function to download logs as JSON
   const handleDownloadLogs = () => {
-    const filteredLogs = applyFilters(logs);
+    const filteredLogs = applyFilters(connectionLogs);
     const dataStr = JSON.stringify(filteredLogs, null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
     
@@ -84,7 +83,7 @@ const ConnectionLogsTab = () => {
     return null;
   };
   
-  const filteredLogs = applyFilters(logs);
+  const filteredLogs = applyFilters(connectionLogs);
 
   return (
     <div className="space-y-2">
