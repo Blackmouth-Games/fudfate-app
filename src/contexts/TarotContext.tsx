@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -22,6 +21,13 @@ interface ReadingCard extends Card {
   revealed: boolean;
 }
 
+interface Interpretation {
+  summary: string;
+  cards?: {
+    [key: string]: string;
+  };
+}
+
 interface TarotContextType {
   selectedDeck: Deck;
   setSelectedDeck: (deck: Deck) => void;
@@ -39,6 +45,7 @@ interface TarotContextType {
   revealCard: (index: number) => Promise<void>;
   resetReading: () => void;
   loading: boolean;
+  interpretation: Interpretation | null;
 }
 
 const TarotContext = createContext<TarotContextType | undefined>(undefined);
@@ -54,6 +61,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [introMessage, setIntroMessage] = useState<string | null>(null);
   const [finalMessage, setFinalMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [interpretation, setInterpretation] = useState<Interpretation | null>(null);
 
   const getRandomCards = (count: number = 6): Card[] => {
     const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
@@ -100,7 +108,19 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      return `La combinación de las cartas elegidas revela un patrón interesante para tu intención "${userIntention}". El mensaje general sugiere que estás en un momento de importantes decisiones que determinarán tu futuro cercano. Confía en tu intuición y mantén la mente abierta a nuevas posibilidades.`;
+      const message = `La combinación de las cartas elegidas revela un patrón interesante para tu intención "${userIntention}". El mensaje general sugiere que estás en un momento de importantes decisiones que determinarán tu futuro cercano. Confía en tu intuición y mantén la mente abierta a nuevas posibilidades.`;
+      
+      setInterpretation({
+        summary: message,
+        cards: cards.reduce((acc, card) => {
+          if (card.interpretation) {
+            acc[card.id] = card.interpretation;
+          }
+          return acc;
+        }, {} as {[key: string]: string})
+      });
+      
+      return message;
     } catch (error) {
       console.error("Error generating final message:", error);
       throw new Error("No se pudo generar el mensaje final");
@@ -168,16 +188,13 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     const card = availableCards.find(c => c.id === cardId);
     if (!card) return;
     
-    // Remove selected card from available cards
     setAvailableCards(prev => prev.filter(c => c.id !== cardId));
     
-    // Add card to selected cards
     setSelectedCards(prev => [
       ...prev, 
       { ...card, revealed: false }
     ]);
     
-    // If we've now selected 3 cards, proceed to reading phase
     if (selectedCards.length === 2) {
       setTimeout(() => {
         setPhase('reading');
@@ -234,6 +251,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setSelectedCards([]);
     setIntroMessage(null);
     setFinalMessage(null);
+    setInterpretation(null);
     
     toast.success("Nueva lectura iniciada", {
       style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
@@ -269,7 +287,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     selectCard,
     revealCard,
     resetReading,
-    loading
+    loading,
+    interpretation
   };
 
   return <TarotContext.Provider value={value}>{children}</TarotContext.Provider>;

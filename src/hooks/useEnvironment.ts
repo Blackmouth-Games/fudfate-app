@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Environment, getWebhooks } from '@/config/webhooks';
+import { Environment, webhooks } from '@/config/webhooks';
 
 export const useEnvironment = () => {
   const [environment, setEnvironment] = useState<Environment>('production'); // Changed default to production
@@ -28,7 +28,5 @@ export const useEnvironment = () => {
     };
   }, []);
 
-  const webhooks = getWebhooks(environment);
-
-  return { environment, webhooks };
+  return { environment, webhooks: webhooks[environment] };
 };
