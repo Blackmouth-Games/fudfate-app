@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
@@ -28,6 +28,11 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
   } = useTarot();
   
   const [loading, setLoading] = useState(false);
+  
+  // Log userData to see what's happening with runsToday
+  useEffect(() => {
+    console.log('IntentionForm userData:', userData);
+  }, [userData]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,8 +96,9 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
                 </p>
               </div>
               
-              {/* Only show form if user has readings available */}
-              {userData?.runsToday ? (
+              {/* Only show form if user has readings available 
+                  Note: userData.runsToday=true means user CAN make readings */}
+              {userData && userData.runsToday ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="relative">
                     <Input

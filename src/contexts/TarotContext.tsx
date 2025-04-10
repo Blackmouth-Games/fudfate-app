@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useWallet } from './WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import tarotCards from '@/data/tarotCards';
 import { 
@@ -22,10 +23,11 @@ const TarotContext = createContext<TarotContextType | undefined>(undefined);
 export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const { connected, walletAddress, walletType, network, userData } = useWallet();
   const { webhooks, environment } = useEnvironment();
+  const { t } = useTranslation();
   const { loading, prepareCardSelection, handleCardReveal, generateInterpretation } = useTarotOperations();
   
-  // State variables
-  const [selectedDeck, setSelectedDeck] = useState<Deck>('deck1');
+  // State variables - default to deck_1 instead of deck1
+  const [selectedDeck, setSelectedDeck] = useState<Deck>('deck_1');
   const [intention, setIntention] = useState<string>('');
   const [phase, setPhase] = useState<ReadingPhase>('intention');
   const [availableCards, setAvailableCards] = useState<Card[]>([]);
@@ -37,14 +39,14 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
 
   const startReading = async () => {
     if (!connected) {
-      toast.error("Debes conectar tu wallet para realizar una lectura", {
+      toast.error(t('errors.walletNotConnected'), {
         style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
       });
       return;
     }
     
     if (!intention.trim()) {
-      toast.error("Por favor ingresa tu intención o pregunta", {
+      toast.error(t('tarot.intentionRequired'), {
         style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
       });
       return;
@@ -52,7 +54,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     
     const hasRequiredToken = await checkUserToken();
     if (!hasRequiredToken) {
-      toast.error("Necesitas tener el token requerido en tu wallet para realizar una lectura", {
+      toast.error(t('errors.tokenRequired'), {
         style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
       });
       return;
@@ -71,7 +73,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       
       // If we're in production and no webhook data, we can't proceed
       if (!webhookData && environment !== 'development') {
-        toast.error("No se pudo obtener información del servidor. Inténtalo más tarde.", {
+        toast.error(t('errors.serverError'), {
           style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
         });
         setPhase('intention');
@@ -94,7 +96,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       
       // If webhook returned a selected deck, use it
       if (selectedDeckFromWebhook) {
-        setSelectedDeck(`deck${selectedDeckFromWebhook}` as Deck);
+        setSelectedDeck(selectedDeckFromWebhook);
       }
       
       // Prepare cards for selection
@@ -108,7 +110,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       
       if (success) {
         setPhase('selection');
-        toast.success("Lectura iniciada correctamente", {
+        toast.success(t('tarot.readingStarted'), {
           style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
         });
       } else {
@@ -116,7 +118,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("Error starting reading:", error);
-      toast.error("Error al iniciar la lectura. Inténtalo de nuevo.", {
+      toast.error(t('errors.readingFailed'), {
         style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
       });
       setPhase('intention');
@@ -127,7 +129,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     if (phase !== 'selection') return;
     
     if (selectedCards.length >= 3) {
-      toast.error("Ya has seleccionado 3 cartas", {
+      toast.error(t('tarot.maxCardsSelected'), {
         style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
       });
       return;
@@ -149,7 +151,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     if (updatedSelectedCards.length === 3) {
       setTimeout(() => {
         setPhase('reading');
-        toast.success("Selección completada. Revela las cartas para ver tu lectura.", {
+        toast.success(t('tarot.selectionCompleted'), {
           style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
         });
       }, 500);
@@ -173,7 +175,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       const allRevealed = updatedCards.every(c => c.revealed);
       
       if (allRevealed) {
-        toast.success("Todas las cartas reveladas. Generando lectura final...", {
+        toast.success(t('tarot.allCardsRevealed'), {
           style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
         });
         
@@ -189,7 +191,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
           setPhase('complete');
         } catch (error) {
           console.error("Error generating final interpretation:", error);
-          toast.error("Error al generar la interpretación final.", {
+          toast.error(t('errors.interpretationFailed'), {
             style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
           });
         }
@@ -207,7 +209,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setInterpretation(null);
     setWebhookResponse(null);
     
-    toast.success("Nueva lectura iniciada", {
+    toast.success(t('tarot.newReadingStarted'), {
       style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
     });
   };

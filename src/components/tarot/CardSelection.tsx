@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
+import { useWallet } from '@/contexts/WalletContext';
 import GlitchText from '@/components/GlitchText';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,13 +16,15 @@ interface CardSelectionProps {
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase } = useTarot();
+  const { userData } = useWallet();
   const { t } = useTranslation();
   
   // Use the correct path format for card back images
   const cardBackImage = getCardBackPath(selectedDeck);
   
-  // Empty state - no cards available
-  if (availableCards.length === 0 && !loading) {
+  // Check if user can make readings (userData.runsToday should be true for "can read")
+  // Empty state - no cards available or user can't read
+  if ((availableCards.length === 0 && !loading) || (userData && !userData.runsToday)) {
     return (
       <div className={`text-center py-12 ${className}`}>
         <div className="bg-amber-50 border border-amber-100 rounded-lg p-6 max-w-md mx-auto">

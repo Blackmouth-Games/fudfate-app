@@ -28,14 +28,14 @@ interface TarotCardSectionProps {
   deckId?: string;
 }
 
-const TarotCardSection = ({ deckId = 'deck1' }: TarotCardSectionProps) => {
+const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   const { t } = useTranslation();
   const cards = exampleCards;
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
-  // Get all cards from the selected deck
-  const selectedDeckCards = tarotCards.filter(card => card.deck === 'deck1');
+  // Get all cards from the selected deck - updated to use 'deck_1' instead of 'deck1'
+  const selectedDeckCards = tarotCards.filter(card => card.deck === 'deck_1');
 
   // Function to handle viewing a specific card in full screen
   const viewCard = (cardId: string) => {
@@ -79,7 +79,7 @@ const TarotCardSection = ({ deckId = 'deck1' }: TarotCardSectionProps) => {
                 <div 
                   className="floating cursor-pointer" 
                   style={{ animationDelay: `${0.2 * index}s` }}
-                  onClick={() => setSelectedDeck(`deck${index + 1}`)}
+                  onClick={() => setSelectedDeck(`deck_${index + 1}`)}
                 >
                   <TarotCard 
                     imageUrl={card.imageUrl}
