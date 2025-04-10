@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -32,6 +33,7 @@ interface Interpretation {
 interface WebhookResponse {
   selected_cards?: number[];
   message?: string;
+  selected_deck?: Deck;
 }
 
 interface TarotContextType {
@@ -222,7 +224,22 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       
       // Call the reading webhook
       const webhookData = await callReadingWebhook();
+      
+      // If we're in production and no webhook data, we can't proceed
+      if (!webhookData && environment !== 'development') {
+        toast.error("No se pudo obtener información del servidor. Inténtalo más tarde.", {
+          style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+        });
+        setPhase('intention');
+        return;
+      }
+      
       setWebhookResponse(webhookData);
+      
+      // If webhook returned a selected deck, use it
+      if (webhookData?.selected_deck) {
+        setSelectedDeck(webhookData.selected_deck);
+      }
       
       const intro = await generateIntroMessage(intention);
       setIntroMessage(intro);

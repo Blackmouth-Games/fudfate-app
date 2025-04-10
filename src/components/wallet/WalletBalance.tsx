@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import { Coins } from 'lucide-react';
+import { getSolanaBalance } from '@/utils/token-utils';
 
 interface WalletBalanceProps {
   className?: string;
@@ -18,15 +19,13 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
       
       setLoading(true);
       try {
-        // This is a mock implementation
-        // In a real app, you would use the appropriate blockchain API
+        // Only show Solana tokens
         if (network === 'solana') {
-          // Simulate API call delay
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setBalance('2.45');
-        } else if (network === 'ethereum') {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          setBalance('0.15');
+          // Get the real balance using our utility function
+          const solBalance = await getSolanaBalance(walletAddress);
+          setBalance(solBalance);
+        } else {
+          setBalance(null);
         }
       } catch (error) {
         console.error('Error fetching balance:', error);
@@ -43,7 +42,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
     return () => clearInterval(intervalId);
   }, [walletAddress, walletType, network]);
 
-  if (!walletAddress || !walletType || !balance) return null;
+  if (!walletAddress || !walletType || !balance || network !== 'solana') return null;
 
   return (
     <div className={`flex items-center px-3 py-1.5 bg-gray-100 rounded-full text-sm font-medium ${className}`}>
@@ -52,7 +51,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
         <div className="w-10 h-4 bg-gray-200 animate-pulse rounded" />
       ) : (
         <span>
-          {balance} {network === 'solana' ? 'SOL' : 'ETH'}
+          {balance} SOL
         </span>
       )}
     </div>

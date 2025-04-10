@@ -12,35 +12,60 @@ interface CardSelectionProps {
 }
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
-  const { availableCards, selectedCards, selectCard, loading } = useTarot();
+  const { availableCards, selectedCards, selectCard, loading, selectedDeck } = useTarot();
   const { t } = useTranslation();
   
-  // Card back image
-  const cardBackImage = "/img/cards/carddeck1/card_back.jpg";
-  const [cardPositions, setCardPositions] = useState<{
-    [key: string]: {
-      left: number;
-      top: number;
-      rotation: number;
-      zIndex: number;
-    };
-  }>({});
-
-  // Generate random positions for cards that remain consistent
-  useEffect(() => {
-    const positions: {[key: string]: {left: number, top: number, rotation: number, zIndex: number}} = {};
+  // Use the correct path format for card back images
+  const cardBackImage = `/img/decks/${selectedDeck}/${selectedDeck}_back.png`;
+  
+  // State to track if a card has been selected
+  const [hasSelectedCard, setHasSelectedCard] = useState(false);
+  
+  // Calculate positions for a hand-like fan arrangement
+  const calculateHandPositions = () => {
+    const positions = {};
+    const cardCount = availableCards.length;
+    const arcWidth = 60; // Width of the arc in degrees
+    const arcStart = -arcWidth / 2; // Start angle
     
     availableCards.forEach((card, index) => {
+      const angle = arcStart + (arcWidth * index / (cardCount - 1 || 1));
+      const radianAngle = (angle * Math.PI) / 180;
+      
+      // Calculate positions based on a fan/hand layout
+      const centerX = 50; // Center X position (%)
+      const bottomY = 90; // Bottom Y position (%)
+      const radius = 40; // Radius of the arc
+      
+      const x = centerX + radius * Math.sin(radianAngle);
+      const y = bottomY - radius * (1 - Math.cos(radianAngle));
+      
       positions[card.id] = {
-        left: Math.floor(Math.random() * 65),
-        top: Math.floor(Math.random() * 65),
-        rotation: Math.floor(Math.random() * 30) - 15,
-        zIndex: Math.floor(Math.random() * 10) + 1
+        left: x,
+        top: y,
+        rotation: angle, // Rotate the card to match the fan angle
+        zIndex: index + 1 // Cards on the right are on top
       };
     });
     
-    setCardPositions(positions);
-  }, [availableCards]);
+    return positions;
+  };
+  
+  const [cardPositions, setCardPositions] = useState({});
+  
+  // Generate positions when cards change but don't change positions after selection
+  useEffect(() => {
+    if (!hasSelectedCard) {
+      setCardPositions(calculateHandPositions());
+    }
+  }, [availableCards, hasSelectedCard]);
+  
+  // Update the hasSelectedCard state when cards are selected
+  useEffect(() => {
+    if (selectedCards.length > 0) {
+      setHasSelectedCard(true);
+    }
+  }, [selectedCards]);
 
   // Empty state - no cards available
   if (availableCards.length === 0 && !loading) {
@@ -62,6 +87,10 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
       </div>
     );
   }
+
+  const handleCardSelect = (cardId) => {
+    selectCard(cardId);
+  };
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -124,21 +153,28 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                     zIndex: position.zIndex,
                     width: '150px',
                     height: '225px',
+                    transformOrigin: 'bottom center',
                   }}
-                  initial={{ opacity: 0, rotate: position.rotation, y: -100 }}
-                  animate={{ opacity: 1, rotate: position.rotation, y: 0 }}
-                  exit={{ opacity: 0, y: -100, transition: { duration: 0.5 } }}
-                  transition={{ duration: 0.5, delay: position.zIndex * 0.1 }}
-                  whileHover={{ y: -10, boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)" }}
-                  onClick={() => selectCard(card.id)}
+                  initial={{ opacity: 0, rotate: position.rotation, y: 50 }}
+                  animate={{ 
+                    opacity: 1, 
+                    rotate: position.rotation, 
+                    y: 0,
+                    transition: { duration: 0.5, delay: position.zIndex * 0.05 }
+                  }}
+                  exit={{ opacity: 0, y: 100, transition: { duration: 0.3 } }}
+                  whileHover={{ y: -20, scale: 1.05, transition: { duration: 0.2 } }}
+                  onClick={() => handleCardSelect(card.id)}
                 >
                   <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center">
                     <motion.img 
                       src={cardBackImage} 
                       alt="Tarot Card Back"
                       className="w-full h-full object-cover"
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ duration: 0.3 }}
+                      onError={(e) => {
+                        // Fallback to default image if the dynamic path fails
+                        e.currentTarget.src = "/img/cards/carddeck1/card_back.jpg";
+                      }}
                     />
                   </div>
                 </motion.div>
@@ -182,6 +218,10 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
                       src={cardBackImage}
                       alt="Selected Card"
                       className="h-full w-full object-cover rounded-md"
+                      onError={(e) => {
+                        // Fallback to default image if the dynamic path fails
+                        e.currentTarget.src = "/img/cards/carddeck1/card_back.jpg";
+                      }}
                     />
                     <motion.div 
                       className="absolute inset-0 bg-amber-400/20 rounded-md"
