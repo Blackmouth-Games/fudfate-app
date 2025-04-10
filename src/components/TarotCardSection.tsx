@@ -113,8 +113,26 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
         onOpenChange={(open) => !open && setOpenDeckId(null)}
         deckId={openDeckId}
         decks={[
-          { id: '1', name: 'deck_1', displayName: t('cards.cryptoDeck'), isActive: true, backImage: '/img/cards/deck_1/99_BACK.png' },
-          { id: '4', name: 'deck_2', displayName: t('cards.classicDeck'), isActive: true, backImage: '/img/cards/deck_2/99_BACK.png' }
+          { 
+            id: '1', 
+            name: 'deck_1', 
+            displayName: t('cards.cryptoDeck'), 
+            description: 'The original crypto-themed tarot deck',
+            isActive: true, 
+            createdAt: new Date().toISOString(),
+            directory: '/img/cards/deck_1/',
+            backImage: '/img/cards/deck_1/99_BACK.png' 
+          },
+          { 
+            id: '4', 
+            name: 'deck_2', 
+            displayName: t('cards.classicDeck'), 
+            description: 'Classic tarot images with a modern twist',
+            isActive: true, 
+            createdAt: new Date().toISOString(),
+            directory: '/img/cards/deck_2/',
+            backImage: '/img/cards/deck_2/99_BACK.png' 
+          }
         ]}
         deckCards={openDeckCards}
         onCardClick={viewCard}
