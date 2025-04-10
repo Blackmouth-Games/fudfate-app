@@ -34,8 +34,11 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   const [selectedDeck, setSelectedDeck] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
-  // Get all cards from the selected deck - updated to use 'deck_1' instead of 'deck1'
-  const selectedDeckCards = tarotCards.filter(card => card.deck === 'deck_1');
+  // Get all cards from the selected deck - updated to use the correct deck format
+  // We need to handle both 'deck1' and 'deck_1' formats since tarotCards uses the old format
+  const selectedDeckCards = tarotCards.filter(card => 
+    card.deck === 'deck_1' || card.deck === 'deck1'
+  );
 
   // Function to handle viewing a specific card in full screen
   const viewCard = (cardId: string) => {
