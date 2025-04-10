@@ -8,17 +8,32 @@ interface GlitchTextProps {
   className?: string;
   fontSize?: string;
   lineHeight?: string;
+  neonEffect?: 'purple' | 'red' | 'blue' | 'none';
+  intensity?: 'normal' | 'intense' | 'digital';
 }
 
-export const GlitchText: React.FC<GlitchTextProps> = ({ 
-  text, 
-  goldEffect = false, 
+export const GlitchText: React.FC<GlitchTextProps> = ({
+  text,
+  goldEffect = false,
   className = '',
   fontSize,
-  lineHeight
+  lineHeight,
+  neonEffect = 'none',
+  intensity = 'normal'
 }) => {
   const baseColor = goldEffect ? 'gold-text' : 'text-gray-900';
   const glitchColor = goldEffect ? 'gold-text' : 'text-gray-900';
+  
+  // Apply neon effect if requested
+  let neonClass = '';
+  if (neonEffect === 'purple') neonClass = 'glitch-neon';
+  else if (neonEffect === 'red') neonClass = 'glitch-neon-red';
+  else if (neonEffect === 'blue') neonClass = 'glitch-neon-blue';
+  
+  // Apply intensity variation
+  let intensityClass = '';
+  if (intensity === 'intense') intensityClass = 'intense-glitch';
+  else if (intensity === 'digital') intensityClass = 'digital-distortion';
   
   const containerStyle: React.CSSProperties = {
     fontSize,
@@ -49,21 +64,21 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
 
   return (
     <div 
-      className={`text-container ${className}`} 
+      className={`text-container ${className} ${intensityClass}`} 
       style={containerStyle}
     >
-      <span className={`text-base ${baseColor}`} style={textStyle}>
+      <span className={`text-base ${baseColor} ${neonClass}`} style={textStyle}>
         {text}
       </span>
       <span 
-        className={`text-glitch-effect-1 ${glitchColor}`} 
+        className={`text-glitch-effect-1 ${glitchColor} ${neonClass}`} 
         aria-hidden="true"
         style={glitchStyle}
       >
         {text}
       </span>
       <span 
-        className={`text-glitch-effect-2 ${glitchColor}`} 
+        className={`text-glitch-effect-2 ${glitchColor} ${neonClass}`} 
         aria-hidden="true"
         style={glitchStyle}
       >
