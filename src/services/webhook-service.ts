@@ -1,11 +1,11 @@
 
 import { WebhookResponse } from '@/types/tarot';
 import { toast } from 'sonner';
-import { v4 as uuidv4 } from 'nanoid';
+import { nanoid } from 'nanoid';
 
 const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number) => {
   const logEntry = {
-    id: uuidv4(),
+    id: nanoid(),
     timestamp: new Date().toISOString(),
     type,
     url,
