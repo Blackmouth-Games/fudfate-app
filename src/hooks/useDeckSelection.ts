@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { DeckInfo } from '@/utils/deck-utils';
@@ -15,6 +14,17 @@ export const useDeckSelection = (availableDecks: DeckInfo[]) => {
   const { webhooks, environment } = useEnvironment();
   const { userData } = useWallet();
   const { selectedDeck, setSelectedDeck } = useTarot();
+
+  // Use login response to set initial deck
+  useEffect(() => {
+    if (userData?.selectedDeck) {
+      // If user data has selected deck, use it
+      setSelectedDeck(userData.selectedDeck);
+    } else {
+      // Otherwise default to "deck_1"
+      setSelectedDeck("deck_1");
+    }
+  }, [userData, setSelectedDeck]);
 
   // Check if images are loaded
   useEffect(() => {
@@ -42,7 +52,7 @@ export const useDeckSelection = (availableDecks: DeckInfo[]) => {
 
   const handleSelectDeck = (deckId: string) => {
     const deck = availableDecks.find(d => d.id === deckId);
-    if (deck && deck.unlocked && deck.isActive) {
+    if (deck && deck.isActive) {
       setSelectedDeck(deck.name);
     }
   };
@@ -55,12 +65,9 @@ export const useDeckSelection = (availableDecks: DeckInfo[]) => {
     setSelectingDeck(deckName);
     
     try {
-      const webhookUrl = environment === 'development' 
-        ? 'https://primary-production-fe05.up.railway.app/webhook-test/f5891d06-7565-4582-bb27-de1f0c3db08e'
-        : 'https://primary-production-fe05.up.railway.app/webhook/f5891d06-7565-4582-bb27-de1f0c3db08e';
-      
+      // Use the webhook from configuration
       const success = await callSelectDeckWebhook(
-        webhookUrl,
+        webhooks.deckSelect,
         userData.userId,
         deckName,
         environment
@@ -81,7 +88,7 @@ export const useDeckSelection = (availableDecks: DeckInfo[]) => {
 
   const openDeckDetails = (deckId: string) => {
     const deck = availableDecks.find(d => d.id === deckId);
-    if (deck && deck.unlocked && deck.isActive) {
+    if (deck && deck.isActive) {
       setOpenDeckId(deckId);
     }
   };

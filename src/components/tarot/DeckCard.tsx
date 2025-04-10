@@ -24,6 +24,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
   t
 }) => {
   const isUnlocked = deck.isActive;
+  const isSelectingThis = isSelecting === deck.name;
 
   const getFallbackDeckImage = (): string => {
     return `/img/cards/deck_1/99_BACK.png`;
@@ -78,13 +79,13 @@ const DeckCard: React.FC<DeckCardProps> = ({
             size="sm" 
             variant="outline" 
             className="text-xs h-6 px-2 mt-1"
-            disabled={isSelecting === deck.name}
+            disabled={isSelectingThis}
             onClick={(e) => {
               e.stopPropagation();
               onSelect(deck.name);
             }}
           >
-            {isSelecting === deck.name ? 'Selecting...' : 'Select'}
+            {isSelectingThis ? 'Selecting...' : 'Select'}
           </Button>
         ) : (
           <span className="text-xs text-gray-400 italic">

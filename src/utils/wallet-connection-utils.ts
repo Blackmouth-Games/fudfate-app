@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { logLoginWebhook } from '@/services/webhook-service';
 
@@ -123,17 +122,39 @@ export const callLoginWebhook = async (
 };
 
 /**
- * Parse user data from webhook response
+ * Parse user data from login webhook response
  */
-export const parseUserData = (data: any): { userId: string; runsToday: boolean; selectedDeck?: string } | null => {
-  if (data && Array.isArray(data) && data.length > 0) {
-    return {
-      userId: data[0].userid,
-      runsToday: data[0].runs_today === true,
-      selectedDeck: data[0].selected_deck || 'deck1'
-    };
+export const parseUserData = (response: any): UserData | null => {
+  try {
+    if (Array.isArray(response) && response.length > 0) {
+      const firstItem = response[0];
+      
+      // Extract selected_deck if available
+      const selectedDeck = firstItem.selected_deck || "deck_1"; // Default to deck_1 if not provided
+      
+      return {
+        userId: firstItem.userid,
+        runsToday: firstItem.runs_today || false,
+        selectedDeck: selectedDeck // Store the selected deck in user data
+      };
+    }
+    
+    if (response && response.userid) {
+      // Extract selected_deck if available
+      const selectedDeck = response.selected_deck || "deck_1"; // Default to deck_1 if not provided
+      
+      return {
+        userId: response.userid,
+        runsToday: response.runs_today || false,
+        selectedDeck: selectedDeck  // Store the selected deck in user data
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error("Error parsing user data:", error);
+    return null;
   }
-  return null;
 };
 
 /**
