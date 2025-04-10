@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+export type WalletType = 'metamask' | 'phantom' | null;
+
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { logLoginWebhook } from '@/services/webhook-service';
 
@@ -36,7 +39,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [connectionLogs, setConnectionLogs] = useState<ConnectionLog[]>([]);
   
-  // Add a log function
   const addConnectionLog = (action: string, details: string) => {
     setConnectionLogs(prev => {
       const newLogs = [
@@ -48,12 +50,10 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         ...prev
       ];
       
-      // Keep only the last 50 logs
       return newLogs.slice(0, 50);
     });
   };
 
-  // Load wallet from localStorage on mount
   useEffect(() => {
     const savedWalletAddress = localStorage.getItem('walletAddress');
     const savedWalletType = localStorage.getItem('walletType');
@@ -81,7 +81,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     addConnectionLog('Connect Attempt', `Attempting to connect ${walletType} wallet`);
     
     try {
-      // Simulate wallet connection
       const address = `0x${Math.random().toString(16).substring(2, 14)}`;
       const networkId = 'mainnet';
       
@@ -94,7 +93,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
       setWalletType(walletType);
       setNetwork(networkId);
       
-      // Save to localStorage
       localStorage.setItem('walletAddress', address);
       localStorage.setItem('walletType', walletType);
       localStorage.setItem('network', networkId);
@@ -127,10 +125,8 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         const data = await response.json();
         console.log('Login webhook response:', data);
         
-        // Log successful webhook call
         logLoginWebhook(webhooks.login, { wallet: address, type: walletType }, data, undefined, status, environment);
         
-        // Handle the webhook response
         if (data && Array.isArray(data) && data.length > 0) {
           addConnectionLog('Login Success', `User ID: ${data[0].userid}`);
           
@@ -145,7 +141,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
           addConnectionLog('Login Error', 'Invalid webhook response format');
           console.error("Invalid webhook response format:", data);
           
-          // In development, we can create mock data
           if (environment === 'development') {
             const mockUserData: UserData = {
               userId: `mock_${Math.random().toString(16).substring(2, 10)}`,
@@ -161,7 +156,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         addConnectionLog('Login Error', `Webhook error: ${error instanceof Error ? error.message : String(error)}`);
         console.error("Error calling login webhook:", error);
         
-        // In development, we can create mock data
         if (environment === 'development') {
           const mockUserData: UserData = {
             userId: `mock_${Math.random().toString(16).substring(2, 10)}`,
@@ -174,7 +168,6 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
         }
       }
 
-      // Track the connection
       addConnectionLog('Connection Success', `Connected with ${walletType}, ${address}`);
       console.log(`Connected with ${walletType}:`, address);
       

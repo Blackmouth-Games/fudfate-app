@@ -27,3 +27,12 @@ export const webhooks: Record<Environment, WebhookConfig> = {
     history: 'https://primary-production-fe05.up.railway.app/webhook/fcb5106e-22e5-4045-b103-4ae32f8d68bf',
   },
 };
+
+/**
+ * Get webhook URLs for the specified environment
+ * @param environment The environment to get webhook URLs for
+ * @returns WebhookConfig object with all webhook URLs
+ */
+export const getWebhookUrls = (environment: Environment): WebhookConfig => {
+  return webhooks[environment];
+};
