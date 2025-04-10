@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Sparkles, History, Layers } from 'lucide-react';
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WalletBalance from '@/components/wallet/WalletBalance';
@@ -39,32 +39,31 @@ const TarotHeader: React.FC<TarotHeaderProps> = ({
         
         {connected && (
           <div className="flex-grow flex justify-center">
-            <TabsList className="grid grid-cols-3">
-              <TabsTrigger 
-                value="reading" 
-                className="flex items-center"
-                onClick={() => onTabChange("reading")}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                {t('tarot.reading')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="history" 
-                className="flex items-center"
-                onClick={() => onTabChange("history")}
-              >
-                <History className="mr-2 h-4 w-4" />
-                {t('tarot.history')}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="decks" 
-                className="flex items-center"
-                onClick={() => onTabChange("decks")}
-              >
-                <Layers className="mr-2 h-4 w-4" />
-                {t('tarot.decks')}
-              </TabsTrigger>
-            </TabsList>
+            <Tabs value={activeTab} onValueChange={onTabChange}>
+              <TabsList className="grid grid-cols-3">
+                <TabsTrigger 
+                  value="reading" 
+                  className="flex items-center"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {t('tarot.reading')}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="history" 
+                  className="flex items-center"
+                >
+                  <History className="mr-2 h-4 w-4" />
+                  {t('tarot.history')}
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="decks" 
+                  className="flex items-center"
+                >
+                  <Layers className="mr-2 h-4 w-4" />
+                  {t('tarot.decks')}
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
         )}
         
