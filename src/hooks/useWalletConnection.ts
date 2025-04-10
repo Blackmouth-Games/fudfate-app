@@ -8,7 +8,8 @@ import {
   connectPhantom, 
   callLoginWebhook,
   parseUserData,
-  fetchAvailableDecks
+  fetchAvailableDecks,
+  processDecksFromApi
 } from '@/utils/wallet-connection-utils';
 import { useWalletStorage } from '@/hooks/useWalletStorage';
 
@@ -86,13 +87,24 @@ export const useWalletConnection = (addConnectionLog: (action: string, details: 
           setUserData(userDataObj);
           saveUserData(userDataObj);
           
-          // Fetch available decks after successful login
+          // Immediately fetch available decks after successful login
+          addConnectionLog('Decks Fetch', `Fetching available decks for user ${userDataObj.userId}`);
           try {
-            await fetchAvailableDecks(webhooks.deck, userDataObj.userId, environment);
-            addConnectionLog('Decks Fetched', `Successfully fetched available decks`);
+            const decksData = await fetchAvailableDecks(webhooks.deck, userDataObj.userId, environment);
+            
+            if (Array.isArray(decksData) && decksData.length > 0) {
+              // Process and log the decks data
+              const processedDecks = processDecksFromApi(decksData);
+              addConnectionLog('Decks Success', `Fetched ${processedDecks.length} decks`);
+              console.log('Available decks:', processedDecks);
+            } else {
+              addConnectionLog('Decks Info', `No decks returned or empty array`);
+            }
           } catch (deckError) {
             addConnectionLog('Decks Error', `Failed to fetch decks: ${deckError instanceof Error ? deckError.message : String(deckError)}`);
+            console.error('Error fetching decks:', deckError);
           }
+          
         } else {
           addConnectionLog('Login Error', 'Invalid webhook response format');
           console.error("Invalid webhook response format:", data);
