@@ -1,12 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash, RefreshCw } from 'lucide-react';
+import { Trash, RefreshCw, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { WebhookLog } from '@/services/webhook-service';
 
 const WebhookLogTab: React.FC = () => {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
+  const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   
   // Load webhook logs from localStorage
   const loadLogs = () => {
@@ -47,6 +48,11 @@ const WebhookLogTab: React.FC = () => {
     };
   }, []);
   
+  // Toggle expanded view for a log
+  const toggleLogExpand = (logId: string) => {
+    setExpandedLogId(expandedLogId === logId ? null : logId);
+  };
+
   // Format date for display
   const formatDate = (dateString: string) => {
     try {
@@ -63,6 +69,9 @@ const WebhookLogTab: React.FC = () => {
     if (status >= 400) return 'text-red-600';
     return 'text-yellow-600';
   };
+
+  // Filter out pushlogs to grafana from logging view
+  const filteredLogs = logs.filter(log => !log.url.includes('pushLogsToGrafana'));
   
   return (
     <div className="space-y-2">
@@ -91,11 +100,15 @@ const WebhookLogTab: React.FC = () => {
       </div>
       
       <div className="max-h-64 overflow-y-auto space-y-2 bg-gray-50 rounded p-1 text-xs">
-        {logs.length === 0 ? (
+        {filteredLogs.length === 0 ? (
           <p className="text-gray-500 text-center py-4 text-xs">No logs available</p>
         ) : (
-          logs.map((log) => (
-            <div key={log.id} className="border border-gray-200 rounded bg-white p-1.5 text-[10px] space-y-1">
+          filteredLogs.map((log) => (
+            <div 
+              key={log.id} 
+              className="border border-gray-200 rounded bg-white p-1.5 text-[10px] space-y-1 hover:border-gray-300 transition-colors"
+              onClick={() => toggleLogExpand(log.id)}
+            >
               <div className="flex justify-between">
                 <span className={`font-semibold ${log.type === 'Reading' ? 'text-purple-600' : log.type === 'Login' ? 'text-blue-600' : log.type === 'Deck' ? 'text-amber-600' : 'text-gray-600'}`}>
                   {log.type}
@@ -119,8 +132,13 @@ const WebhookLogTab: React.FC = () => {
                 </div>
               )}
               
-              <details>
-                <summary className="cursor-pointer text-blue-500 hover:text-blue-700">Details</summary>
+              {log.environment && (
+                <div className="text-xs">
+                  <span className="text-gray-600">Env:</span> <span className={log.environment === 'production' ? 'text-green-600' : 'text-amber-600'}>{log.environment}</span>
+                </div>
+              )}
+
+              {(expandedLogId === log.id || log.error) && (
                 <div className="mt-1 space-y-1 pl-2 border-l-2 border-gray-200">
                   <div>
                     <div className="font-medium">Request:</div>
@@ -134,7 +152,13 @@ const WebhookLogTab: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </details>
+              )}
+              
+              {expandedLogId !== log.id && !log.error && (
+                <div className="text-center text-blue-500 text-[9px] cursor-pointer">
+                  Click to show details <ExternalLink className="inline h-2 w-2" />
+                </div>
+              )}
             </div>
           ))
         )}

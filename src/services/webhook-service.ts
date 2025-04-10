@@ -17,6 +17,11 @@ export interface WebhookLog {
 }
 
 const logWebhookCall = (type: string, url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+  // Filter out pushLogs to Grafana to prevent infinite logging
+  if (url.includes('pushLogsToGrafana')) {
+    return; // Skip logging for Grafana push logs
+  }
+  
   const logEntry: WebhookLog = {
     id: nanoid(),
     timestamp: new Date().toISOString(),
@@ -26,7 +31,7 @@ const logWebhookCall = (type: string, url: string, requestData: any, responseDat
     response: responseData,
     error: error ? (error.message || String(error)) : undefined,
     status,
-    environment // Add environment to the log entry
+    environment
   };
 
   // Store in localStorage first to ensure persistence
@@ -89,15 +94,13 @@ export const callReadingWebhook = async (
       // For development environment, return mock data
       if (environment === 'development') {
         console.log("Using mock data for development environment");
-        const mockData = {
-          userid: userId,
-          intention: intention || "What does the future hold?",
-          cards: [
-            { id: "0_TheDegen", position: "past" },
-            { id: "1_TheMiner", position: "present" },
-            { id: "2_TheOracle", position: "future" }
-          ],
-          reading: "This is a mock reading for development purposes."
+        const mockData: WebhookResponse = {
+          selected_cards: [0, 1, 2],
+          message: "This is a mock reading for development purposes.",
+          returnwebhoock: JSON.stringify({
+            selected_cards: [0, 1, 2],
+            message: "This is a mock reading for development purposes."
+          })
         };
         
         // Log the mock response
@@ -129,15 +132,13 @@ export const callReadingWebhook = async (
     // For development environment, return mock data
     if (environment === 'development') {
       console.log("Using mock data for development environment");
-      const mockData = {
-        userid: userId,
-        intention: intention || "What does the future hold?",
-        cards: [
-          { id: "0_TheDegen", position: "past" },
-          { id: "1_TheMiner", position: "present" },
-          { id: "2_TheOracle", position: "future" }
-        ],
-        reading: "This is a mock reading for development purposes."
+      const mockData: WebhookResponse = {
+        selected_cards: [0, 1, 2],
+        message: "This is a mock reading for development purposes.",
+        returnwebhoock: JSON.stringify({
+          selected_cards: [0, 1, 2],
+          message: "This is a mock reading for development purposes."
+        })
       };
       
       // Log the mock response

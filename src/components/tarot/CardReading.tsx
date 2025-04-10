@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import GlitchText from '@/components/GlitchText';
 import { motion } from 'framer-motion';
+import { getCardBackPath } from '@/utils/deck-utils';
 
 interface CardReadingProps {
   className?: string;
@@ -21,6 +22,13 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   useEffect(() => {
     if (webhookResponse && typeof webhookResponse === 'object') {
       try {
+        // Try to get message directly from the response
+        if (webhookResponse.message) {
+          setWebhookMessage(webhookResponse.message);
+          return;
+        }
+        
+        // Try to parse returnwebhoock if it exists
         if (typeof webhookResponse.returnwebhoock === 'string') {
           const parsedData = JSON.parse(webhookResponse.returnwebhoock);
           if (parsedData && parsedData.message) {
@@ -34,14 +42,14 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   }, [webhookResponse]);
   
   // Card back image based on selected deck
-  const cardBackImage = `/img/cards/deck_${selectedDeck}/99_BACK.png`;
+  const cardBackImage = getCardBackPath(selectedDeck);
   
   // Track flipping state for animation
   const [flippingCards, setFlippingCards] = useState<{[key: number]: boolean}>({});
   
   // Handle card click with animation
   const handleCardClick = async (index: number) => {
-    if (selectedCards[index].revealed || loading) return;
+    if (selectedCards[index]?.revealed || loading) return;
     
     // Set card as flipping
     setFlippingCards(prev => ({ ...prev, [index]: true }));
@@ -55,6 +63,13 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
       }, 600);
     }, 600);
   };
+
+  console.log("CardReading rendering with:", {
+    cardBackImage,
+    selectedCards: selectedCards?.length || 0,
+    selectedDeck,
+    finalMessage: !!finalMessage
+  });
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -81,7 +96,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {selectedCards.map((card, index) => (
             <div 
-              key={card.id}
+              key={card?.id || `card-${index}`}
               className="flex flex-col items-center space-y-3"
             >
               <div className="perspective-1000 w-full max-w-[200px] aspect-[2/3]">
@@ -89,9 +104,9 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                   className={`relative w-full h-full transition-transform duration-1000 transform-style-3d cursor-pointer`}
                   style={{ 
                     transformStyle: "preserve-3d",
-                    transform: (card.revealed || flippingCards[index]) ? 'rotateY(180deg)' : 'rotateY(0deg)'
+                    transform: (card?.revealed || flippingCards[index]) ? 'rotateY(180deg)' : 'rotateY(0deg)'
                   }}
-                  onClick={() => !card.revealed && !loading && handleCardClick(index)}
+                  onClick={() => !card?.revealed && !loading && handleCardClick(index)}
                 >
                   {/* Card Back */}
                   <div 
@@ -102,6 +117,10 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                       src={cardBackImage} 
                       alt="Card Back" 
                       className="h-full w-full object-cover rounded-lg"
+                      onError={(e) => {
+                        console.warn(`Failed to load card back image: ${cardBackImage}, using fallback`);
+                        e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
+                      }}
                     />
                   </div>
                   
@@ -113,23 +132,29 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
                       transform: "rotateY(180deg)"
                     }}
                   >
-                    <div className="p-3 h-full flex flex-col">
-                      <div className="text-center font-bold text-amber-700 mb-2 bg-amber-50/50 py-1 rounded truncate">
-                        {card.name}
+                    {card && (
+                      <div className="p-3 h-full flex flex-col">
+                        <div className="text-center font-bold text-amber-700 mb-2 bg-amber-50/50 py-1 rounded truncate">
+                          {card.name}
+                        </div>
+                        <div className="flex-1 flex items-center justify-center p-2">
+                          <img 
+                            src={card.image} 
+                            alt={card.name} 
+                            className="max-h-full max-w-full object-contain drop-shadow-md"
+                            onError={(e) => {
+                              console.warn(`Failed to load card image: ${card.image}, using fallback`);
+                              e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
+                            }}
+                          />
+                        </div>
                       </div>
-                      <div className="flex-1 flex items-center justify-center p-2">
-                        <img 
-                          src={card.image} 
-                          alt={card.name} 
-                          className="max-h-full max-w-full object-contain drop-shadow-md"
-                        />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </motion.div>
               </div>
               
-              {card.revealed && (
+              {card?.revealed && card?.interpretation && (
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -158,21 +183,27 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           <div className="grid grid-cols-3 gap-4">
             {selectedCards.map((card, index) => (
               <div 
-                key={card.id}
+                key={card?.id || `card-${index}`}
                 className="aspect-[2/3] rounded-lg overflow-hidden bg-gradient-to-br from-amber-50 to-white border border-amber-300 shadow-md hover:shadow-lg transition-shadow"
               >
-                <div className="p-2 h-full flex flex-col">
-                  <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded truncate">
-                    {card.name}
+                {card && (
+                  <div className="p-2 h-full flex flex-col">
+                    <div className="text-center text-xs font-bold text-amber-700 mb-1 bg-amber-50 p-1 rounded truncate">
+                      {card.name}
+                    </div>
+                    <div className="flex-1 flex items-center justify-center p-1">
+                      <img 
+                        src={card.image} 
+                        alt={card.name} 
+                        className="max-h-full object-contain drop-shadow-sm"
+                        onError={(e) => {
+                          console.warn(`Failed to load card image: ${card.image}, using fallback`);
+                          e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
+                        }}
+                      />
+                    </div>
                   </div>
-                  <div className="flex-1 flex items-center justify-center p-1">
-                    <img 
-                      src={card.image} 
-                      alt={card.name} 
-                      className="max-h-full object-contain drop-shadow-sm"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

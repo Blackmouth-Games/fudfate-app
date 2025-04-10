@@ -1,141 +1,119 @@
 
-/**
- * Utility functions for managing deck paths and card references
- */
+import { Deck, DeckInfo } from '@/types/tarot';
 
-/**
- * Get the path to a card back image based on deck ID
- */
-export const getCardBackPath = (deckId: string = 'deck1'): string => {
-  // Format should be 'deck_1' instead of 'deck1' for file paths
-  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
-  return `/img/cards/${formattedDeckId}/99_back.png`;
-};
-
-/**
- * Get the path to a deck back image based on deck ID
- */
-export const getDeckBackPath = (deckId: string = 'deck1'): string => {
-  // Format should be 'deck_1' instead of 'deck1' for file paths
-  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
-  return `/img/cards/${formattedDeckId}/99_BACK.png`;
-};
-
-/**
- * Get the path to a specific card image
- */
-export const getCardImagePath = (deckId: string, cardId: string): string => {
-  // Format should be 'deck_1' instead of 'deck1' for file paths
-  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
-  return `/img/cards/${formattedDeckId}/${cardId}.png`;
-};
-
-/**
- * Format a card path for the data structure
- */
-export const formatCardPath = (deckId: string, cardNumber: number, cardName: string): string => {
-  // Format should be 'deck_1' instead of 'deck1' for file paths
-  const formattedDeckId = deckId.replace(/deck(\d+)/, 'deck_$1');
-  return `/img/cards/${formattedDeckId}/${cardNumber}_${cardName}.png`;
-};
+export interface ApiDeckResponse {
+  id: string;
+  name: string;
+  description: string;
+  created_at: string;
+  url: string;
+  is_active: boolean;
+}
 
 export interface DeckInfo {
   id: string;
   name: string;
   displayName: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  directory: string;
   backImage: string;
-  unlocked: boolean;
-  description?: string;
-  createdAt?: string;
-  url?: string;
-  isActive?: boolean;
 }
 
 /**
- * Map a deck ID from API to internal deck ID
+ * Get the path to the card back image for a given deck
  */
-export const mapDeckIdFromApi = (apiName: string): string => {
-  // Convert from 'deck_1' format to internal 'deck1' format
-  return apiName.replace(/_/g, '');
+export const getCardBackPath = (deck: Deck): string => {
+  // Make sure we use the correct format: '/img/cards/deck_1/99_BACK.png'
+  const deckNumber = deck.replace('deck', '');
+  const backPath = `/img/cards/deck_${deckNumber}/99_BACK.png`;
+  console.log(`getCardBackPath: ${deck} -> ${backPath}`);
+  return backPath;
 };
 
 /**
- * Convert API deck data to our internal format
+ * Get the path to a specific card image in a deck
  */
-export const convertApiDeckToInternal = (apiDeck: any): DeckInfo => {
-  // Ensure we have all required fields with fallbacks
-  const id = apiDeck.id || '1';
-  const name = apiDeck.name || 'deck_1';
-  const internalId = mapDeckIdFromApi(name);
+export const getCardPath = (deck: Deck, cardId: string): string => {
+  // Make sure we use the correct format: '/img/cards/deck_1/0_TheDegen.png'
+  const deckNumber = deck.replace('deck', '');
+  const path = `/img/cards/deck_${deckNumber}/${cardId}.png`;
+  return path;
+};
+
+/**
+ * Convert API deck format to internal format
+ */
+export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => {
+  // Extract the deck number from the name (e.g., "deck_1" → "1")
+  const deckNumber = apiDeck.name.replace('deck_', '');
+  
+  // Format display name to be more user friendly
+  const displayName = apiDeck.description || `Deck ${deckNumber}`;
+  
+  // Format the directory path for card images
+  const directory = `/img/cards/deck_${deckNumber}/`;
+  
+  // Get back image path
+  const backImage = `/img/cards/deck_${deckNumber}/99_BACK.png`;
   
   return {
-    id: internalId, 
-    name: name,
-    displayName: apiDeck.description || getDeckDisplayName(internalId),
-    backImage: getDeckBackPath(internalId),
-    unlocked: apiDeck.is_active === true,
-    description: apiDeck.description || '',
-    createdAt: apiDeck.created_at || new Date().toISOString(),
-    url: apiDeck.url || '',
-    isActive: apiDeck.is_active === true
+    id: apiDeck.id,
+    name: `deck${deckNumber}`,
+    displayName,
+    description: apiDeck.description,
+    isActive: apiDeck.is_active,
+    createdAt: apiDeck.created_at,
+    directory,
+    backImage
   };
 };
 
 /**
- * Get a user-friendly name for a deck
+ * Get all deck information for the available decks
  */
-export const getDeckDisplayName = (deckId: string): string => {
-  const displayNames: Record<string, string> = {
-    'deck1': 'Crypto Classics',
-    'deck2': 'DeFi Destinies',
-    'deck3': 'NFT Narratives',
-    'deck4': 'Meme Magic',
-    'deck5': 'Web3 Wonders'
-  };
-  
-  return displayNames[deckId] || deckId;
-};
-
-/**
- * Get available decks with their information
- * This is a fallback in case the webhook fails
- */
-export const getAvailableDecks = (): DeckInfo[] => {
+export const getAllDecks = (): DeckInfo[] => {
   return [
-    { 
-      id: 'deck1', 
-      name: 'deck_1', 
-      displayName: 'Crypto Classics', 
-      backImage: getDeckBackPath('deck1'), 
-      unlocked: true 
+    {
+      id: '1',
+      name: 'deck1',
+      displayName: 'Crypto Classics',
+      description: 'The original crypto-themed tarot deck',
+      isActive: true,
+      createdAt: new Date().toISOString(),
+      directory: '/img/cards/deck_1/',
+      backImage: '/img/cards/deck_1/99_BACK.png'
     },
-    { 
-      id: 'deck2', 
-      name: 'deck_2', 
-      displayName: 'DeFi Destinies', 
-      backImage: getDeckBackPath('deck2'), 
-      unlocked: false 
-    },
-    { 
-      id: 'deck3', 
-      name: 'deck_3', 
-      displayName: 'NFT Narratives', 
-      backImage: getDeckBackPath('deck3'), 
-      unlocked: false 
-    },
-    { 
-      id: 'deck4', 
-      name: 'deck_4', 
-      displayName: 'Meme Magic', 
-      backImage: getDeckBackPath('deck4'), 
-      unlocked: false 
-    },
-    { 
-      id: 'deck5', 
-      name: 'deck_5', 
-      displayName: 'Web3 Wonders', 
-      backImage: getDeckBackPath('deck5'), 
-      unlocked: false 
+    {
+      id: '2',
+      name: 'deck2',
+      displayName: 'Traditional Tarot',
+      description: 'Classic tarot images with a modern twist',
+      isActive: true, 
+      createdAt: new Date().toISOString(),
+      directory: '/img/cards/deck_2/',
+      backImage: '/img/cards/deck_2/99_BACK.png'
     }
   ];
+};
+
+/**
+ * Get deck information from deck ID
+ */
+export const getDeckInfo = (deckId: string): DeckInfo | undefined => {
+  const allDecks = getAllDecks();
+  return allDecks.find((deck) => deck.id === deckId);
+};
+
+/**
+ * Debug utility to check image availability
+ */
+export const checkImageAvailability = (imagePath: string): Promise<boolean> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = imagePath;
+  });
 };

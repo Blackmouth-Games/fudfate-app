@@ -26,6 +26,10 @@ export interface WebhookResponse {
   message?: string;
   selected_deck?: string;
   returnwebhoock?: string;
+  userid?: string;
+  intention?: string;
+  cards?: any[];
+  reading?: string;
 }
 
 export interface TarotContextType {
