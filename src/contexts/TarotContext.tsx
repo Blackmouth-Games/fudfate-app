@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useWallet } from './WalletContext';
+import { useEnvironment } from '@/hooks/useEnvironment';
 
 // Assuming we have the tarot card data files
 import tarotCards from '../data/tarotCards';
@@ -28,6 +29,11 @@ interface Interpretation {
   };
 }
 
+interface WebhookResponse {
+  selected_cards?: number[];
+  message?: string;
+}
+
 interface TarotContextType {
   selectedDeck: Deck;
   setSelectedDeck: (deck: Deck) => void;
@@ -51,7 +57,8 @@ interface TarotContextType {
 const TarotContext = createContext<TarotContextType | undefined>(undefined);
 
 export const TarotProvider = ({ children }: { children: ReactNode }) => {
-  const { connected, walletAddress, walletType, network } = useWallet();
+  const { connected, walletAddress, walletType, network, userData } = useWallet();
+  const { webhooks, environment } = useEnvironment();
   
   const [selectedDeck, setSelectedDeck] = useState<Deck>('deck1');
   const [intention, setIntention] = useState<string>('');
@@ -62,11 +69,21 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [finalMessage, setFinalMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [interpretation, setInterpretation] = useState<Interpretation | null>(null);
+  const [webhookResponse, setWebhookResponse] = useState<WebhookResponse | null>(null);
 
   const getRandomCards = (count: number = 6): Card[] => {
     const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
     const shuffled = [...deckCards].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
+  };
+
+  const getCardsByIndices = (indices: number[]): Card[] => {
+    const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
+    return indices.map(index => {
+      // Ensure the index is valid
+      const validIndex = Math.min(Math.max(0, index), deckCards.length - 1);
+      return deckCards[validIndex];
+    });
   };
 
   const generateIntroMessage = async (userIntention: string): Promise<string> => {
@@ -108,7 +125,9 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const message = `La combinación de las cartas elegidas revela un patrón interesante para tu intención "${userIntention}". El mensaje general sugiere que estás en un momento de importantes decisiones que determinarán tu futuro cercano. Confía en tu intuición y mantén la mente abierta a nuevas posibilidades.`;
+      // Use the webhook response message if available
+      const message = webhookResponse?.message || 
+        `La combinación de las cartas elegidas revela un patrón interesante para tu intención "${userIntention}". El mensaje general sugiere que estás en un momento de importantes decisiones que determinarán tu futuro cercano. Confía en tu intuición y mantén la mente abierta a nuevas posibilidades.`;
       
       setInterpretation({
         summary: message,
@@ -126,6 +145,52 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       throw new Error("No se pudo generar el mensaje final");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const callReadingWebhook = async (): Promise<WebhookResponse | null> => {
+    if (!userData?.userId) {
+      console.error("No user ID available for webhook call");
+      return null;
+    }
+
+    try {
+      console.log("Calling reading webhook with userid:", userData.userId);
+      console.log("Using webhook URL:", webhooks.reading);
+      
+      const response = await fetch(webhooks.reading, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: new Date().toISOString(),
+          userid: userData.userId,
+          intention: intention
+        }),
+      });
+      
+      if (!response.ok) {
+        console.error(`Webhook error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('Reading webhook response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error calling reading webhook:', error);
+      
+      // In development, we allow continuing without the webhook
+      if (environment === 'development') {
+        toast.error("Error calling reading webhook. Using fallback data in development mode.", {
+          style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
+        });
+        return null;
+      }
+      
+      // In production, we fail the reading
+      throw error;
     }
   };
 
@@ -155,12 +220,23 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     try {
       setPhase('preparing');
       
+      // Call the reading webhook
+      const webhookData = await callReadingWebhook();
+      setWebhookResponse(webhookData);
+      
       const intro = await generateIntroMessage(intention);
       setIntroMessage(intro);
       
-      const randomCards = getRandomCards(6);
-      setAvailableCards(randomCards);
+      // If webhook returned card indices, use those cards
+      let randomCards;
+      if (webhookData && Array.isArray(webhookData.selected_cards) && webhookData.selected_cards.length > 0) {
+        // We'll use these cards when the user reveals them, but for selection we still show random ones
+        randomCards = getRandomCards(6);
+      } else {
+        randomCards = getRandomCards(6);
+      }
       
+      setAvailableCards(randomCards);
       setPhase('selection');
       
       toast.success("Lectura iniciada correctamente", {
@@ -213,6 +289,31 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     
     try {
       setLoading(true);
+      
+      // If we have webhook data with selected cards, and this is the first card reveal,
+      // replace the selected cards with the ones from the webhook
+      if (webhookResponse && 
+          Array.isArray(webhookResponse.selected_cards) && 
+          webhookResponse.selected_cards.length > 0 &&
+          selectedCards.every(c => !c.revealed)) {
+        
+        const webhookCards = getCardsByIndices(webhookResponse.selected_cards);
+        if (webhookCards.length > 0) {
+          // Replace all cards but keep the current request to reveal
+          const newSelectedCards = webhookCards.map((card, i) => ({
+            ...card,
+            revealed: i === index,
+            interpretation: i === index ? 
+              `Para tu intención "${intention}", la carta ${card.name} sugiere que estás en un momento de transformación. Esta energía te invita a confiar en tu intuición y seguir adelante con confianza en el camino que has elegido.` : 
+              undefined
+          }));
+          
+          setSelectedCards(newSelectedCards);
+          setLoading(false);
+          return;
+        }
+      }
+      
       const interpretation = await generateCardInterpretation(card.id, intention);
       
       const updatedCards = [...selectedCards];
@@ -252,6 +353,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setIntroMessage(null);
     setFinalMessage(null);
     setInterpretation(null);
+    setWebhookResponse(null);
     
     toast.success("Nueva lectura iniciada", {
       style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
