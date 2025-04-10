@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -15,12 +14,10 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
   const { t } = useTranslation();
   const { intention, selectedCards, interpretation, finalMessage, webhookResponse } = useTarot();
 
-  // Extract webhook message for sharing
   const getWebhookMessage = (): string => {
     if (finalMessage) return finalMessage;
     
     if (webhookResponse) {
-      // Try to extract message from webhookResponse
       if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
         if (webhookResponse[0].message) return webhookResponse[0].message;
         
@@ -61,7 +58,7 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
     const text = t('tarot.shareText', {
       cards: cardNames,
       intention: intention.length > 30 ? intention.substring(0, 30) + '...' : intention,
-      message: shareMessage ? `"${shareMessage.substring(0, 60)}${shareMessage.length >.citeText.length ? '...' : ''}"` : ''
+      message: shareMessage ? `"${shareMessage.substring(0, 60)}${shareMessage.length > 60 ? '...' : ''}"` : ''
     });
     
     const url = 'https://app-fudfate.blackmouthgames.com/';
