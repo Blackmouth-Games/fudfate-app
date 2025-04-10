@@ -6,6 +6,7 @@ import GlitchText from '@/components/GlitchText';
 import { Dialog, DialogContent, DialogTitle, DialogClose, DialogHeader } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import tarotCards from '@/data/tarotCards';
+import { getDeckBackPath, getAvailableDecks } from '@/utils/deck-utils';
 
 interface DeckSelectorProps {
   className?: string;
@@ -17,18 +18,8 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
   
-  // Card back image
-  const cardBackImage = "/img/cards/carddeck1/card_back.jpg";
-  const deckBackImage = "/img/cards/carddeck1/deck1_back.png";
-
-  // Mock decks - in a real app, this would come from your backend
-  const decks = [
-    { id: 'deck1', name: 'Crypto Classics', image: deckBackImage, unlocked: true },
-    { id: 'deck2', name: 'DeFi Destinies', image: deckBackImage, unlocked: false },
-    { id: 'deck3', name: 'NFT Narratives', image: deckBackImage, unlocked: false },
-    { id: 'deck4', name: 'Meme Magic', image: deckBackImage, unlocked: false },
-    { id: 'deck5', name: 'Web3 Wonders', image: deckBackImage, unlocked: false }
-  ];
+  // Get decks from our utility
+  const decks = getAvailableDecks();
 
   const handleSelectDeck = (deckId: string) => {
     // Only allow selecting the unlocked deck
@@ -90,7 +81,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({ className = '' }) => {
                 }}
               >
                 <img 
-                  src={deck.image} 
+                  src={deck.backImage} 
                   alt={deck.name} 
                   className="w-full h-full object-cover"
                 />

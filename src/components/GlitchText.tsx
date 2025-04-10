@@ -20,30 +20,52 @@ export const GlitchText: React.FC<GlitchTextProps> = ({
   const baseColor = goldEffect ? 'gold-text' : 'text-gray-900';
   const glitchColor = goldEffect ? 'gold-text' : 'text-gray-900';
   
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     fontSize,
-    lineHeight
+    lineHeight,
+    position: 'relative',
+    display: 'inline-block',
+    width: 'fit-content',
+    maxWidth: '100%'
+  };
+
+  const textStyle: React.CSSProperties = {
+    fontSize,
+    lineHeight,
+    display: 'inline-block',
+    position: 'relative',
+    zIndex: 10
+  };
+
+  const glitchStyle: React.CSSProperties = {
+    fontSize,
+    lineHeight,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    pointerEvents: 'none',
+    userSelect: 'none'
   };
 
   return (
     <div 
-      className={`text-container relative ${className}`} 
+      className={`text-container ${className}`} 
       style={containerStyle}
     >
-      <span className={`text-base relative z-10 ${baseColor}`} style={containerStyle}>
+      <span className={`text-base ${baseColor}`} style={textStyle}>
         {text}
       </span>
       <span 
-        className={`text-glitch-effect-1 ${glitchColor} pointer-events-none select-none`} 
+        className={`text-glitch-effect-1 ${glitchColor}`} 
         aria-hidden="true"
-        style={containerStyle}
+        style={glitchStyle}
       >
         {text}
       </span>
       <span 
-        className={`text-glitch-effect-2 ${glitchColor} pointer-events-none select-none`} 
+        className={`text-glitch-effect-2 ${glitchColor}`} 
         aria-hidden="true"
-        style={containerStyle}
+        style={glitchStyle}
       >
         {text}
       </span>

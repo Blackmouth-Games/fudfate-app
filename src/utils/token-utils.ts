@@ -2,7 +2,7 @@
 // Token utilities for handling balances and token info
 
 // Mapping of token mint addresses to token info
-interface TokenInfo {
+export interface TokenInfo {
   symbol: string;
   decimals: number;
   name: string;
@@ -45,8 +45,11 @@ export const getTokenBalance = async (
   walletAddress: string, 
   mintAddress: string
 ): Promise<string | null> => {
-  // Here you would implement the actual token balance fetching logic
-  // For now we return null
+  if (mintAddress === 'So11111111111111111111111111111111111111112') {
+    return await getSolanaBalance(walletAddress);
+  }
+  
+  // Here you would implement the actual token balance fetching logic for other tokens
   return null;
 };
 
@@ -55,4 +58,14 @@ export const getTokenBalance = async (
  */
 export const getTokenInfo = (mintAddress: string): TokenInfo | null => {
   return TOKEN_LIST[mintAddress] || null;
+};
+
+/**
+ * Show only the tokens that are desired by the user
+ * @param visibleTokens List of token mint addresses to display
+ */
+export const getVisibleTokens = (visibleTokens: string[] = ['So11111111111111111111111111111111111111112']): TokenInfo[] => {
+  return visibleTokens
+    .map(mintAddress => TOKEN_LIST[mintAddress])
+    .filter((token): token is TokenInfo => token !== undefined);
 };

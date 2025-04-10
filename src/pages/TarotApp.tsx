@@ -1,22 +1,21 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import WalletConnector from '@/components/wallet/WalletConnector';
-import WalletBalance from '@/components/wallet/WalletBalance';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
 import GlitchText from '@/components/GlitchText';
 import IntentionForm from '@/components/tarot/IntentionForm';
 import DeckSelector from '@/components/tarot/DeckSelector';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, History, Layers } from 'lucide-react';
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 import GlitchLogo from '@/components/GlitchLogo';
 import Footer from '@/components/Footer';
 import CommitSHA from '@/components/CommitSHA';
 import DevToolPanel from '@/components/DevToolPanel';
+import TarotHeader from '@/components/tarot/TarotHeader';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
@@ -98,86 +97,43 @@ const TarotApp: React.FC = () => {
     }
   };
 
+  // Component to show when not connected
+  const renderWelcomeScreen = () => (
+    <div className="flex flex-col items-center max-w-2xl w-full mx-auto">
+      <GlitchLogo 
+        imageUrl="/img/logos/FUDFATE_logo.png" 
+        size="large"
+        className="mb-8"
+      />
+      
+      <div className="text-center mb-8">
+        <GlitchText
+          text={t('tarot.cryptoFortuneAwaits')}
+          className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase"
+          goldEffect={true}
+        />
+      </div>
+      
+      <div className="flex flex-col gap-4 items-center max-w-sm w-full">
+        <WalletConnector showButtons={true} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
-      <header className="sticky top-0 z-50 bg-white shadow-md">
-        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center">
-            <a 
-              href="https://app-fudfate.blackmouthgames.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <img 
-                src="/img/logos/FUDFATE_logo.png" 
-                alt="FUDFATE" 
-                className="h-12"
-              />
-            </a>
-          </div>
-          
-          {connected && (
-            <div className="flex-grow flex justify-center">
-              <Tabs 
-                defaultValue="reading" 
-                value={activeTab}
-                onValueChange={handleTabChange}
-                className="max-w-xs"
-              >
-                <TabsList className="grid grid-cols-3">
-                  <TabsTrigger value="reading" className="flex items-center">
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    {t('tarot.reading')}
-                  </TabsTrigger>
-                  <TabsTrigger value="history" className="flex items-center">
-                    <History className="mr-2 h-4 w-4" />
-                    {t('tarot.history')}
-                  </TabsTrigger>
-                  <TabsTrigger value="decks" className="flex items-center">
-                    <Layers className="mr-2 h-4 w-4" />
-                    {t('tarot.decks')}
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-          )}
-          
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
-            {connected && <WalletBalance />}
-            {connected && (
-              <div>
-                <WalletConnector showButtons={false} />
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <TarotHeader 
+        connected={connected} 
+        activeTab={activeTab} 
+        onTabChange={handleTabChange} 
+      />
 
       <main className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
         {!connected ? (
-          <div className="flex flex-col items-center max-w-2xl w-full mx-auto">
-            <GlitchLogo 
-              imageUrl="/img/logos/FUDFATE_logo.png" 
-              size="large"
-              className="mb-8"
-            />
-            
-            <div className="text-center mb-8">
-              <GlitchText
-                text={t('tarot.cryptoFortuneAwaits')}
-                className="text-3xl md:text-4xl font-bold font-pixel tracking-wider uppercase"
-                goldEffect={true}
-              />
-            </div>
-            
-            <div className="flex flex-col gap-4 items-center max-w-sm w-full">
-              <WalletConnector showButtons={true} />
-            </div>
-          </div>
+          renderWelcomeScreen()
         ) : (
           <div className="max-w-4xl mx-auto my-8 w-full">
-            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs value={activeTab} className="w-full">
               <TabsContent value="reading" className="mt-0">
                 <IntentionForm className="w-full" />
               </TabsContent>

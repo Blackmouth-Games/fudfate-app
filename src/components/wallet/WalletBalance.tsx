@@ -2,13 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import { Coins } from 'lucide-react';
-import { getSolanaBalance } from '@/utils/token-utils';
+import { getSolanaBalance, getTokenInfo } from '@/utils/token-utils';
 
 interface WalletBalanceProps {
   className?: string;
+  visibleTokens?: string[];
 }
 
-const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
+const WalletBalance: React.FC<WalletBalanceProps> = ({ 
+  className = '',
+  visibleTokens = ['So11111111111111111111111111111111111111112'] // Default to SOL
+}) => {
   const { walletType, walletAddress, network } = useWallet();
   const [balance, setBalance] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -19,9 +23,10 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
       
       setLoading(true);
       try {
-        // Only show Solana tokens
+        // Only show Solana tokens when on Solana network
         if (network === 'solana') {
-          // Get the real balance using our utility function
+          // Get the balance for the default SOL token
+          const solMint = visibleTokens[0]; // Just use the first one (SOL)
           const solBalance = await getSolanaBalance(walletAddress);
           setBalance(solBalance);
         } else {
@@ -40,9 +45,13 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
     const intervalId = setInterval(fetchBalance, 30000); // every 30 seconds
     
     return () => clearInterval(intervalId);
-  }, [walletAddress, walletType, network]);
+  }, [walletAddress, walletType, network, visibleTokens]);
 
   if (!walletAddress || !walletType || !balance || network !== 'solana') return null;
+
+  // Get token info for display
+  const tokenInfo = getTokenInfo(visibleTokens[0]);
+  const symbol = tokenInfo?.symbol || 'SOL';
 
   return (
     <div className={`flex items-center px-3 py-1.5 bg-gray-100 rounded-full text-sm font-medium ${className}`}>
@@ -51,7 +60,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ className = '' }) => {
         <div className="w-10 h-4 bg-gray-200 animate-pulse rounded" />
       ) : (
         <span>
-          {balance} SOL
+          {balance} {symbol}
         </span>
       )}
     </div>

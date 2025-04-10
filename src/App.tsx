@@ -13,6 +13,7 @@ import { WalletProvider } from './contexts/WalletContext';
 import { TarotProvider } from './contexts/TarotContext';
 import DevTool from './components/DevTool';
 import CookieConsent from './components/CookieConsent';
+import AppRoutes from './routes/AppRoutes';
 
 // Create React Query client with appropriate settings
 const queryClient = new QueryClient({
@@ -24,13 +25,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Routes configuration for DevTool
-const routes = [
-  { path: '/', name: 'Tarot App' },
-  { path: '/cookies', name: 'Cookies Policy' },
-  { path: '/privacy', name: 'Privacy Policy' },
-];
-
 function App() {
   return (
     <React.StrictMode>
@@ -39,14 +33,7 @@ function App() {
           <WalletProvider>
             <TarotProvider>
               <Router>
-                <Routes>
-                  <Route path="/" element={<TarotApp />} />
-                  <Route path="/app" element={<Navigate to="/" replace />} />
-                  <Route path="/cookies" element={<CookiesPolicy />} />
-                  <Route path="/privacy" element={<PrivacyPolicy />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <DevTool routes={routes} />
+                <AppRoutes />
                 <CookieConsent />
               </Router>
               <Toaster position="bottom-center" />
