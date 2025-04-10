@@ -21,6 +21,14 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   // Track which cards have been flipped to prevent multiple flips
   const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
   
+  console.log("CardReading rendering with:", {
+    cardBackImage: getCardBackPath(selectedDeck),
+    selectedCards: selectedCards?.length || 0,
+    selectedDeck,
+    finalMessage: !!finalMessage,
+    webhookResponse: webhookResponse,
+  });
+  
   // Parse webhook message if available
   useEffect(() => {
     if (webhookResponse && typeof webhookResponse === 'object') {
@@ -33,13 +41,22 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         
         // Try to parse returnwebhoock if it exists
         if (typeof webhookResponse.returnwebhoock === 'string') {
-          const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-          if (parsedData && parsedData.message) {
-            setWebhookMessage(parsedData.message);
+          try {
+            const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+            if (parsedData && parsedData.message) {
+              setWebhookMessage(parsedData.message);
+            }
+            
+            // For debugging in DevTools - log selected cards from webhook
+            if (parsedData && Array.isArray(parsedData.selected_cards)) {
+              console.log("Webhook selected cards:", parsedData.selected_cards);
+            }
+          } catch (error) {
+            console.error("Error parsing webhook message in CardReading:", error);
           }
         }
       } catch (error) {
-        console.error("Error parsing webhook message in CardReading:", error);
+        console.error("Error processing webhook response in CardReading:", error);
       }
     }
   }, [webhookResponse]);
@@ -55,18 +72,13 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
     // Mark this card as flipped to prevent multiple flips
     setFlippedCards(prev => ({ ...prev, [index]: true }));
     
+    console.log(`Revealing card ${index}`, selectedCards[index]?.id);
+    
     // Reveal the card
     setTimeout(() => {
       revealCard(index);
     }, 300);
   };
-
-  console.log("CardReading rendering with:", {
-    cardBackImage,
-    selectedCards: selectedCards?.length || 0,
-    selectedDeck,
-    finalMessage: !!finalMessage
-  });
 
   return (
     <div className={`space-y-6 ${className}`}>

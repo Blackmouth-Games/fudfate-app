@@ -55,6 +55,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   }
 
   const handleCardSelect = (cardId: string) => {
+    console.log("Selecting card:", cardId);
     selectCard(cardId);
   };
 
@@ -125,7 +126,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
         </div>
       </div>
       
-      {/* All available cards for selection - updated to display all 22 cards with overlap */}
+      {/* All available cards for selection - improved to display all 22 cards with better overlap */}
       <div className="relative mt-8">
         <h4 className="text-center font-medium mb-4 text-gray-700">
           {t('tarot.availableCards')}
@@ -166,52 +167,56 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
             </div>
           </div>
         ) : (
-          <div className="relative h-[60vh] sm:h-[40vh] overflow-hidden">
-            <div className="absolute inset-0">
-              <div className="grid grid-cols-7 sm:grid-cols-11 gap-1 h-full">
-                <AnimatePresence>
-                  {allDeckCards.map((card, index) => {
-                    // Calculate offset for staggered card display
-                    const rowOffset = index % 2 === 0 ? "10%" : "0";
-                    
-                    return (
-                      <motion.div
-                        key={card.id}
-                        className="cursor-pointer transition-all duration-300 transform aspect-[2/3] hover:z-10"
-                        initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                        animate={{ 
-                          opacity: 1, 
-                          scale: 1, 
-                          y: 0,
-                          transition: { duration: 0.3, delay: index * 0.02 }
-                        }}
-                        exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-                        whileHover={{ y: -20, scale: 1.1, transition: { duration: 0.2 } }}
-                        onClick={() => handleCardSelect(card.id)}
-                        style={{
-                          position: 'relative',
-                          top: rowOffset,
-                          marginLeft: `-${index > 0 ? 60 : 0}%`, // Create overlap for cards
-                          width: '100%',
-                          zIndex: index
-                        }}
-                      >
-                        <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 border-amber-200/50 hover:border-amber-400 transition-colors">
-                          <motion.img 
-                            src={cardBackImage} 
-                            alt="Tarot Card Back"
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              // Fallback to default image if the dynamic path fails
-                              console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
-                              e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
-                            }}
-                          />
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
+          <div className="relative h-[65vh] sm:h-[45vh] overflow-hidden">
+            <div className="absolute inset-0 px-4">
+              <div className="flex flex-wrap justify-center">
+                {allDeckCards.map((card, index) => {
+                  // Calculate offset for fan-like arrangement
+                  const angle = ((index - allDeckCards.length / 2) / allDeckCards.length) * 30;
+                  const translateX = index % 2 === 0 ? index * 10 : index * 12;
+                  const translateY = index % 3 === 0 ? index * 2 : index % 3 === 1 ? index * 1 : 0;
+                  
+                  return (
+                    <motion.div
+                      key={card.id}
+                      className="cursor-pointer absolute transform -translate-x-1/2"
+                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                      animate={{ 
+                        opacity: 1, 
+                        scale: 1, 
+                        y: 0,
+                        transition: { duration: 0.3, delay: index * 0.04 }
+                      }}
+                      whileHover={{ 
+                        y: -20, 
+                        scale: 1.1, 
+                        zIndex: 50,
+                        transition: { duration: 0.2 } 
+                      }}
+                      onClick={() => handleCardSelect(card.id)}
+                      style={{
+                        left: `${50 + (index - allDeckCards.length / 2) * 5}%`,
+                        top: `${50 + translateY}px`,
+                        zIndex: index,
+                        rotateZ: `${angle}deg`,
+                        width: '120px'
+                      }}
+                    >
+                      <div className="w-full aspect-[2/3] rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 border-amber-200/50 hover:border-amber-400 transition-colors">
+                        <motion.img 
+                          src={cardBackImage} 
+                          alt="Tarot Card Back"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            // Fallback to default image if the dynamic path fails
+                            console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
+                            e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
+                          }}
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
           </div>

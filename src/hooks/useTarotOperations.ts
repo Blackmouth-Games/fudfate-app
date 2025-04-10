@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
@@ -39,15 +38,9 @@ export const useTarotOperations = () => {
         }
       }
       
-      // Get cards for selection
-      let randomCards;
-      if (parsedWebhookResponse && Array.isArray(parsedWebhookResponse.selected_cards) && parsedWebhookResponse.selected_cards.length > 0) {
-        // We'll use webhook cards when revealed, but for selection we show random ones
-        randomCards = getRandomCards(selectedDeck, 6);
-      } else {
-        randomCards = getRandomCards(selectedDeck, 6);
-      }
-      
+      // Get all 22 cards from the current deck for selection
+      // We're no longer only showing 6 cards, we're showing all deck cards
+      const randomCards = getRandomCards(selectedDeck, 22);
       setAvailableCards(randomCards);
       return true;
     } catch (error) {
@@ -74,31 +67,44 @@ export const useTarotOperations = () => {
       
       // Parse webhook response if available
       let parsedWebhookResponse = webhookResponse;
-      if (webhookResponse && typeof webhookResponse.returnwebhoock === 'string') {
-        try {
-          const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-          parsedWebhookResponse = parsedData;
-        } catch (error) {
-          console.error("Error parsing webhook response:", error);
+      let webhookCards: number[] = [];
+      
+      if (webhookResponse) {
+        // Try to get selected_cards directly from the response
+        if (Array.isArray(webhookResponse.selected_cards)) {
+          webhookCards = webhookResponse.selected_cards;
+        }
+        
+        // Try to parse returnwebhoock if it exists
+        if (typeof webhookResponse.returnwebhoock === 'string') {
+          try {
+            const parsedData = JSON.parse(webhookResponse.returnwebhoock);
+            parsedWebhookResponse = parsedData;
+            
+            if (Array.isArray(parsedData.selected_cards)) {
+              webhookCards = parsedData.selected_cards;
+            }
+          } catch (error) {
+            console.error("Error parsing webhook response:", error);
+          }
         }
       }
       
       // If we have webhook data with selected cards, and this is the first card reveal,
       // replace the selected cards with the ones from the webhook
-      if (parsedWebhookResponse && 
-          Array.isArray(parsedWebhookResponse.selected_cards) && 
-          parsedWebhookResponse.selected_cards.length > 0 &&
-          selectedCards.every(c => !c.revealed)) {
+      if (webhookCards.length > 0 && selectedCards.every(c => !c.revealed)) {
+        console.log("Using webhook cards for reveal:", webhookCards);
+        console.log("Current selected deck:", selectedDeck);
         
-        const webhookCards = getCardsByIndices(selectedDeck, parsedWebhookResponse.selected_cards);
-        if (webhookCards.length > 0) {
+        const webhookDeckCards = getCardsByIndices(selectedDeck, webhookCards);
+        console.log("Cards by indices:", webhookDeckCards);
+        
+        if (webhookDeckCards.length > 0) {
           // Replace all cards but keep the current request to reveal
-          const newSelectedCards = webhookCards.map((card, i) => ({
+          const newSelectedCards = webhookDeckCards.map((card, i) => ({
             ...card,
             revealed: i === index,
-            interpretation: i === index ? 
-              `Para tu intención "${intention}", la carta ${card.name} sugiere que estás en un momento de transformación. Esta energía te invita a confiar en tu intuición y seguir adelante con confianza en el camino que has elegido.` : 
-              undefined
+            interpretation: undefined
           }));
           
           setSelectedCards(newSelectedCards);
@@ -107,7 +113,7 @@ export const useTarotOperations = () => {
         }
       }
       
-      // Regular card reveal flow
+      // If we don't have webhook cards or couldn't use them, just reveal the current card
       const interpretation = await generateCardInterpretation(card.id, intention);
       
       const updatedCards = [...selectedCards];
@@ -121,7 +127,7 @@ export const useTarotOperations = () => {
       return true;
     } catch (error) {
       console.error("Error revealing card:", error);
-      toast.error("Error al revelar la carta. Inténtalo de nuevo.", {
+      toast.error("Error revealing card. Please try again.", {
         style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
       });
       return false;
