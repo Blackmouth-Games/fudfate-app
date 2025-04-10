@@ -15,6 +15,7 @@ import ConfigTab from './TabsContent/ConfigTab';
 import DebugTab from './TabsContent/DebugTab';
 import RoutesTab from './TabsContent/RoutesTab';
 import WebhookLogTab from './TabsContent/WebhookLogTab';
+import ConnectionLogsTab from './TabsContent/ConnectionLogsTab';
 
 interface DevToolPanelProps {
   routes?: Array<{
@@ -58,7 +59,7 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-12 left-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 w-80 max-h-[80vh] overflow-hidden flex flex-col"
+              className="absolute top-12 left-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 w-[90vw] max-w-md max-h-[80vh] overflow-hidden flex flex-col"
             >
               <div className="flex items-center justify-between p-2 border-b border-gray-200 bg-amber-50">
                 <div className="flex items-center">
@@ -98,7 +99,7 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
               </div>
               
               <Tabs defaultValue="wallet" className="flex-grow overflow-hidden flex flex-col">
-                <TabsList className="justify-start px-2 pt-2 border-b border-gray-100 h-10">
+                <TabsList className="justify-start px-2 pt-2 border-b border-gray-100 h-10 overflow-x-auto">
                   <TabsTrigger value="wallet" className="text-xs py-1 px-1.5 h-7">
                     Wallet
                   </TabsTrigger>
@@ -108,8 +109,11 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
                   <TabsTrigger value="debug" className="text-xs py-1 px-1.5 h-7">
                     Debug
                   </TabsTrigger>
+                  <TabsTrigger value="logs" className="text-xs py-1 px-1.5 h-7">
+                    Conn Logs
+                  </TabsTrigger>
                   <TabsTrigger value="webhooks" className="text-xs py-1 px-1.5 h-7">
-                    Logs
+                    API Logs
                   </TabsTrigger>
                   {routes.length > 0 && (
                     <TabsTrigger value="nav" className="text-xs py-1 px-1.5 h-7">
@@ -129,6 +133,10 @@ const DevToolPanel: React.FC<DevToolPanelProps> = ({ routes = [] }) => {
                   
                   <TabsContent value="debug" className="mt-0">
                     <DebugTab />
+                  </TabsContent>
+                  
+                  <TabsContent value="logs" className="mt-0">
+                    <ConnectionLogsTab />
                   </TabsContent>
                   
                   <TabsContent value="webhooks" className="mt-0">

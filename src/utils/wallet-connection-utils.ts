@@ -106,6 +106,7 @@ export const callLoginWebhook = async (
     const data = await response.json();
     console.log('Login webhook response:', data);
     
+    addConnectionLog('Login Success', `Received response with status ${status}`);
     logLoginWebhook(webhookUrl, { wallet: address, type: walletType }, data, undefined, status, environment);
     
     return data;
