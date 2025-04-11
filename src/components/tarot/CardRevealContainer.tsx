@@ -6,7 +6,8 @@ import GlitchText from '@/components/GlitchText';
 import CardItem from './CardItem';
 import ShareReading from './ShareReading';
 import { Button } from '@/components/ui/button';
-import { Share, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import CardDetailsDialog from './CardDetailsDialog';
 
 interface CardRevealContainerProps {
   selectedCards: ReadingCard[];
@@ -29,6 +30,10 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   const [allRevealed, setAllRevealed] = useState(false);
   // Show share button with delay
   const [showShareButton, setShowShareButton] = useState(false);
+  // Track selected card for details dialog
+  const [selectedCardDetails, setSelectedCardDetails] = useState<ReadingCard | null>(null);
+  // Control visibility of the card details dialog
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
   // Check if all cards are revealed
   useEffect(() => {
@@ -53,6 +58,12 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
     
     // Directly reveal the card
     handleCardClick(index);
+  };
+
+  // View card details
+  const viewCardDetails = (card: ReadingCard) => {
+    setSelectedCardDetails(card);
+    setIsDetailsOpen(true);
   };
   
   // Share to Twitter/X
@@ -85,6 +96,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
             isRevealed={card?.revealed}
             loading={loading}
             cardBackImage={cardBackImage}
+            onCardView={card.revealed ? () => viewCardDetails(card) : undefined}
           />
         ))}
       </div>
@@ -106,6 +118,12 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
           </div>
         </div>
       )}
+
+      <CardDetailsDialog
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        cardDetails={selectedCardDetails}
+      />
     </div>
   );
 };

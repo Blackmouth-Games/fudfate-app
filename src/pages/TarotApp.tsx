@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -34,6 +33,13 @@ const TarotApp: React.FC = () => {
   useEffect(() => {
     if (connected && userData?.userId) {
       fetchUserDecks();
+    }
+  }, [connected, userData]);
+
+  // Also fetch history when the user connects
+  useEffect(() => {
+    if (connected && userData?.userId) {
+      fetchUserHistory();
     }
   }, [connected, userData]);
 
@@ -112,50 +118,56 @@ const TarotApp: React.FC = () => {
     }
   };
 
+  const fetchUserHistory = async () => {
+    if (!userData?.userId) return;
+    
+    setIsLoadingHistory(true);
+    try {
+      console.log("Calling history webhook with userid:", userData.userId);
+      const response = await fetch(webhooks.history, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          date: new Date().toISOString(),
+          userid: userData.userId
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("History webhook response:", data);
+      
+      if (data && Array.isArray(data.readings)) {
+        setHistoryData(data.readings);
+      } else if (data && Array.isArray(data)) {
+        setHistoryData(data);
+      } else {
+        console.warn("Unexpected history data format:", data);
+        setHistoryData([]);
+      }
+    } catch (error) {
+      console.error('Error calling history webhook:', error);
+      toast.error(t('errors.historyLoadFailed'), {
+        position: 'bottom-center',
+      });
+      setHistoryData([]);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
   const handleTabChange = async (value: string) => {
     setActiveTab(value);
     
     if (value === 'decks' && userData?.userId && availableDecks.length === 0) {
       await fetchUserDecks();
     } else if (value === 'history' && userData?.userId) {
-      setIsLoadingHistory(true);
-      try {
-        console.log("Calling history webhook with userid:", userData.userId);
-        const response = await fetch(webhooks.history, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            date: new Date().toISOString(),
-            userid: userData.userId
-          }),
-        });
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        console.log("History webhook response:", data);
-        
-        if (data && Array.isArray(data.readings)) {
-          setHistoryData(data.readings);
-        } else if (data && Array.isArray(data)) {
-          setHistoryData(data);
-        } else {
-          console.warn("Unexpected history data format:", data);
-          setHistoryData([]);
-        }
-      } catch (error) {
-        console.error('Error calling history webhook:', error);
-        toast.error(t('errors.historyLoadFailed'), {
-          position: 'bottom-center',
-        });
-        setHistoryData([]);
-      } finally {
-        setIsLoadingHistory(false);
-      }
+      await fetchUserHistory();
     }
   };
 
