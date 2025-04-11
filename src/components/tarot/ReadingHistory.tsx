@@ -19,7 +19,7 @@ interface Reading {
   id: string;
   date: string;
   question: string;
-  cards: number[] | string;
+  cards: number[] | string | any[];
   result?: string;
   selected_cards?: any[];
   user_id?: string;
@@ -92,7 +92,12 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     // Convert cards array to ReadingCard format
     const readingCards: ReadingCard[] = Array.isArray(reading.cards) 
       ? reading.cards.map((cardId, index) => {
-          const cardNumber = typeof cardId === 'string' ? parseInt(cardId, 10) : cardId;
+          const cardNumber = typeof cardId === 'number' 
+            ? cardId 
+            : typeof cardId === 'string' 
+              ? parseInt(cardId, 10) 
+              : index;
+              
           return {
             id: String(cardNumber),
             name: getCardName(cardNumber, index),
@@ -159,7 +164,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   // Share reading functions
   const shareOnTwitter = (reading: Reading) => {
     const cardIds = Array.isArray(reading.cards) ? 
-      reading.cards.map(c => typeof c === 'number' ? c : parseInt(c.toString(), 10)) : [];
+      reading.cards.map(c => {
+        if (typeof c === 'number') return c;
+        if (typeof c === 'string') return parseInt(c, 10);
+        return 0; // Default value if parsing fails
+      }) : [];
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
@@ -183,7 +192,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
 
   const copyToClipboard = (reading: Reading) => {
     const cardIds = Array.isArray(reading.cards) ? 
-      reading.cards.map(c => typeof c === 'number' ? c : parseInt(c.toString(), 10)) : [];
+      reading.cards.map(c => {
+        if (typeof c === 'number') return c;
+        if (typeof c === 'string') return parseInt(c, 10);
+        return 0; // Default value if parsing fails
+      }) : [];
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
@@ -277,7 +290,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                 {formattedReadings.map((reading) => {
                   const formattedDate = new Date(reading.date).toLocaleDateString();
                   const cardIds = Array.isArray(reading.cards) ? 
-                    reading.cards.map(c => typeof c === 'number' ? c : parseInt(c.toString(), 10)) : [];
+                    reading.cards.map(c => {
+                      if (typeof c === 'number') return c;
+                      if (typeof c === 'string') return parseInt(c, 10);
+                      return 0; // Default value if parsing fails
+                    }) : [];
                   
                   const cardNames = cardIds.map(id => getCardName(id, 0));
                   
