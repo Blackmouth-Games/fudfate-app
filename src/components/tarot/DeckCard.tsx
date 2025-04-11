@@ -4,6 +4,7 @@ import { CheckCircle2, LockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DeckInfo } from '@/utils/deck-utils';
 import { motion } from 'framer-motion';
+import tarotCards from '@/data/tarotCards';
 
 interface DeckCardProps {
   deck: DeckInfo;
@@ -28,6 +29,15 @@ const DeckCard: React.FC<DeckCardProps> = ({
   const isSelectingThis = isSelecting === deck.name;
   const [isHovered, setIsHovered] = React.useState(false);
 
+  // Get sample cards from this deck for the animation
+  const deckCards = React.useMemo(() => {
+    return tarotCards.filter(card => card.deck === deck.name);
+  }, [deck.name]);
+
+  // Pick two random cards from the deck for the animation
+  const sampleCard1 = deckCards.length > 0 ? deckCards[0].image.replace('.png', '.jpg') : deck.backImage.replace('.png', '.jpg');
+  const sampleCard2 = deckCards.length > 1 ? deckCards[1].image.replace('.png', '.jpg') : deck.backImage.replace('.png', '.jpg');
+
   const getFallbackDeckImage = (): string => {
     return `/img/cards/deck_1/99_BACK.jpg`;
   };
@@ -50,8 +60,8 @@ const DeckCard: React.FC<DeckCardProps> = ({
             >
               <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
                 <img 
-                  src={deck.backImage.replace('.png', '.jpg')} 
-                  alt="Card Back" 
+                  src={sampleCard1} 
+                  alt="Card Preview" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
@@ -68,8 +78,8 @@ const DeckCard: React.FC<DeckCardProps> = ({
             >
               <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
                 <img 
-                  src={deck.backImage.replace('.png', '.jpg')} 
-                  alt="Card Back" 
+                  src={sampleCard2} 
+                  alt="Card Preview" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
@@ -86,7 +96,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
             ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
           onClick={() => {
             if (isUnlocked) {
-              onSelect(deck.id);
+              // Only open details when clicking on deck, don't select
               onDetailsOpen(deck.id);
             }
           }}
@@ -117,7 +127,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
       </div>
 
       <h4 className="mt-2 text-center text-sm font-medium">
-        {deck.displayName}
+        {deck.description || deck.displayName}
       </h4>
       <div className="flex flex-col items-center">
         {isSelected ? (

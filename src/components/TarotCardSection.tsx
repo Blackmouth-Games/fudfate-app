@@ -17,6 +17,7 @@ import { X } from 'lucide-react';
 import { getCardBackPath, getAvailableDecks } from '@/utils/deck-utils';
 import DeckDetailsDialog from '@/components/tarot/DeckDetailsDialog';
 import { motion } from 'framer-motion';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 // Example cards for the carousel - updated paths to proper format
 const exampleCards = [
@@ -71,6 +72,17 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
     setOpenDeckId(deckId);
   };
 
+  // Get sample cards from each deck for hover animation
+  const getSampleCardsFromDeck = (deckIndex: number) => {
+    const deckId = deckIndex < 3 ? 'deck_1' : 'deck_2';
+    const deckCards = tarotCards.filter(card => card.deck === deckId);
+    
+    return {
+      card1: deckCards.length > 0 ? deckCards[0].image.replace('.png', '.jpg') : `/img/cards/deck_${deckIndex < 3 ? '1' : '2'}/99_BACK.jpg`,
+      card2: deckCards.length > 1 ? deckCards[1].image.replace('.png', '.jpg') : `/img/cards/deck_${deckIndex < 3 ? '1' : '2'}/99_BACK.jpg`
+    };
+  };
+
   return (
     <section id="cards" className="py-20 px-4 md:px-8 lg:px-16 relative">
       <div className="max-w-6xl mx-auto">
@@ -95,60 +107,69 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
           }}
         >
           <CarouselContent className="py-10">
-            {cards.map((card, index) => (
-              <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3 px-6">
-                <div 
-                  className="floating cursor-pointer relative"
-                  style={{ animationDelay: `${0.2 * index}s` }}
-                  onClick={() => handleDeckClick(index < 3 ? '1' : '2')}
-                  onMouseEnter={() => setHoveredDeck(index)}
-                  onMouseLeave={() => setHoveredDeck(null)}
-                >
-                  {/* Animated deck cards - positioned behind */}
-                  {hoveredDeck === index && (
-                    <>
-                      <motion.div 
-                        className="absolute top-0 left-0 w-full z-0"
-                        initial={{ rotateZ: -5, x: -10, y: -5 }}
-                        animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
-                        transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-                      >
-                        <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
-                          <img 
-                            src={`/img/cards/deck_${index < 3 ? '1' : '2'}/99_BACK.jpg`} 
-                            alt="Card Back" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </motion.div>
-                      
-                      <motion.div 
-                        className="absolute top-0 left-0 w-full z-0"
-                        initial={{ rotateZ: 5, x: 10, y: -2 }}
-                        animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
-                        transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
-                      >
-                        <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
-                          <img 
-                            src={`/img/cards/deck_${index < 3 ? '1' : '2'}/99_BACK.jpg`} 
-                            alt="Card Back" 
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </motion.div>
-                    </>
-                  )}
-                  
-                  {/* The actual card - positioned in front */}
-                  <div className="relative z-10">
-                    <TarotCard 
-                      imageUrl={card.imageUrl}
-                      title={card.title} 
-                    />
+            {cards.map((card, index) => {
+              const sampleCards = getSampleCardsFromDeck(index);
+              return (
+                <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3 px-6">
+                  <div 
+                    className="floating cursor-pointer relative"
+                    style={{ animationDelay: `${0.2 * index}s` }}
+                    onClick={() => handleDeckClick(index < 3 ? '1' : '2')}
+                    onMouseEnter={() => setHoveredDeck(index)}
+                    onMouseLeave={() => setHoveredDeck(null)}
+                  >
+                    {/* Animated deck cards - positioned behind */}
+                    {hoveredDeck === index && (
+                      <>
+                        <motion.div 
+                          className="absolute top-0 left-0 w-full z-0"
+                          initial={{ rotateZ: -5, x: -10, y: -5 }}
+                          animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
+                          transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                        >
+                          <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+                            <img 
+                              src={sampleCards.card1} 
+                              alt="Card Back" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = `/img/cards/deck_${index < 3 ? '1' : '2'}/99_BACK.jpg`;
+                              }}
+                            />
+                          </div>
+                        </motion.div>
+                        
+                        <motion.div 
+                          className="absolute top-0 left-0 w-full z-0"
+                          initial={{ rotateZ: 5, x: 10, y: -2 }}
+                          animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
+                          transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
+                        >
+                          <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+                            <img 
+                              src={sampleCards.card2} 
+                              alt="Card Back" 
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.src = `/img/cards/deck_${index < 3 ? '1' : '2'}/99_BACK.jpg`;
+                              }}
+                            />
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                    
+                    {/* The actual card - positioned in front */}
+                    <div className="relative z-10">
+                      <TarotCard 
+                        imageUrl={card.imageUrl}
+                        title={card.title} 
+                      />
+                    </div>
                   </div>
-                </div>
-              </CarouselItem>
-            ))}
+                </CarouselItem>
+              );
+            })}
           </CarouselContent>
           <div className="flex justify-center mt-12">
             <CarouselPrevious className="relative static mr-2" />
@@ -158,15 +179,17 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
       </div>
 
       {/* Use the DeckDetailsDialog component for displaying all cards in a deck */}
-      <DeckDetailsDialog
-        open={!!openDeckId}
-        onOpenChange={(open) => !open && setOpenDeckId(null)}
-        deckId={openDeckId}
-        decks={availableDecks}
-        deckCards={openDeckCards}
-        onCardClick={viewCard}
-        t={t}
-      />
+      <TooltipProvider>
+        <DeckDetailsDialog
+          open={!!openDeckId}
+          onOpenChange={(open) => !open && setOpenDeckId(null)}
+          deckId={openDeckId}
+          decks={availableDecks}
+          deckCards={openDeckCards}
+          onCardClick={viewCard}
+          t={t}
+        />
+      </TooltipProvider>
 
       {/* Dialog for individual card view */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && closeCardView()}>

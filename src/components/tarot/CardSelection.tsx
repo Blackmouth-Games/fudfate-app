@@ -29,52 +29,11 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   
   // Load all cards from the current deck on component mount or deck change
   useEffect(() => {
+    // These are just mock cards for selection UI, the real reveal will use webhook data
     // Get all cards for the selected deck
     const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
-    
-    // If we have webhook response with selected_cards, use those specific cards
-    if (webhookResponse && webhookResponse.selected_cards && webhookResponse.selected_cards.length > 0) {
-      try {
-        // Extract the selected card ids from the webhook
-        const selectedCardIds = webhookResponse.selected_cards.map(cardNum => {
-          // Find cards that start with this number
-          const matchingCards = deckCards.filter(card => 
-            card.id.startsWith(`${cardNum}_`) ||
-            card.id === `${cardNum}`
-          );
-          
-          if (matchingCards.length > 0) {
-            return matchingCards[0].id;
-          }
-          return null;
-        }).filter(Boolean);
-        
-        console.log("Using preselected cards from webhook:", selectedCardIds);
-        
-        // Add these cards to the deck to ensure they're available
-        const webhookCards = selectedCardIds.map(id => 
-          deckCards.find(card => card.id === id)
-        ).filter(Boolean);
-        
-        if (webhookCards.length > 0) {
-          // Ensure the webhook cards are included in the deck
-          const remainingCards = deckCards.filter(card => 
-            !webhookCards.some(wc => wc.id === card.id)
-          );
-          
-          // Mix webhook cards with remaining cards
-          setAllDeckCards([...webhookCards, ...remainingCards]);
-        } else {
-          setAllDeckCards(deckCards);
-        }
-      } catch (error) {
-        console.error("Error processing webhook selected_cards:", error);
-        setAllDeckCards(deckCards);
-      }
-    } else {
-      setAllDeckCards(deckCards);
-    }
-  }, [selectedDeck, webhookResponse]);
+    setAllDeckCards(deckCards);
+  }, [selectedDeck]);
   
   // Check if user can make readings (userData.runsToday should be true for "can read")
   // Empty state - no cards available or user can't read

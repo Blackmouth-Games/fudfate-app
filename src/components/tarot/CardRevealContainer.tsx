@@ -6,7 +6,7 @@ import GlitchText from '@/components/GlitchText';
 import CardItem from './CardItem';
 import ShareReading from './ShareReading';
 import { Button } from '@/components/ui/button';
-import { Share } from 'lucide-react';
+import { Share, X } from 'lucide-react';
 
 interface CardRevealContainerProps {
   selectedCards: ReadingCard[];
@@ -27,18 +27,29 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   
   // Track which cards have been revealed
   const [allRevealed, setAllRevealed] = useState(false);
+  // Show share button with delay
+  const [showShareButton, setShowShareButton] = useState(false);
   
   // Check if all cards are revealed
   useEffect(() => {
     if (selectedCards.every(card => card.revealed)) {
       setAllRevealed(true);
+      
+      // Show share button after 2 seconds if we have a webhook message
+      if (webhookMessage) {
+        const timer = setTimeout(() => {
+          setShowShareButton(true);
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+      }
     }
-  }, [selectedCards]);
+  }, [selectedCards, webhookMessage]);
   
   // Handle card click directly without queueing
   const handleCardReveal = (index: number) => {
-    // Check if card is already revealed or loading
-    if (selectedCards[index]?.revealed || loading) return;
+    // Only check if loading (not if already revealed)
+    if (loading) return;
     
     // Directly reveal the card
     handleCardClick(index);
@@ -78,7 +89,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
         ))}
       </div>
       
-      {allRevealed && webhookMessage && (
+      {allRevealed && webhookMessage && showShareButton && (
         <div className="mt-10 space-y-6">
           <div className="p-5 bg-amber-50 border border-amber-200 rounded-lg text-center">
             <p className="text-lg font-medium text-amber-800">{webhookMessage}</p>
@@ -89,7 +100,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
               onClick={shareToX}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white"
             >
-              <Share className="h-4 w-4" />
+              <X className="h-4 w-4" />
               {t('tarot.shareOnX')}
             </Button>
           </div>
