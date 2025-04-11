@@ -40,15 +40,13 @@ export const callSelectDeckWebhook = async (
   } catch (error) {
     console.error('Error calling select deck webhook:', error);
     
-    // Log failed webhook call
-    logDeckSelectWebhook(
-      webhookUrl, 
-      { userid: userId, deck_to_select: deckToSelect }, 
-      null, 
-      error, 
-      undefined, 
+    // Update to use object parameter format
+    logDeckSelectWebhook({
+      url: webhookUrl, 
+      requestData: { userid: userId, deck_to_select: deckToSelect }, 
+      error: error instanceof Error ? error.message : String(error), 
       environment
-    );
+    });
     
     toast.error("Error selecting deck. Please try again later.", {
       description: error instanceof Error ? error.message : 'Unknown error'

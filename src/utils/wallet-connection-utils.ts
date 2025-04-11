@@ -105,7 +105,14 @@ export const callLoginWebhook = async (
     if (!response.ok) {
       const errorText = await response.text();
       addConnectionLog('Login Error', `HTTP error! status: ${status}, ${errorText}`);
-      logLoginWebhook(webhookUrl, { wallet: address, type: walletType }, null, `HTTP error! status: ${status}`, status, environment);
+      // Update to use object parameter format
+      logLoginWebhook({
+        url: webhookUrl,
+        requestData: { wallet: address, type: walletType },
+        error: `HTTP error! status: ${status}`,
+        status,
+        environment
+      });
       throw new Error(`HTTP error! status: ${status}`);
     }
     
@@ -113,7 +120,14 @@ export const callLoginWebhook = async (
     console.log('Login webhook response:', data);
     
     addConnectionLog('Login Success', `Received response with status ${status}`);
-    logLoginWebhook(webhookUrl, { wallet: address, type: walletType }, data, undefined, status, environment);
+    // Update to use object parameter format
+    logLoginWebhook({
+        url: webhookUrl,
+        requestData: { wallet: address, type: walletType },
+        responseData: data,
+        status,
+        environment
+    });
     
     return data;
   } catch (error) {

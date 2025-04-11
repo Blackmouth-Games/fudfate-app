@@ -60,7 +60,13 @@ export const callReadingWebhook = async (
     throw new Error(result.error);
   } catch (error) {
     console.error('Error calling reading webhook:', error);
-    logReadingWebhook(webhookUrl, requestData, null, error, undefined, environment);
+    // Update to use object parameter format
+    logReadingWebhook({
+      url: webhookUrl,
+      requestData,
+      error: error instanceof Error ? error.message : String(error),
+      environment
+    });
     
     // For development environment, return mock data
     if (environment === 'development') {
