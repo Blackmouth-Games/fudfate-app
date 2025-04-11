@@ -37,7 +37,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   
   // Check if all cards are revealed
   useEffect(() => {
-    if (selectedCards.every(card => card.revealed)) {
+    if (selectedCards.length > 0 && selectedCards.every(card => card.revealed)) {
       setAllRevealed(true);
       
       // Show share button after 2 seconds if we have a webhook message
@@ -48,6 +48,9 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
         
         return () => clearTimeout(timer);
       }
+    } else {
+      setAllRevealed(false);
+      setShowShareButton(false);
     }
   }, [selectedCards, webhookMessage]);
   
@@ -77,6 +80,14 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
       '_blank'
     );
   };
+
+  // Debug log to check selected cards
+  console.log("CardRevealContainer rendering with:", {
+    selectedCards: selectedCards.length,
+    allRevealed,
+    loading,
+    cardBackImage
+  });
   
   return (
     <div className="space-y-8">

@@ -31,6 +31,14 @@ const CardItem: React.FC<CardItemProps> = ({
     }
   };
 
+  // Debug log for card rendering
+  console.log(`Rendering CardItem ${index}:`, {
+    cardId: card?.id,
+    isRevealed,
+    cardImage: card?.image,
+    cardBackImage
+  });
+
   return (
     <motion.div
       className="card-container cursor-pointer"
@@ -43,7 +51,7 @@ const CardItem: React.FC<CardItemProps> = ({
     >
       <div className={`card-wrapper relative ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
         <div className={`card ${isRevealed ? 'is-flipped' : ''}`}>
-          <div className="card-face card-back">
+          <div className="card-face card-back relative">
             <AspectRatio ratio={5/8}>
               <img 
                 src={cardBackImage} 
@@ -57,10 +65,10 @@ const CardItem: React.FC<CardItemProps> = ({
             </AspectRatio>
           </div>
           
-          <div className="card-face card-front">
+          <div className="card-face card-front relative">
             <AspectRatio ratio={5/8}>
               <img 
-                src={card?.image.replace('.png', '.jpg')} 
+                src={card?.image?.replace('.png', '.jpg')} 
                 alt={card?.name}
                 className="w-full h-full object-cover rounded-lg" 
                 onError={(e) => {

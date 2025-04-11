@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -57,14 +56,13 @@ const TarotApp: React.FC = () => {
       console.log("Raw decks data from API:", decksData);
       
       // Log the webhook response
-      logDeckWebhook(
-        webhooks.deck,
-        { userid: userData.userId },
-        decksData,
-        undefined,
-        200,
-        environment
-      );
+      logDeckWebhook({
+        url: webhooks.deck,
+        request: { userid: userData.userId },
+        response: decksData,
+        status: 200,
+        environment: environment
+      });
       
       if (Array.isArray(decksData) && decksData.length > 0) {
         // Process API response
@@ -91,14 +89,12 @@ const TarotApp: React.FC = () => {
     } catch (error) {
       console.error('Error fetching decks:', error);
       // Log the webhook error
-      logDeckWebhook(
-        webhooks.deck,
-        { userid: userData.userId },
-        null,
-        error instanceof Error ? error.message : String(error),
-        undefined,
-        environment
-      );
+      logDeckWebhook({
+        url: webhooks.deck,
+        request: { userid: userData.userId },
+        error: error instanceof Error ? error.message : String(error),
+        environment: environment
+      });
       
       toast.error(t('errors.deckLoadFailed'), {
         position: 'bottom-center',
@@ -135,7 +131,7 @@ const TarotApp: React.FC = () => {
           date: new Date().toISOString(),
           userid: userData.userId
         },
-        environment
+        environment: environment
       });
       
       const response = await fetch(webhooks.history, {
@@ -170,7 +166,7 @@ const TarotApp: React.FC = () => {
         },
         response: data,
         status: response.status,
-        environment
+        environment: environment
       });
       
       if (data && Array.isArray(data.readings)) {
@@ -194,7 +190,7 @@ const TarotApp: React.FC = () => {
           userid: userData.userId
         },
         error: error instanceof Error ? error.message : String(error),
-        environment
+        environment: environment
       });
       
       toast.error(t('errors.historyLoadFailed'), {
@@ -216,7 +212,6 @@ const TarotApp: React.FC = () => {
     }
   };
 
-  // Component to show when not connected
   const renderWelcomeScreen = () => (
     <div className="flex flex-col items-center max-w-2xl w-full mx-auto">
       <GlitchLogo 

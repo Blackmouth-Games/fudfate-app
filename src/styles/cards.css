@@ -1,14 +1,48 @@
 
 /* Card Display Styles */
 .card {
-  padding: 2em;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
 }
 
 .card-container {
   display: flex;
   justify-content: center;
-  padding: 1rem 0.5rem 2rem 0.5rem;
   perspective: 1000px;
+  width: 100%;
+  height: 100%;
+}
+
+.card-wrapper {
+  width: 100%;
+  height: 100%;
+  perspective: 1000px;
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.card-back {
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+
+.card-front {
+  transform: rotateY(180deg);
+}
+
+.card.is-flipped {
+  transform: rotateY(180deg);
 }
 
 .card-3d {
@@ -34,19 +68,6 @@
   image-rendering: pixelated;
 }
 
-/* Card flip animation */
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.transform-style-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-}
-
 /* Card selection animations */
 @keyframes float {
   0% {
@@ -69,4 +90,21 @@
   transform: translateY(-10px);
   box-shadow: 0 10px 20px rgba(250, 209, 43, 0.3);
   transition: all 0.3s ease;
+}
+
+/* Card reveal animation */
+@keyframes reveal-glow {
+  0% {
+    box-shadow: 0 0 0px rgba(111, 76, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(111, 76, 255, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(111, 76, 255, 0.2);
+  }
+}
+
+.card-revealing {
+  animation: reveal-glow 2s ease-out;
 }
