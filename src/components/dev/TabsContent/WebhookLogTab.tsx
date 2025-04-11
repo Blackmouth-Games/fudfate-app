@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Trash, RefreshCw, ExternalLink } from 'lucide-react';
@@ -82,7 +83,8 @@ const WebhookLogTab: React.FC = () => {
   };
 
   // Filter out pushlogs to grafana from logging view
-  const filteredLogs = logs.filter(log => !log.url.includes('pushLogsToGrafana'));
+  // Added null check for url property
+  const filteredLogs = logs.filter(log => log.url && typeof log.url === 'string' && !log.url.includes('pushLogsToGrafana'));
   
   return (
     <div className="space-y-2">
@@ -135,7 +137,7 @@ const WebhookLogTab: React.FC = () => {
               </div>
               
               <div className="truncate">
-                <span className="text-gray-600">URL:</span> <span className="font-mono overflow-ellipsis">{log.url}</span>
+                <span className="text-gray-600">URL:</span> <span className="font-mono overflow-ellipsis">{log.url || 'N/A'}</span>
               </div>
               
               {log.status && (

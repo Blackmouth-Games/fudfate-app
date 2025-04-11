@@ -15,8 +15,11 @@ export const logWebhookCall = (
   environment: string = 'production', 
   method: string = 'POST'
 ): void => {
+  // Ensure URL is a string to prevent 'includes' errors
+  const safeUrl = url && typeof url === 'string' ? url : '';
+  
   // Filter out pushLogs to Grafana to prevent infinite logging
-  if (url && url.includes && url.includes('pushLogsToGrafana')) {
+  if (safeUrl && safeUrl.includes('pushLogsToGrafana')) {
     return; // Skip logging for Grafana push logs
   }
   
@@ -24,7 +27,7 @@ export const logWebhookCall = (
     id: nanoid(),
     timestamp: new Date().toISOString(),
     type,
-    url,
+    url: safeUrl,
     method,
     request: requestData,
     response: responseData,
