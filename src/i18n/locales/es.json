@@ -87,7 +87,15 @@
     "reading": "Lectura",
     "history": "Historial",
     "decks": "Mazos",
-    "revealYourDestiny": "Revela Tu Destino"
+    "revealYourDestiny": "Revela Tu Destino",
+    "selected": "Seleccionado",
+    "select": "Seleccionar",
+    "selecting": "Seleccionando...",
+    "comingSoon": "Próximamente",
+    "locked": "Bloqueado",
+    "noReadingsTitle": "No Se Encontraron Lecturas",
+    "backToHistory": "Volver al Historial",
+    "view": "Ver"
   },
   "errors": {
     "readingFailed": "Error al iniciar la lectura. Por favor, inténtalo de nuevo más tarde.",
@@ -110,7 +118,9 @@
     "back": "Reverso de la Carta",
     "viewFullsize": "Ver Tamaño Completo",
     "cryptoDeck": "Mazo de Tarot Crypto",
-    "classicDeck": "Mazo de Tarot Clásico"
+    "classicDeck": "Mazo de Tarot Clásico",
+    "noDescription": "No hay descripción disponible",
+    "noCardsInDeck": "No se encontraron cartas en este mazo"
   },
   "history": {
     "title": "Historial de Lecturas",

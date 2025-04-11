@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogClose, DialogHeader } from '@/components/ui/dialog';
-import { X, Info } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
+import { Info } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
 import { DeckInfo } from '@/utils/deck-utils';
 import tarotCards from '@/data/tarotCards';
@@ -54,10 +54,6 @@ const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <DialogClose className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100">
-              <X className="h-4 w-4" />
-              <span className="sr-only">{t('common.close')}</span>
-            </DialogClose>
           </DialogTitle>
         </DialogHeader>
         

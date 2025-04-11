@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -124,6 +125,19 @@ const TarotApp: React.FC = () => {
     setIsLoadingHistory(true);
     try {
       console.log("Calling history webhook with userid:", userData.userId);
+      
+      // Log the webhook request about to be made
+      logWebhookCall({
+        type: "History",
+        url: webhooks.history,
+        method: "POST",
+        request: {
+          date: new Date().toISOString(),
+          userid: userData.userId
+        },
+        environment
+      });
+      
       const response = await fetch(webhooks.history, {
         method: 'POST',
         headers: {
@@ -135,12 +149,29 @@ const TarotApp: React.FC = () => {
         }),
       });
       
+      // Log the webhook response status
+      console.log(`History webhook response status: ${response.status}`);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       
       const data = await response.json();
       console.log("History webhook response:", data);
+      
+      // Log the webhook response
+      logWebhookCall({
+        type: "History",
+        url: webhooks.history,
+        method: "POST",
+        request: {
+          date: new Date().toISOString(),
+          userid: userData.userId
+        },
+        response: data,
+        status: response.status,
+        environment
+      });
       
       if (data && Array.isArray(data.readings)) {
         setHistoryData(data.readings);
@@ -152,6 +183,20 @@ const TarotApp: React.FC = () => {
       }
     } catch (error) {
       console.error('Error calling history webhook:', error);
+      
+      // Log the webhook error
+      logWebhookCall({
+        type: "History",
+        url: webhooks.history,
+        method: "POST",
+        request: {
+          date: new Date().toISOString(),
+          userid: userData.userId
+        },
+        error: error instanceof Error ? error.message : String(error),
+        environment
+      });
+      
       toast.error(t('errors.historyLoadFailed'), {
         position: 'bottom-center',
       });

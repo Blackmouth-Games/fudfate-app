@@ -87,7 +87,15 @@
     "reading": "Reading",
     "history": "History",
     "decks": "Decks",
-    "revealYourDestiny": "Reveal Your Destiny"
+    "revealYourDestiny": "Reveal Your Destiny",
+    "selected": "Selected",
+    "select": "Select",
+    "selecting": "Selecting...",
+    "comingSoon": "Coming Soon",
+    "locked": "Locked",
+    "noReadingsTitle": "No Readings Found",
+    "backToHistory": "Back to History",
+    "view": "View"
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",
@@ -110,7 +118,9 @@
     "back": "Back of Card",
     "viewFullsize": "View Fullsize",
     "cryptoDeck": "Crypto Tarot Deck",
-    "classicDeck": "Classic Tarot Deck"
+    "classicDeck": "Classic Tarot Deck",
+    "noDescription": "No description available",
+    "noCardsInDeck": "No cards found in this deck"
   },
   "history": {
     "title": "Reading History",

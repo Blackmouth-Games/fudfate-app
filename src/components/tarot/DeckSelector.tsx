@@ -28,6 +28,16 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   
   const decks = availableDecks.length > 0 ? availableDecks : getAvailableDecks();
   
+  // Sort decks: first by ID, then by active status (active first)
+  const sortedDecks = [...decks].sort((a, b) => {
+    // First compare activation status - active decks first
+    if (a.isActive !== b.isActive) {
+      return a.isActive ? -1 : 1;
+    }
+    // Then sort by ID if both have same activation status
+    return parseInt(a.id) - parseInt(b.id);
+  });
+  
   const {
     openDeckId,
     selectedCard,
@@ -58,12 +68,12 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
             <GlitchText text={t('tarot.selectDeck')} />
           </h3>
           <p className="text-gray-600 text-xs">
-            {t('tarot.additionalDecksComingSoon')}
+            {t('cards.decksDescription')}
           </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {decks.map((deck) => (
+          {sortedDecks.map((deck) => (
             <DeckCard
               key={deck.id}
               deck={deck}
