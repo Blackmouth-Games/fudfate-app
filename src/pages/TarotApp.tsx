@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -58,8 +59,8 @@ const TarotApp: React.FC = () => {
       // Log the webhook response
       logDeckWebhook({
         url: webhooks.deck,
-        request: { userid: userData.userId },
-        response: decksData,
+        requestData: { userid: userData.userId },
+        responseData: decksData,
         status: 200,
         environment: environment
       });
@@ -91,7 +92,7 @@ const TarotApp: React.FC = () => {
       // Log the webhook error
       logDeckWebhook({
         url: webhooks.deck,
-        request: { userid: userData.userId },
+        requestData: { userid: userData.userId },
         error: error instanceof Error ? error.message : String(error),
         environment: environment
       });
@@ -123,16 +124,10 @@ const TarotApp: React.FC = () => {
       console.log("Calling history webhook with userid:", userData.userId);
       
       // Log the webhook request about to be made
-      logWebhookCall({
-        type: "History",
-        url: webhooks.history,
-        method: "POST",
-        request: {
-          date: new Date().toISOString(),
-          userid: userData.userId
-        },
-        environment: environment
-      });
+      logWebhookCall('History', webhooks.history, {
+        date: new Date().toISOString(),
+        userid: userData.userId
+      }, null, undefined, undefined, environment);
       
       const response = await fetch(webhooks.history, {
         method: 'POST',
@@ -156,18 +151,10 @@ const TarotApp: React.FC = () => {
       console.log("History webhook response:", data);
       
       // Log the webhook response
-      logWebhookCall({
-        type: "History",
-        url: webhooks.history,
-        method: "POST",
-        request: {
-          date: new Date().toISOString(),
-          userid: userData.userId
-        },
-        response: data,
-        status: response.status,
-        environment: environment
-      });
+      logWebhookCall('History', webhooks.history, {
+        date: new Date().toISOString(),
+        userid: userData.userId
+      }, data, undefined, response.status, environment);
       
       if (data && Array.isArray(data.readings)) {
         setHistoryData(data.readings);
@@ -181,17 +168,10 @@ const TarotApp: React.FC = () => {
       console.error('Error calling history webhook:', error);
       
       // Log the webhook error
-      logWebhookCall({
-        type: "History",
-        url: webhooks.history,
-        method: "POST",
-        request: {
-          date: new Date().toISOString(),
-          userid: userData.userId
-        },
-        error: error instanceof Error ? error.message : String(error),
-        environment: environment
-      });
+      logWebhookCall('History', webhooks.history, {
+        date: new Date().toISOString(),
+        userid: userData.userId
+      }, null, error, undefined, environment);
       
       toast.error(t('errors.historyLoadFailed'), {
         position: 'bottom-center',

@@ -69,7 +69,7 @@ const CardItem: React.FC<CardItemProps> = ({
             <AspectRatio ratio={5/8}>
               <img 
                 src={card?.image?.replace('.png', '.jpg')} 
-                alt={card?.name}
+                alt={card?.name || 'Tarot Card'}
                 className="w-full h-full object-cover rounded-lg" 
                 onError={(e) => {
                   console.warn(`Failed to load card image: ${card?.image}`);

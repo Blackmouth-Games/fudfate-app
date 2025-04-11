@@ -16,7 +16,7 @@ export const logWebhookCall = (
   method: string = 'POST'
 ): void => {
   // Filter out pushLogs to Grafana to prevent infinite logging
-  if (url.includes('pushLogsToGrafana')) {
+  if (url && url.includes && url.includes('pushLogsToGrafana')) {
     return; // Skip logging for Grafana push logs
   }
   
@@ -52,18 +52,58 @@ export const logWebhookCall = (
 };
 
 // Specific logging functions for different webhook types
-export const logLoginWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+export const logLoginWebhook = (
+  params: { 
+    url: string, 
+    requestData: any, 
+    responseData?: any, 
+    error?: any, 
+    status?: number, 
+    environment?: string 
+  }
+) => {
+  const { url, requestData, responseData, error, status, environment = 'production' } = params;
   logWebhookCall('Login', url, requestData, responseData, error, status, environment, 'POST');
 };
 
-export const logReadingWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+export const logReadingWebhook = (
+  params: { 
+    url: string, 
+    requestData: any, 
+    responseData?: any, 
+    error?: any, 
+    status?: number, 
+    environment?: string 
+  }
+) => {
+  const { url, requestData, responseData, error, status, environment = 'production' } = params;
   logWebhookCall('Reading', url, requestData, responseData, error, status, environment, 'POST');
 };
 
-export const logDeckWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+export const logDeckWebhook = (
+  params: { 
+    url: string, 
+    requestData: any, 
+    responseData?: any, 
+    error?: any, 
+    status?: number, 
+    environment?: string 
+  }
+) => {
+  const { url, requestData, responseData, error, status, environment = 'production' } = params;
   logWebhookCall('Deck', url, requestData, responseData, error, status, environment, 'POST');
 };
 
-export const logDeckSelectWebhook = (url: string, requestData: any, responseData?: any, error?: any, status?: number, environment: string = 'production') => {
+export const logDeckSelectWebhook = (
+  params: { 
+    url: string, 
+    requestData: any, 
+    responseData?: any, 
+    error?: any, 
+    status?: number, 
+    environment?: string 
+  }
+) => {
+  const { url, requestData, responseData, error, status, environment = 'production' } = params;
   logWebhookCall('DeckSelect', url, requestData, responseData, error, status, environment, 'POST');
 };
