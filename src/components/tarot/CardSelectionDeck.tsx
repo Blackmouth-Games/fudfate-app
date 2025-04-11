@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,9 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
 }) => {
   const { t } = useTranslation();
   const { phase, setPhase } = useTarot();
+  
+  // Ensure all image paths use .jpg instead of .png
+  const backImage = cardBackImage.replace('.png', '.jpg');
 
   useEffect(() => {
     if (selectedCards.length === 3) {
@@ -155,15 +159,15 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                     width: '120px'
                   }}
                 >
-                  <AspectRatio ratio={2/3}>
+                  <AspectRatio ratio={5/8}>
                     <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 hover:border-amber-400 transition-colors">
                       <motion.img 
-                        src={cardBackImage} 
+                        src={backImage} 
                         alt="Tarot Card Back"
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
-                          e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
+                          console.warn(`Failed to load image: ${backImage}, using fallback`);
+                          e.currentTarget.src = `/img/cards/deck_1/99_BACK.jpg`;
                         }}
                       />
                     </div>

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ReadingCard } from '@/types/tarot';
 import GlitchText from '@/components/GlitchText';
 import CardItem from './CardItem';
+import ShareReading from './ShareReading';
 
 interface CardRevealContainerProps {
   selectedCards: ReadingCard[];
@@ -96,8 +97,12 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
       </div>
       
       {allRevealed && webhookMessage && (
-        <div className="mt-10 p-5 bg-amber-50 border border-amber-200 rounded-lg text-center">
-          <p className="text-lg font-medium text-amber-800">{webhookMessage}</p>
+        <div className="mt-10 space-y-6">
+          <div className="p-5 bg-amber-50 border border-amber-200 rounded-lg text-center">
+            <p className="text-lg font-medium text-amber-800">{webhookMessage}</p>
+          </div>
+          
+          <ShareReading className="mt-6" />
         </div>
       )}
     </div>

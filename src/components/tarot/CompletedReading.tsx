@@ -6,6 +6,7 @@ import GlitchText from '@/components/GlitchText';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { motion } from 'framer-motion';
+import ShareReading from './ShareReading';
 
 interface CompletedReadingProps {
   finalMessage: string;
@@ -50,19 +51,19 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
             className="card-fullview border-2 border-amber-400 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
             {card && (
-              <AspectRatio ratio={2/3}>
+              <AspectRatio ratio={5/8}>
                 <div className="p-3 h-full flex flex-col">
                   <div className="text-center font-bold text-amber-800 py-1.5 px-2 bg-amber-50 rounded-md mb-2 truncate">
                     {card.name}
                   </div>
                   <div className="flex-1 flex items-center justify-center p-2">
                     <img 
-                      src={card.image} 
+                      src={card.image.replace('.png', '.jpg')} 
                       alt={card.name} 
                       className="max-h-full max-w-full object-contain rounded-md"
                       onError={(e) => {
                         console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
+                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
                       }}
                     />
                   </div>
@@ -86,6 +87,8 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
           "{finalMessage}"
         </p>
       </motion.div>
+      
+      <ShareReading className="mb-6" />
       
       <motion.div 
         className="flex justify-center pt-4"

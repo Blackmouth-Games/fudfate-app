@@ -16,13 +16,14 @@ import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@
 import { X } from 'lucide-react';
 import { getCardBackPath, getAvailableDecks } from '@/utils/deck-utils';
 import DeckDetailsDialog from '@/components/tarot/DeckDetailsDialog';
+import { motion } from 'framer-motion';
 
 // Example cards for the carousel - updated paths to proper format
 const exampleCards = [
-  { id: 1, title: "The Degen", imageUrl: "/img/cards/deck_1/0_TheDegen.png" },
-  { id: 2, title: "The Miner", imageUrl: "/img/cards/deck_1/1_TheMiner.png" },
-  { id: 3, title: "The Oracle", imageUrl: "/img/cards/deck_1/2_TheOracle.png" },
-  { id: 4, title: "The Wheel", imageUrl: "/img/cards/deck_2/10_wheel of fortune.png" },
+  { id: 1, title: "The Degen", imageUrl: "/img/cards/deck_1/0_TheDegen.jpg" },
+  { id: 2, title: "The Miner", imageUrl: "/img/cards/deck_1/1_TheMiner.jpg" },
+  { id: 3, title: "The Oracle", imageUrl: "/img/cards/deck_1/2_TheOracle.jpg" },
+  { id: 4, title: "The Wheel", imageUrl: "/img/cards/deck_2/10_wheel of fortune.jpg" },
 ];
 
 interface TarotCardSectionProps {
@@ -34,6 +35,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
   const cards = exampleCards;
   const [openDeckId, setOpenDeckId] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<string | null>(null);
+  const [hoveredDeck, setHoveredDeck] = useState<number | null>(null);
   
   // Get all available decks
   const availableDecks = getAvailableDecks();
@@ -96,14 +98,51 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
             {cards.map((card, index) => (
               <CarouselItem key={card.id} className="md:basis-1/2 lg:basis-1/3 px-6">
                 <div 
-                  className="floating cursor-pointer" 
+                  className="floating cursor-pointer relative"
                   style={{ animationDelay: `${0.2 * index}s` }}
                   onClick={() => handleDeckClick(index < 3 ? '1' : '2')}
+                  onMouseEnter={() => setHoveredDeck(index)}
+                  onMouseLeave={() => setHoveredDeck(null)}
                 >
                   <TarotCard 
                     imageUrl={card.imageUrl}
                     title={card.title} 
                   />
+                  
+                  {/* Deck hover effect with multiple cards */}
+                  {hoveredDeck === index && (
+                    <>
+                      <motion.div 
+                        className="absolute top-0 left-0 w-full z-10"
+                        initial={{ rotateZ: -5, x: -10, y: -5 }}
+                        animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
+                        transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                      >
+                        <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+                          <img 
+                            src={`/img/cards/deck_${index < 3 ? '1' : '2'}/99_BACK.jpg`} 
+                            alt="Card Back" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </motion.div>
+                      
+                      <motion.div 
+                        className="absolute top-0 left-0 w-full z-20"
+                        initial={{ rotateZ: 5, x: 10, y: -2 }}
+                        animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
+                        transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
+                      >
+                        <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+                          <img 
+                            src={`/img/cards/deck_${index < 3 ? '1' : '2'}/99_BACK.jpg`} 
+                            alt="Card Back" 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </motion.div>
+                    </>
+                  )}
                 </div>
               </CarouselItem>
             ))}
@@ -141,11 +180,15 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
             {cardDetails && (
               <>
                 <div className="mb-4 w-full max-w-xs mx-auto">
-                  <div className="aspect-[2/3] overflow-hidden rounded-lg border-2 border-amber-400 shadow-lg">
+                  <div className="aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-400 shadow-lg">
                     <img 
-                      src={cardDetails.image} 
+                      src={cardDetails.image.replace('.png', '.jpg')} 
                       alt={cardDetails.name} 
                       className="w-full h-full object-contain" 
+                      onError={(e) => {
+                        console.warn(`Failed to load image: ${cardDetails.image.replace('.png', '.jpg')}, using fallback`);
+                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
+                      }}
                     />
                   </div>
                 </div>

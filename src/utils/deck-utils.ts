@@ -36,7 +36,7 @@ export const getCardBackPath = (deck: Deck): string => {
     deckNumber = deck.replace('deck', '');
   }
   
-  const backPath = `/img/cards/deck_${deckNumber}/99_BACK.png`;
+  const backPath = `/img/cards/deck_${deckNumber}/99_BACK.jpg`;
   console.log(`getCardBackPath: ${deck} -> ${backPath}`);
   return backPath;
 };
@@ -55,7 +55,7 @@ export const getCardPath = (deck: Deck, cardId: string): string => {
     deckNumber = deck.replace('deck', '');
   }
   
-  const path = `/img/cards/deck_${deckNumber}/${cardId}.png`;
+  const path = `/img/cards/deck_${deckNumber}/${cardId}.jpg`;
   return path;
 };
 
@@ -76,7 +76,7 @@ export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => 
   const directory = `/img/cards/deck_${deckNumber}/`;
   
   // Get back image path
-  const backImage = `/img/cards/deck_${deckNumber}/99_BACK.png`;
+  const backImage = `/img/cards/deck_${deckNumber}/99_BACK.jpg`;
   
   return {
     id: apiDeck.id,
@@ -104,7 +104,7 @@ export const getAllDecks = (): DeckInfo[] => {
       isActive: true,
       createdAt: new Date().toISOString(),
       directory: '/img/cards/deck_1/',
-      backImage: '/img/cards/deck_1/99_BACK.png',
+      backImage: '/img/cards/deck_1/99_BACK.jpg',
       unlocked: true
     },
     {
@@ -115,7 +115,7 @@ export const getAllDecks = (): DeckInfo[] => {
       isActive: true, 
       createdAt: new Date().toISOString(),
       directory: '/img/cards/deck_2/',
-      backImage: '/img/cards/deck_2/99_BACK.png',
+      backImage: '/img/cards/deck_2/99_BACK.jpg',
       unlocked: true
     }
   ];

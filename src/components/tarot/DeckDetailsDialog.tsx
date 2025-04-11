@@ -5,7 +5,7 @@ import { X, Info } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
 import { DeckInfo } from '@/utils/deck-utils';
 import tarotCards from '@/data/tarotCards';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface DeckDetailsDialogProps {
   open: boolean;
@@ -73,15 +73,15 @@ const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
                 className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
                 onClick={() => onCardClick(card.id)}
               >
-                <div className="border-2 border-amber-300 rounded-lg overflow-hidden shadow-md w-full aspect-[2/3]">
+                <div className="border-2 border-amber-300 rounded-lg overflow-hidden shadow-md w-full aspect-[5/8]">
                   <img 
-                    src={card.image} 
+                    src={card.image.replace('.png', '.jpg')} 
                     alt={card.name} 
                     className="w-full h-full object-cover"
                     loading="lazy"
                     onError={(e) => {
                       console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                      e.currentTarget.src = selectedDeck ? selectedDeck.backImage : "/img/cards/deck_1/0_TheDegen.png";
+                      e.currentTarget.src = selectedDeck ? selectedDeck.backImage.replace('.png', '.jpg') : "/img/cards/deck_1/0_TheDegen.jpg";
                     }}
                   />
                 </div>

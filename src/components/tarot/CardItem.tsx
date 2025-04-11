@@ -21,13 +21,17 @@ const CardItem: React.FC<CardItemProps> = ({
   loading,
   cardBackImage
 }) => {
+  // Ensure all image paths use .jpg instead of .png
+  const cardImage = card?.image ? card.image.replace('.png', '.jpg') : '';
+  const backImage = cardBackImage.replace('.png', '.jpg');
+
   return (
     <div className="flex flex-col items-center space-y-3">
       <motion.div 
         className="perspective-1000 w-full"
         whileHover={{ scale: isRevealed ? 1.02 : 1.05, transition: { duration: 0.2 } }}
       >
-        <AspectRatio ratio={2/3} className="w-full">
+        <AspectRatio ratio={5/8} className="w-full">
           <motion.div 
             className={`relative w-full h-full transition-transform duration-1000 transform-style-3d cursor-pointer`}
             style={{ 
@@ -42,12 +46,12 @@ const CardItem: React.FC<CardItemProps> = ({
               style={{ backfaceVisibility: "hidden" }}
             >
               <img 
-                src={cardBackImage} 
+                src={backImage} 
                 alt="Card Back" 
                 className="h-full w-full object-cover rounded-lg"
                 onError={(e) => {
-                  console.warn(`Failed to load card back image: ${cardBackImage}, using fallback`);
-                  e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
+                  console.warn(`Failed to load card back image: ${backImage}, using fallback`);
+                  e.currentTarget.src = `/img/cards/deck_1/99_BACK.jpg`;
                 }}
               />
             </div>
@@ -70,12 +74,12 @@ const CardItem: React.FC<CardItemProps> = ({
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.3, duration: 0.5 }}
-                      src={card.image} 
+                      src={cardImage} 
                       alt={card.name} 
                       className="max-h-full max-w-full object-contain rounded-md"
                       onError={(e) => {
-                        console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.png`;
+                        console.warn(`Failed to load card image: ${cardImage}, using fallback`);
+                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
                       }}
                     />
                   </div>

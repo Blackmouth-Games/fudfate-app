@@ -22,9 +22,12 @@ const TarotCard = ({
   // Only apply glitch if an effect is selected
   const shouldGlitch = glitchEffect !== 'none';
   
+  // Convert .png to .jpg in image URL
+  const jpgImageUrl = imageUrl.replace('.png', '.jpg');
+  
   return (
     <BaseCard
-      imageUrl={imageUrl}
+      imageUrl={jpgImageUrl}
       title={title}
       className={className}
       delay={delay}
