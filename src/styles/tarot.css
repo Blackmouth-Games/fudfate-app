@@ -96,6 +96,7 @@
   align-items: center;
   justify-content: center;
   padding: 0.5rem;
+  aspect-ratio: 5/8;
 }
 
 .tarot-card-image img {
@@ -108,6 +109,7 @@
 .selection-slot {
   transition: all 0.3s ease;
   border: 1px dashed transparent;
+  aspect-ratio: 5/8;
 }
 
 .selection-slot-highlight {
@@ -121,6 +123,7 @@
   transition: all 0.3s ease;
   background-color: rgba(255, 255, 255, 0.05);
   overflow: hidden;
+  aspect-ratio: 5/8;
 }
 
 .tarot-selection-card:hover {

@@ -38,7 +38,7 @@ const CardItem: React.FC<CardItemProps> = ({
               transformStyle: "preserve-3d",
               transform: isRevealed ? 'rotateY(180deg)' : 'rotateY(0deg)'
             }}
-            onClick={() => !isRevealed && !loading && handleCardClick(index)}
+            onClick={() => !loading && handleCardClick(index)}
           >
             {/* Card Back */}
             <div 
@@ -66,9 +66,6 @@ const CardItem: React.FC<CardItemProps> = ({
             >
               {card && (
                 <div className="p-3 h-full flex flex-col">
-                  <div className="text-center font-bold text-amber-800 mb-2 bg-amber-50 py-1.5 px-2 rounded-md truncate">
-                    {card.name}
-                  </div>
                   <div className="flex-1 flex items-center justify-center p-2 overflow-hidden">
                     <motion.img 
                       initial={{ opacity: 0, scale: 0.8 }}

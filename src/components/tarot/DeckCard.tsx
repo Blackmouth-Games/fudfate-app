@@ -39,8 +39,49 @@ const DeckCard: React.FC<DeckCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative">
+        {/* Animated cards that appear on hover - positioned first in the DOM to be behind other elements */}
+        {isHovered && isUnlocked && (
+          <>
+            <motion.div 
+              className="absolute top-0 left-0 max-w-[120px] z-0"
+              initial={{ rotateZ: -5, x: -10, y: -5 }}
+              animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
+              transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            >
+              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+                <img 
+                  src={deck.backImage.replace('.png', '.jpg')} 
+                  alt="Card Back" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
+                  }}
+                />
+              </div>
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-0 left-0 max-w-[120px] z-0"
+              initial={{ rotateZ: 5, x: 10, y: -2 }}
+              animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
+              transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
+            >
+              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+                <img 
+                  src={deck.backImage.replace('.png', '.jpg')} 
+                  alt="Card Back" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
+                  }}
+                />
+              </div>
+            </motion.div>
+          </>
+        )}
+
         <div 
-          className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[120px] h-[192px] mx-auto
+          className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[120px] h-[192px] mx-auto z-10
             ${isSelected ? 'border-amber-500 shadow-amber-200' : 'border-gray-200'}
             ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
           onClick={() => {
@@ -73,47 +114,6 @@ const DeckCard: React.FC<DeckCardProps> = ({
             <div className="absolute top-1 right-1 bg-amber-500 w-3 h-3 rounded-full border border-white"></div>
           )}
         </div>
-
-        {/* Animated cards that appear on hover */}
-        {isHovered && isUnlocked && (
-          <>
-            <motion.div 
-              className="absolute top-0 left-0 max-w-[120px] z-10"
-              initial={{ rotateZ: -5, x: -10, y: -5 }}
-              animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
-              transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-            >
-              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
-                <img 
-                  src={deck.backImage.replace('.png', '.jpg')} 
-                  alt="Card Back" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
-                  }}
-                />
-              </div>
-            </motion.div>
-            
-            <motion.div 
-              className="absolute top-0 left-0 max-w-[120px] z-20"
-              initial={{ rotateZ: 5, x: 10, y: -2 }}
-              animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
-              transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
-            >
-              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
-                <img 
-                  src={deck.backImage.replace('.png', '.jpg')} 
-                  alt="Card Back" 
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
-                  }}
-                />
-              </div>
-            </motion.div>
-          </>
-        )}
       </div>
 
       <h4 className="mt-2 text-center text-sm font-medium">
@@ -128,7 +128,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
           <Button 
             size="sm" 
             variant="outline" 
-            className="text-xs h-6 px-2 mt-1"
+            className="text-xs h-6 px-2 mt-1 relative z-20"
             disabled={isSelectingThis}
             onClick={(e) => {
               e.stopPropagation();

@@ -5,6 +5,8 @@ import { ReadingCard } from '@/types/tarot';
 import GlitchText from '@/components/GlitchText';
 import CardItem from './CardItem';
 import ShareReading from './ShareReading';
+import { Button } from '@/components/ui/button';
+import { Share } from 'lucide-react';
 
 interface CardRevealContainerProps {
   selectedCards: ReadingCard[];
@@ -23,56 +25,36 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
 }) => {
   const { t } = useTranslation();
   
-  // Track which cards have been flipped to prevent multiple flips
-  const [flippedCards, setFlippedCards] = useState<Record<number, boolean>>({});
-  const [revealQueue, setRevealQueue] = useState<number[]>([]);
-  const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+  // Track which cards have been revealed
   const [allRevealed, setAllRevealed] = useState(false);
   
-  // Handle card click with animation - only allow one flip per card and queue if needed
-  const handleCardReveal = async (index: number) => {
-    // Check if card is already revealed or is currently being flipped
-    if (selectedCards[index]?.revealed || loading || flippedCards[index]) return;
-    
-    // Mark this card as flipped to prevent multiple flips
-    setFlippedCards(prev => ({ ...prev, [index]: true }));
-    
-    // Add to queue instead of immediately revealing
-    setRevealQueue(prev => [...prev, index]);
-  };
-
-  // Process the reveal queue
-  useEffect(() => {
-    const processQueue = async () => {
-      if (revealQueue.length === 0 || isProcessingQueue) return;
-      
-      setIsProcessingQueue(true);
-      
-      // Process first index in queue
-      const index = revealQueue[0];
-      console.log(`Processing card reveal for index ${index}`);
-      
-      // Reveal the card with delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      handleCardClick(index);
-      
-      // Remove from queue and wait before processing next
-      setRevealQueue(prev => prev.slice(1));
-      
-      // Wait a bit longer before processing next card
-      await new Promise(resolve => setTimeout(resolve, 800));
-      setIsProcessingQueue(false);
-    };
-    
-    processQueue();
-  }, [revealQueue, isProcessingQueue, handleCardClick]);
-
   // Check if all cards are revealed
   useEffect(() => {
     if (selectedCards.every(card => card.revealed)) {
       setAllRevealed(true);
     }
   }, [selectedCards]);
+  
+  // Handle card click directly without queueing
+  const handleCardReveal = (index: number) => {
+    // Check if card is already revealed or loading
+    if (selectedCards[index]?.revealed || loading) return;
+    
+    // Directly reveal the card
+    handleCardClick(index);
+  };
+  
+  // Share to Twitter/X
+  const shareToX = () => {
+    const text = `I just got a crypto tarot reading! ${webhookMessage || 'Check out my fortune!'}`;
+    const url = window.location.href;
+    const hashtags = 'CryptoTarot,FUDFate';
+    
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${hashtags}`,
+      '_blank'
+    );
+  };
   
   return (
     <div className="space-y-8">
@@ -102,7 +84,15 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
             <p className="text-lg font-medium text-amber-800">{webhookMessage}</p>
           </div>
           
-          <ShareReading className="mt-6" />
+          <div className="mt-6 flex flex-col items-center">
+            <Button 
+              onClick={shareToX}
+              className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white"
+            >
+              <Share className="h-4 w-4" />
+              {t('tarot.shareOnX')}
+            </Button>
+          </div>
         </div>
       )}
     </div>

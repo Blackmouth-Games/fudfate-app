@@ -103,7 +103,7 @@ export const useTarotOperations = () => {
       
       // If we have webhook data with selected cards, and this is the first card reveal,
       // replace the selected cards with the ones from the webhook
-      if (webhookCards.length > 0 && selectedCards.every(c => !c.revealed)) {
+      if (webhookCards.length > 0 && selectedCards.filter(c => c.revealed).length === 0) {
         console.log("Using webhook cards for reveal:", webhookCards);
         console.log("Current selected deck:", selectedDeck);
         
@@ -214,3 +214,5 @@ export const useTarotOperations = () => {
     generateInterpretation
   };
 };
+
+export default useTarotOperations;
