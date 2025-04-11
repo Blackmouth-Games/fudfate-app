@@ -5,7 +5,7 @@ import { X, Info } from 'lucide-react';
 import GlitchText from '@/components/GlitchText';
 import { DeckInfo } from '@/utils/deck-utils';
 import tarotCards from '@/data/tarotCards';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 interface DeckDetailsDialogProps {
   open: boolean;
@@ -43,14 +43,16 @@ const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
           <DialogTitle className="flex justify-between items-center">
             <div className="flex items-center">
               <GlitchText text={selectedDeck?.displayName || ''} />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs max-w-[200px]">{selectedDeck?.description || t('cards.noDescription')}</p>
-                </TooltipContent>
-              </Tooltip>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs max-w-[200px]">{selectedDeck?.description || t('cards.noDescription')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <DialogClose className="h-6 w-6 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100">
               <X className="h-4 w-4" />
