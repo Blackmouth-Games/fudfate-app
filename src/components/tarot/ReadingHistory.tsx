@@ -7,6 +7,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Share2, Twitter } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 import CompletedReading from './CompletedReading';
 import { ReadingCard } from '@/types/tarot';
 import { useTarot } from '@/contexts/TarotContext';
@@ -21,6 +25,7 @@ interface Reading {
   question: string;
   cards: number[] | string | any[];
   result?: string;
+  response?: string;
   selected_cards?: any[];
   user_id?: string;
   reading_date?: string;
@@ -72,6 +77,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           question: reading.question || reading.intention || '',
           cards: parsedCards,
           result: reading.result || reading.message || '',
+          response: reading.response || '',
           user_id: reading.user_id || reading.userid || userData?.userId || '',
           selected_cards: reading.selected_cards || []
         };
@@ -139,6 +145,14 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     };
     
     return cardNames[cardId] || `Card ${fallbackIndex + 1}`;
+  };
+
+  // Get card image path from card ID
+  const getCardImagePath = (cardId: number): string => {
+    if (cardId >= 0 && cardId <= 21) {
+      return `/img/cards/deck_1/${cardId}_${getCardName(cardId, 0).replace(/\s+/g, '')}.jpg`;
+    }
+    return '/img/cards/deck_1/0_TheDegen.jpg';
   };
 
   // View card details
@@ -231,7 +245,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           </div>
           
           <CompletedReading 
-            finalMessage={selectedReading.result || t('tarot.noMessageAvailable')}
+            finalMessage={selectedReading.result || selectedReading.response || t('tarot.noMessageAvailable')}
             selectedCards={viewingCards}
             resetReading={resetReading}
           />
@@ -266,88 +280,143 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   }
 
   return (
-    <Card className={`border-amber-400/50 shadow-md ${className}`}>
-      <CardContent className="p-6">
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-full" />
-          </div>
-        ) : formattedReadings.length > 0 ? (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('tarot.date')}</TableHead>
-                  <TableHead>{t('tarot.question')}</TableHead>
-                  <TableHead>{t('tarot.cards')}</TableHead>
-                  <TableHead>{t('tarot.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {formattedReadings.map((reading) => {
-                  const formattedDate = new Date(reading.date).toLocaleDateString();
-                  const cardIds = Array.isArray(reading.cards) ? 
-                    reading.cards.map(c => {
-                      if (typeof c === 'number') return c;
-                      if (typeof c === 'string') return parseInt(c, 10);
-                      return 0; // Default value if parsing fails
-                    }) : [];
-                  
-                  const cardNames = cardIds.map(id => getCardName(id, 0));
-                  
-                  return (
-                    <TableRow key={reading.id}>
-                      <TableCell className="font-medium">{formattedDate}</TableCell>
-                      <TableCell>{reading.question}</TableCell>
-                      <TableCell>{cardNames.join(', ')}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => viewReading(reading)}
-                          >
-                            {t('tarot.view')}
-                          </Button>
-                          <Button
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => copyToClipboard(reading)}
-                            title={t('tarot.copyReading')}
-                          >
-                            <Share2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => shareOnTwitter(reading)}
-                            title={t('tarot.shareOnX')}
-                            className="text-[#1DA1F2]"
-                          >
-                            <Twitter className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        ) : (
-          <div className="text-center py-6">
-            <Alert>
-              <InfoIcon className="h-4 w-4" />
-              <AlertTitle>{t('tarot.noReadingsTitle')}</AlertTitle>
-              <AlertDescription>{t('tarot.noReadingsAvailable')}</AlertDescription>
-            </Alert>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <TooltipProvider>
+      <Card className={`border-amber-400/50 shadow-md ${className}`}>
+        <CardContent className="p-6">
+          {isLoading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+              <Skeleton className="h-6 w-full" />
+            </div>
+          ) : formattedReadings.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t('tarot.date')}</TableHead>
+                    <TableHead>{t('tarot.question')}</TableHead>
+                    <TableHead>{t('tarot.cards')}</TableHead>
+                    <TableHead>{t('tarot.response')}</TableHead>
+                    <TableHead>{t('tarot.actions')}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {formattedReadings.map((reading) => {
+                    const formattedDate = new Date(reading.date).toLocaleDateString();
+                    
+                    const cardIds = Array.isArray(reading.cards) ? 
+                      reading.cards.map(c => {
+                        if (typeof c === 'number') return c;
+                        if (typeof c === 'string') return parseInt(c, 10);
+                        return 0; // Default value if parsing fails
+                      }) : [];
+                    
+                    const cardImages = cardIds.map(id => getCardImagePath(id));
+                    
+                    return (
+                      <TableRow key={reading.id}>
+                        <TableCell className="font-medium">{formattedDate}</TableCell>
+                        <TableCell>{reading.question}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center space-x-1">
+                            {cardImages.map((imagePath, index) => (
+                              <HoverCard key={`card-hover-${index}`}>
+                                <HoverCardTrigger asChild>
+                                  <div className="w-8 h-12 cursor-pointer">
+                                    <AspectRatio ratio={5/8}>
+                                      <img 
+                                        src={imagePath} 
+                                        alt={`Card ${index + 1}`}
+                                        className="w-full h-full object-cover rounded-sm"
+                                        onError={(e) => {
+                                          console.warn(`Failed to load card image: ${imagePath}`);
+                                          (e.target as HTMLImageElement).src = '/img/cards/deck_1/0_TheDegen.jpg';
+                                        }}
+                                      />
+                                    </AspectRatio>
+                                  </div>
+                                </HoverCardTrigger>
+                                <HoverCardContent className="p-0 border-none shadow-xl">
+                                  <div className="w-40 h-64">
+                                    <AspectRatio ratio={5/8}>
+                                      <img 
+                                        src={imagePath} 
+                                        alt={`Card ${index + 1}`}
+                                        className="w-full h-full object-cover rounded-md"
+                                      />
+                                    </AspectRatio>
+                                  </div>
+                                  <div className="p-2 text-center">
+                                    <p className="text-sm font-medium">
+                                      {getCardName(cardIds[index], index)}
+                                    </p>
+                                  </div>
+                                </HoverCardContent>
+                              </HoverCard>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="max-w-[160px] truncate">
+                                {reading.result || reading.response || 
+                                 <span className="text-gray-400 italic">No response</span>}
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-[300px]">{reading.result || reading.response || "No response available"}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => viewReading(reading)}
+                            >
+                              {t('tarot.view')}
+                            </Button>
+                            <Button
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => copyToClipboard(reading)}
+                              title={t('tarot.copyReading')}
+                            >
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => shareOnTwitter(reading)}
+                              title={t('tarot.shareOnX')}
+                              className="text-[#1DA1F2]"
+                            >
+                              <Twitter className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Alert>
+                <InfoIcon className="h-4 w-4" />
+                <AlertTitle>{t('tarot.noReadingsTitle')}</AlertTitle>
+                <AlertDescription>{t('tarot.noReadingsAvailable')}</AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 };
 
