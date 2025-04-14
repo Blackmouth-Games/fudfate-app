@@ -83,11 +83,13 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     : [];
 
   // Find today's reading if it exists
-  const todayReading = formattedReadings.find(reading => {
-    const readingDate = new Date(reading.date).toISOString().split('T')[0];
-    const today = new Date().toISOString().split('T')[0];
-    return readingDate === today;
-  });
+  const todayReading = React.useMemo(() => {
+    return formattedReadings.find(reading => {
+      const readingDate = new Date(reading.date).toISOString().split('T')[0];
+      const today = new Date().toISOString().split('T')[0];
+      return readingDate === today;
+    });
+  }, [formattedReadings]);
 
   // Helper function to get card name from card ID
   const getCardName = (cardId: number, fallbackIndex: number): string => {
@@ -150,7 +152,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           return {
             id: String(cardNumber),
             name: getCardName(cardNumber, index),
-            image: `/img/cards/deck_1/${cardNumber}_${getCardName(cardNumber, index).replace(/\s+/g, '')}.jpg`,
+            image: getCardImagePath(cardNumber),
             description: "",
             revealed: true
           };

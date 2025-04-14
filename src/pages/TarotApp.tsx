@@ -13,8 +13,8 @@ import NoReadingsAlert from '@/components/tarot/NoReadingsAlert';
 import { useTranslation } from 'react-i18next';
 
 const TarotApp: React.FC = () => {
-  const { connected, userData } = useWallet();
   const { t } = useTranslation();
+  const { connected, userData } = useWallet();
   
   // Use the custom hook for data fetching and tab state
   const {
@@ -30,7 +30,7 @@ const TarotApp: React.FC = () => {
 
   // Check if user has a reading from today
   useEffect(() => {
-    if (connected && userData && !userData.runsToday && historyData.length > 0) {
+    if (connected && userData && historyData.length > 0) {
       // Find today's reading if it exists
       const today = new Date().toISOString().split('T')[0];
       
@@ -41,12 +41,12 @@ const TarotApp: React.FC = () => {
       
       setShowTodayReading(!!todayReading);
       
-      // If we have a reading from today, switch to history tab
-      if (todayReading && activeTab !== 'history') {
+      // If we have a reading from today and user has no runs left, switch to history tab
+      if (todayReading && !userData.runsToday && activeTab !== 'history') {
         handleTabChange('history');
       }
     }
-  }, [connected, userData, historyData, activeTab]);
+  }, [connected, userData, historyData, activeTab, handleTabChange]);
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
@@ -61,8 +61,8 @@ const TarotApp: React.FC = () => {
           <WelcomeScreen />
         ) : (
           <>
-            {userData && !userData.runsToday && !showTodayReading && (
-              <NoReadingsAlert className="mb-6" />
+            {userData && !userData.runsToday && (
+              <NoReadingsAlert className="mb-6" showTodayReading={showTodayReading} />
             )}
 
             <TarotMainContent 

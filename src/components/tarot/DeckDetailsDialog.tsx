@@ -1,20 +1,21 @@
 
-import React from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
-import { Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { X } from 'lucide-react';
+import TarotCard from '@/components/TarotCard';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Deck } from '@/types/tarot';
 import GlitchText from '@/components/GlitchText';
-import { DeckInfo } from '@/utils/deck-utils';
-import tarotCards from '@/data/tarotCards';
-import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface DeckDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   deckId: string | null;
-  decks: DeckInfo[];
+  decks: Deck[];
   deckCards: any[];
-  onCardClick: (cardId: string) => void;
-  t: (key: string) => string;
+  onCardClick?: (cardId: string) => void;
+  t: any; // Translation function
 }
 
 const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
@@ -26,66 +27,85 @@ const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
   onCardClick,
   t
 }) => {
-  const selectedDeck = decks.find(d => d.id === deckId);
+  const [activeDeckId, setActiveDeckId] = useState<string | null>(deckId);
   
-  // If no cards are passed, get them from tarotCards data
-  const cardsToShow = deckCards.length > 0 
-    ? deckCards 
-    : tarotCards.filter(card => {
-        const deckName = selectedDeck?.name || '';
-        return card.deck === deckName;
-      });
-
+  // Find the active deck details
+  const activeDeck = decks.find(deck => deck.id === activeDeckId);
+  
+  // Handle tab change
+  const handleDeckChange = (newDeckId: string) => {
+    setActiveDeckId(newDeckId);
+  };
+  
+  // Reset active deck when dialog is closed
+  React.useEffect(() => {
+    if (!open) {
+      // Wait for dialog close animation before resetting
+      const timeout = setTimeout(() => {
+        setActiveDeckId(deckId);
+      }, 300);
+      return () => clearTimeout(timeout);
+    } else {
+      setActiveDeckId(deckId);
+    }
+  }, [open, deckId]);
+  
   return (
-    <Dialog open={!!open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl max-h-[80vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
-          <DialogTitle className="flex justify-between items-center">
-            <div className="flex items-center">
-              <GlitchText text={selectedDeck?.displayName || ''} />
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 ml-2 text-gray-400 cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-xs max-w-[200px]">{selectedDeck?.description || t('cards.noDescription')}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+          <DialogTitle className="text-center">
+            <GlitchText 
+              text={activeDeck?.name || t('tarot.deckViewer')} 
+              className="text-2xl font-pixel-2p"
+              goldEffect
+            />
           </DialogTitle>
+          <DialogClose className="absolute right-4 top-4">
+            <X className="h-4 w-4" />
+          </DialogClose>
         </DialogHeader>
         
-        {cardsToShow.length === 0 ? (
-          <div className="py-8 text-center text-gray-500">
-            {t('cards.noCardsInDeck')}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 py-4">
-            {cardsToShow.map((card) => (
-              <div 
-                key={card.id} 
-                className="flex flex-col items-center cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => onCardClick(card.id)}
-              >
-                <div className="border-2 border-amber-300 rounded-lg overflow-hidden shadow-md w-full aspect-[5/8]">
-                  <img 
-                    src={card.image.replace('.png', '.jpg')} 
-                    alt={card.name} 
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                    onError={(e) => {
-                      console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                      e.currentTarget.src = selectedDeck ? selectedDeck.backImage.replace('.png', '.jpg') : "/img/cards/deck_1/0_TheDegen.jpg";
-                    }}
-                  />
-                </div>
-                <h5 className="mt-2 text-center text-xs font-medium">{card.name}</h5>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Deck tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-6">
+          {decks.map(deck => (
+            <Button
+              key={deck.id}
+              variant={deck.id === activeDeckId ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleDeckChange(deck.id)}
+              className={deck.id === activeDeckId ? "bg-amber-600 hover:bg-amber-700" : "border-amber-300 hover:bg-amber-50"}
+            >
+              {deck.name}
+            </Button>
+          ))}
+        </div>
+        
+        {/* Card grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-2">
+          {deckCards.map(card => (
+            <div 
+              key={card.id}
+              className="aspect-[5/8] transition-transform transform hover:-translate-y-1"
+            >
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="h-full">
+                    <TarotCard 
+                      imageUrl={card.image.replace('.png', '.jpg')} 
+                      title={card.name} 
+                      glitchEffect="none"
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p className="font-bold">{card.name}</p>
+                  <p className="text-xs mt-1">{card.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          ))}
+        </div>
       </DialogContent>
     </Dialog>
   );
