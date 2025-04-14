@@ -16,7 +16,7 @@ const importAllLocales = () => {
     
     if (langCode) {
       resources[langCode] = { 
-        translation: module.default || module 
+        translation: (module as any).default || module 
       };
       console.log(`Loaded language: ${langCode}`);
     }

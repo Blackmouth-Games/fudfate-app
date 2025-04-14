@@ -31,19 +31,32 @@ const TarotApp: React.FC = () => {
   useEffect(() => {
     if (connected && historyData.length > 0 && !hasLoadedReading) {
       const today = new Date().toISOString().split('T')[0];
+      
       const todayReading = historyData.find(reading => {
-        const readingDate = new Date(reading.reading_date || reading.date).toISOString().split('T')[0];
-        return readingDate === today;
+        try {
+          const readingDate = reading.reading_date || reading.date;
+          // Validate if the date is parseable
+          if (!readingDate || typeof readingDate !== 'string' || isNaN(new Date(readingDate).getTime())) {
+            console.warn('Invalid date format in reading:', reading);
+            return false;
+          }
+          const formattedDate = new Date(readingDate).toISOString().split('T')[0];
+          return formattedDate === today;
+        } catch (error) {
+          console.error('Error parsing date:', error, reading);
+          return false;
+        }
       });
 
-      const latestReading = historyData[0]; // Assuming historyData is sorted by date
+      // If user has readings and no runs left today
       const hasNoMoreReadings = userData && !userData.runsToday;
       
       if (hasNoMoreReadings) {
+        // If a reading from today exists, show it
         if (todayReading) {
           setShowTodayReading(true);
           handleTabChange('history');
-        } else if (latestReading) {
+        } else if (historyData.length > 0) {
           // If no reading today but has previous readings, show history
           handleTabChange('history');
         }
