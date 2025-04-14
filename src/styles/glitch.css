@@ -1,4 +1,3 @@
-
 /* Text Glitch Animation */
 .text-container {
   position: relative;
@@ -22,67 +21,59 @@
 
 .text-glitch-effect-1 {
   clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-  animation: glitch-anim-1 2.5s infinite linear alternate-reverse;
+  animation: glitch1 3s infinite;
+  transform-origin: center;
 }
 
 .text-glitch-effect-2 {
   clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
-  animation: glitch-anim-2 3s infinite linear alternate-reverse;
+  animation: glitch2 3.5s infinite;
+  transform-origin: center;
 }
 
-@keyframes glitch-anim-1 {
+@keyframes glitch1 {
   0% {
-    transform: translate(0, 0);
-    filter: hue-rotate(0deg) blur(0px);
-    text-shadow: 0.5px 0 0 rgba(255, 0, 0, 0.75), -0.5px -0 0 rgba(0, 255, 0, 0.75);
+    transform: translate(-5px) skew(-5deg);
+    filter: hue-rotate(0deg) brightness(1.1);
   }
-  30% {
-    transform: translate(2px, -2px);
-    filter: hue-rotate(90deg) blur(0.5px);
-    text-shadow: 1px 0 0 rgba(255, 0, 0, 0.75), -1px -0 0 rgba(0, 255, 0, 0.75);
+  25% {
+    transform: translate(5px) skew(5deg);
+    filter: hue-rotate(90deg) brightness(1.3);
   }
   50% {
-    transform: translate(-1px, 1px);
-    filter: hue-rotate(180deg) blur(1px);
-    text-shadow: 2px 0 0 rgba(0, 0, 255, 0.75), -2px -0 0 rgba(255, 0, 0, 0.75);
+    transform: translate(-3px) skew(-3deg);
+    filter: hue-rotate(180deg) brightness(1.2);
   }
-  70% {
-    transform: translate(2px, 2px);
-    filter: hue-rotate(270deg) blur(0.5px);
-    text-shadow: 1px 0 0 rgba(0, 255, 0, 0.75), -1px -0 0 rgba(0, 0, 255, 0.75);
+  75% {
+    transform: translate(3px) skew(3deg);
+    filter: hue-rotate(270deg) brightness(1.1);
   }
   100% {
-    transform: translate(-2px, -2px);
-    filter: hue-rotate(360deg) blur(0px);
-    text-shadow: 0.5px 0 0 rgba(255, 0, 0, 0.75), -0.5px -0 0 rgba(0, 255, 0, 0.75);
+    transform: translate(-5px) skew(-5deg);
+    filter: hue-rotate(360deg) brightness(1.1);
   }
 }
 
-@keyframes glitch-anim-2 {
+@keyframes glitch2 {
   0% {
-    transform: translate(0, 0);
-    filter: hue-rotate(270deg) blur(0px);
-    text-shadow: 0.5px 0 0 rgba(0, 0, 255, 0.75), -0.5px -0 0 rgba(255, 0, 0, 0.75);
+    transform: translate(5px) skew(5deg);
+    filter: hue-rotate(360deg) brightness(1.2);
   }
-  30% {
-    transform: translate(-2px, 2px);
-    filter: hue-rotate(180deg) blur(0.5px);
-    text-shadow: 1px 0 0 rgba(0, 255, 0, 0.75), -1px -0 0 rgba(0, 0, 255, 0.75);
+  25% {
+    transform: translate(-5px) skew(-5deg);
+    filter: hue-rotate(270deg) brightness(1.3);
   }
   50% {
-    transform: translate(1px, -1px);
-    filter: hue-rotate(90deg) blur(1px);
-    text-shadow: 2px 0 0 rgba(255, 0, 0, 0.75), -2px -0 0 rgba(0, 255, 0, 0.75);
+    transform: translate(3px) skew(3deg);
+    filter: hue-rotate(180deg) brightness(1.1);
   }
-  70% {
-    transform: translate(-2px, -2px);
-    filter: hue-rotate(0deg) blur(0.5px);
-    text-shadow: 1px 0 0 rgba(0, 0, 255, 0.75), -1px -0 0 rgba(255, 0, 0, 0.75);
+  75% {
+    transform: translate(-3px) skew(-3deg);
+    filter: hue-rotate(90deg) brightness(1.2);
   }
   100% {
-    transform: translate(2px, 2px);
-    filter: hue-rotate(360deg) blur(0px);
-    text-shadow: 0.5px 0 0 rgba(0, 255, 0, 0.75), -0.5px -0 0 rgba(255, 0, 0, 0.75);
+    transform: translate(5px) skew(5deg);
+    filter: hue-rotate(0deg) brightness(1.2);
   }
 }
 
@@ -134,11 +125,38 @@
 
 /* Gold text effect */
 .gold-text {
-  color: #FFD700;
+  background: linear-gradient(
+    45deg,
+    #FAD12B 0%,
+    #FCF6BA 25%,
+    #B38728 50%,
+    #FBF5B7 75%,
+    #AA771C 100%
+  );
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gold-shine 3s linear infinite;
   text-shadow: 
-    0 0 2px rgba(255, 215, 0, 0.8),
-    0 0 4px rgba(255, 215, 0, 0.6),
-    0 0 6px rgba(255, 215, 0, 0.4);
+    0 0 5px rgba(250, 209, 43, 0.5),
+    0 0 10px rgba(250, 209, 43, 0.3),
+    0 0 15px rgba(250, 209, 43, 0.2);
+}
+
+@keyframes gold-shine {
+  0% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1.2);
+  }
+  100% {
+    background-position: 0% 50%;
+    filter: brightness(1);
+  }
 }
 
 /* Neon text effect for glitch */

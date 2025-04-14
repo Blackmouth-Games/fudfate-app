@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import useTarotData from '@/hooks/useTarotData';
@@ -16,7 +15,6 @@ const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
   const { t } = useTranslation();
   
-  // Use the custom hook for data fetching and tab state
   const {
     activeTab,
     historyData,
@@ -28,25 +26,26 @@ const TarotApp: React.FC = () => {
 
   const [showTodayReading, setShowTodayReading] = useState(false);
 
-  // Check if user has a reading from today
   useEffect(() => {
-    if (connected && userData && !userData.runsToday && historyData.length > 0) {
-      // Find today's reading if it exists
+    if (connected && historyData.length > 0) {
       const today = new Date().toISOString().split('T')[0];
-      
       const todayReading = historyData.find(reading => {
         const readingDate = new Date(reading.reading_date || reading.date).toISOString().split('T')[0];
         return readingDate === today;
       });
+
+      const hasNoMoreReadings = userData && !userData.runsToday;
       
-      setShowTodayReading(!!todayReading);
-      
-      // If we have a reading from today, switch to history tab
-      if (todayReading && activeTab !== 'history') {
-        handleTabChange('history');
+      if (hasNoMoreReadings) {
+        if (todayReading) {
+          setShowTodayReading(true);
+          handleTabChange('history');
+        } else {
+          handleTabChange('history');
+        }
       }
     }
-  }, [connected, userData, historyData, activeTab]);
+  }, [connected, userData, historyData]);
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">

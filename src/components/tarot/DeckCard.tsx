@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CheckCircle2, LockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -29,22 +28,18 @@ const DeckCard: React.FC<DeckCardProps> = ({
   const isSelectingThis = isSelecting === deck.name;
   const [isHovered, setIsHovered] = React.useState(false);
 
-  // Get sample cards from this deck for the animation
   const deckCards = React.useMemo(() => {
     return tarotCards.filter(card => card.deck === deck.name);
   }, [deck.name]);
 
-  // Pick two random cards from the deck for the animation
   const getSampleCards = () => {
     if (deckCards.length === 0) return {
       card1: deck.backImage.replace('.png', '.jpg'),
       card2: deck.backImage.replace('.png', '.jpg')
     };
     
-    // Use random cards from the deck
     const randomIndex1 = Math.floor(Math.random() * deckCards.length);
     let randomIndex2 = Math.floor(Math.random() * deckCards.length);
-    // Make sure we get a different second card if possible
     if (deckCards.length > 1 && randomIndex2 === randomIndex1) {
       randomIndex2 = (randomIndex2 + 1) % deckCards.length;
     }
@@ -68,13 +63,16 @@ const DeckCard: React.FC<DeckCardProps> = ({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="relative">
-        {/* Animated cards that appear on hover - positioned first in the DOM to be behind other elements */}
         {isHovered && isUnlocked && (
           <>
             <motion.div 
               className="absolute top-0 left-0 max-w-[150px] z-0"
-              initial={{ rotateZ: -5, x: -10, y: -5 }}
-              animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
+              initial={{ rotateZ: -15, x: -20, y: -5 }}
+              animate={{ 
+                rotateZ: [-15, -20, -15], 
+                x: [-20, -25, -20], 
+                y: [-5, -8, -5] 
+              }}
               transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
             >
               <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
@@ -91,8 +89,12 @@ const DeckCard: React.FC<DeckCardProps> = ({
             
             <motion.div 
               className="absolute top-0 left-0 max-w-[150px] z-0"
-              initial={{ rotateZ: 5, x: 10, y: -2 }}
-              animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
+              initial={{ rotateZ: 15, x: 20, y: -2 }}
+              animate={{ 
+                rotateZ: [15, 20, 15], 
+                x: [20, 25, 20], 
+                y: [-2, -5, -2] 
+              }}
               transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
             >
               <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
@@ -115,7 +117,6 @@ const DeckCard: React.FC<DeckCardProps> = ({
             ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
           onClick={() => {
             if (isUnlocked) {
-              // Only open details when clicking on deck, don't select
               onDetailsOpen(deck.id);
             }
           }}
