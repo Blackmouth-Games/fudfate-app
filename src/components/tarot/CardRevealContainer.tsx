@@ -86,7 +86,13 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
     selectedCards: selectedCards.length,
     allRevealed,
     loading,
-    cardBackImage
+    cardBackImage,
+    cardDetails: selectedCards.map(card => ({
+      id: card.id,
+      name: card.name,
+      revealed: card.revealed,
+      image: card.image
+    }))
   });
   
   return (
@@ -100,7 +106,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {selectedCards.map((card, index) => (
           <CardItem
-            key={card?.id || `card-${index}`}
+            key={`card-${index}-${card?.id || 'unknown'}`}
             card={card}
             index={index}
             handleCardClick={handleCardReveal}

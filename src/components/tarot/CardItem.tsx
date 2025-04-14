@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ReadingCard } from '@/types/tarot';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { motion } from 'framer-motion';
@@ -23,21 +23,33 @@ const CardItem: React.FC<CardItemProps> = ({
   cardBackImage,
   onCardView
 }) => {
+  const [hasError, setHasError] = useState(false);
+  const [frontImageSrc, setFrontImageSrc] = useState('');
+  const [backImageSrc, setBackImageSrc] = useState('');
+  
+  // Set up image sources with proper fallbacks
+  useEffect(() => {
+    // For card front (when revealed)
+    if (card?.image) {
+      // Ensure we use jpg extension
+      const imageSrc = card.image.replace('.png', '.jpg');
+      setFrontImageSrc(imageSrc);
+    } else {
+      setFrontImageSrc('/img/cards/deck_1/0_TheDegen.jpg');
+    }
+    
+    // For card back
+    setBackImageSrc(cardBackImage || '/img/cards/deck_1/99_BACK.jpg');
+  }, [card, cardBackImage]);
+
   const handleClick = () => {
+    console.log("Card clicked:", { isRevealed, cardId: card?.id });
     if (isRevealed && onCardView) {
       onCardView();
     } else {
       handleCardClick(index);
     }
   };
-
-  // Debug log for card rendering
-  console.log(`Rendering CardItem ${index}:`, {
-    cardId: card?.id,
-    isRevealed,
-    cardImage: card?.image,
-    cardBackImage
-  });
 
   return (
     <motion.div
@@ -51,32 +63,43 @@ const CardItem: React.FC<CardItemProps> = ({
     >
       <div className={`card-wrapper relative ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
         <div className={`card ${isRevealed ? 'is-flipped' : ''}`}>
+          {/* Card Back */}
           <div className="card-face card-back relative">
             <AspectRatio ratio={5/8}>
               <img 
-                src={cardBackImage} 
+                src={backImageSrc} 
                 alt="Card Back" 
                 className="w-full h-full object-cover rounded-lg"
-                onError={(e) => {
-                  console.warn(`Failed to load card back image: ${cardBackImage}`);
-                  e.currentTarget.src = `/img/cards/deck_1/99_BACK.jpg`;
+                onError={() => {
+                  console.warn(`Failed to load card back image: ${backImageSrc}, using fallback`);
+                  setBackImageSrc('/img/cards/deck_1/99_BACK.jpg');
                 }}
               />
             </AspectRatio>
           </div>
           
+          {/* Card Front */}
           <div className="card-face card-front relative">
             <AspectRatio ratio={5/8}>
               <img 
-                src={card?.image?.replace('.png', '.jpg')} 
+                src={frontImageSrc} 
                 alt={card?.name || 'Tarot Card'}
                 className="w-full h-full object-cover rounded-lg" 
-                onError={(e) => {
-                  console.warn(`Failed to load card image: ${card?.image}`);
-                  e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
+                onError={() => {
+                  console.warn(`Failed to load card image: ${frontImageSrc}, using fallback`);
+                  setHasError(true);
+                  setFrontImageSrc('/img/cards/deck_1/0_TheDegen.jpg');
                 }}
               />
             </AspectRatio>
+            {isRevealed && (
+              <motion.div 
+                className="absolute inset-0 bg-amber-400/20 rounded-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            )}
           </div>
         </div>
       </div>

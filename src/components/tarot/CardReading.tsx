@@ -84,6 +84,11 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   // Card back image based on selected deck
   const cardBackImage = getCardBackPath(selectedDeck);
 
+  // Debug the selected cards
+  useEffect(() => {
+    console.log("CardReading - Selected Cards:", selectedCards);
+  }, [selectedCards]);
+
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="text-center space-y-2">
