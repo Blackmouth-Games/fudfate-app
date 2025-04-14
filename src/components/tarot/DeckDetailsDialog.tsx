@@ -81,12 +81,13 @@ const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
           ))}
         </div>
         
-        {/* Card grid - Remove card click functionality */}
+        {/* Card grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-2">
           {deckCards.map(card => (
             <div 
               key={card.id}
-              className="aspect-[5/8] transition-transform transform hover:-translate-y-1"
+              className="aspect-[5/8] transition-transform transform hover:-translate-y-1 cursor-pointer"
+              onClick={() => onCardClick && onCardClick(card.id)}
             >
               <Tooltip>
                 <TooltipTrigger asChild>

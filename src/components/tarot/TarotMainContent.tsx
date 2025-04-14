@@ -4,7 +4,10 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import IntentionForm from '@/components/tarot/IntentionForm';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
 import DeckSelector from '@/components/tarot/DeckSelector';
+import CardSelection from '@/components/tarot/CardSelection';
+import CardReading from '@/components/tarot/CardReading';
 import { DeckInfo } from '@/utils/deck-utils';
+import { useTarot } from '@/contexts/TarotContext';
 
 interface TarotMainContentProps {
   activeTab: string;
@@ -25,11 +28,23 @@ const TarotMainContent: React.FC<TarotMainContentProps> = ({
   todayReadingData,
   showTodayReading
 }) => {
+  const { phase } = useTarot();
+  
   return (
     <div className="max-w-4xl mx-auto my-8 w-full">
       <Tabs value={activeTab} className="w-full">
         <TabsContent value="reading" className="mt-0">
-          <IntentionForm className="w-full" />
+          {phase === 'intention' && (
+            <IntentionForm className="w-full" />
+          )}
+          
+          {phase === 'selection' && (
+            <CardSelection className="w-full" />
+          )}
+          
+          {(phase === 'reading' || phase === 'complete') && (
+            <CardReading className="w-full" />
+          )}
         </TabsContent>
         
         <TabsContent value="history" className="mt-0">

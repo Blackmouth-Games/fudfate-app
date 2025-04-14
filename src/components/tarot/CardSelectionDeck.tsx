@@ -83,6 +83,10 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
               alt={t('tarot.cardBack')}
               className="w-full h-full object-cover rounded-md"
               loading="lazy"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = "/img/cards/deck_1/99_BACK.jpg";
+              }}
             />
           </motion.div>
         );

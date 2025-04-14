@@ -9,13 +9,14 @@ import { getCardBackPath } from '@/utils/deck-utils';
 import tarotCards from '@/data/tarotCards';
 import SelectedCardsDisplay from './SelectedCardsDisplay';
 import CardSelectionDeck from './CardSelectionDeck';
+import { Button } from '@/components/ui/button';
 
 interface CardSelectionProps {
   className?: string;
 }
 
 const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
-  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase, webhookResponse } = useTarot();
+  const { availableCards, selectedCards, selectCard, loading, selectedDeck, phase, setPhase } = useTarot();
   const { userData } = useWallet();
   const { t } = useTranslation();
   
@@ -79,6 +80,12 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
     }, 500); // Match this to the animation duration
   };
 
+  const handleProceedToReading = () => {
+    if (selectedCards.length === 3) {
+      setPhase('reading');
+    }
+  };
+
   return (
     <div className={`space-y-6 ${className}`}>
       <div className="text-center space-y-2">
@@ -105,6 +112,18 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
             {t('tarot.selectedCards', { count: selectedCards.length })}
           </h4>
         </div>
+        
+        {/* Continue button - only show when all 3 cards are selected */}
+        {selectedCards.length === 3 && (
+          <div className="mt-6 flex justify-center">
+            <Button 
+              onClick={handleProceedToReading}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {t('tarot.continueToReading')}
+            </Button>
+          </div>
+        )}
         
         {/* Available Cards text now goes below selected cards */}
         <div className="text-center mt-8 mb-4">

@@ -13,7 +13,7 @@ interface CardReadingProps {
 }
 
 const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
-  const { selectedCards, revealCard, loading, finalMessage, resetReading, webhookResponse, selectedDeck } = useTarot();
+  const { selectedCards, revealCard, loading, finalMessage, resetReading, webhookResponse, selectedDeck, phase } = useTarot();
   const { t } = useTranslation();
   
   // State for webhook message
@@ -25,6 +25,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
     selectedDeck,
     finalMessage: !!finalMessage,
     webhookResponse: webhookResponse,
+    phase: phase
   });
   
   // Parse webhook message if available
