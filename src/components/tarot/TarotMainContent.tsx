@@ -12,6 +12,8 @@ interface TarotMainContentProps {
   isLoadingHistory: boolean;
   availableDecks: DeckInfo[];
   isLoadingDecks: boolean;
+  todayReadingData?: any;
+  showTodayReading?: boolean;
 }
 
 const TarotMainContent: React.FC<TarotMainContentProps> = ({
@@ -19,7 +21,9 @@ const TarotMainContent: React.FC<TarotMainContentProps> = ({
   historyData,
   isLoadingHistory,
   availableDecks,
-  isLoadingDecks
+  isLoadingDecks,
+  todayReadingData,
+  showTodayReading
 }) => {
   return (
     <div className="max-w-4xl mx-auto my-8 w-full">
@@ -33,6 +37,8 @@ const TarotMainContent: React.FC<TarotMainContentProps> = ({
             className="w-full" 
             readings={historyData} 
             isLoading={isLoadingHistory} 
+            todayReadingData={todayReadingData}
+            showTodayReading={showTodayReading}
           />
         </TabsContent>
         
