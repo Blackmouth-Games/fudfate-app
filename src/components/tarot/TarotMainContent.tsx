@@ -30,6 +30,9 @@ const TarotMainContent: React.FC<TarotMainContentProps> = ({
 }) => {
   const { phase } = useTarot();
   
+  // Adding a console log to verify changes are being applied
+  console.log("TarotMainContent rendering with phase:", phase, "and activeTab:", activeTab);
+  
   return (
     <div className="max-w-4xl mx-auto my-8 w-full">
       <Tabs value={activeTab} className="w-full">
