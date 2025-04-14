@@ -29,14 +29,39 @@ const TarotApp: React.FC = () => {
   const [showTodayReading, setShowTodayReading] = useState(false);
   const [todayReadingData, setTodayReadingData] = useState<any>(null);
 
+  // Helper function to safely create a Date object
+  const safeParseDate = (dateStr: string | undefined | null): Date | null => {
+    if (!dateStr) return null;
+    
+    try {
+      const date = new Date(dateStr);
+      // Check if date is valid by testing if it's NaN
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date;
+    } catch (e) {
+      console.error("Error parsing date:", e, dateStr);
+      return null;
+    }
+  };
+
   // Check if user has a reading from today
   useEffect(() => {
     if (connected && userData && historyData.length > 0) {
       const today = new Date().toISOString().split('T')[0];
       
       const todayReading = historyData.find(reading => {
-        const readingDate = new Date(reading.reading_date || reading.date).toISOString().split('T')[0];
-        return readingDate === today;
+        try {
+          // Safely parse the reading date
+          const readingDate = safeParseDate(reading.reading_date || reading.date);
+          if (!readingDate) return false;
+          
+          return readingDate.toISOString().split('T')[0] === today;
+        } catch (e) {
+          console.error("Error comparing dates:", e, reading);
+          return false;
+        }
       });
       
       if (todayReading) {
