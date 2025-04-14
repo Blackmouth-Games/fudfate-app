@@ -40,7 +40,7 @@ export const verifySecureConnection = (): SecurityCheckResult => {
   for (const pattern of knownPhishingPatterns) {
     if (hostname.includes(pattern)) {
       warnings.push(`Suspicious domain detected: ${hostname} may be a phishing attempt.`);
-      recommendations.push('Verify you're on the correct website before connecting your wallet.');
+      recommendations.push('Verify you\'re on the correct website before connecting your wallet.');
       passed = false;
     }
   }
@@ -111,7 +111,7 @@ export const performWalletSecurityCheck = (walletType: string | null): SecurityC
     recommendations: [
       'Always verify the URL before connecting your wallet',
       'Never share your seed phrase or private keys with anyone',
-      'Disconnect your wallet when you're done using the application'
+      'Disconnect your wallet when you\'re done using the application'
     ]
   });
   
@@ -127,7 +127,7 @@ export const getWalletSecurityTips = (): string[] => {
     'Always verify the URL is correct before connecting your wallet',
     'Use a hardware wallet for storing significant amounts of cryptocurrency',
     'Consider using a separate browser profile for cryptocurrency transactions',
-    'Disconnect your wallet when you're done using a dApp',
+    'Disconnect your wallet when you\'re done using a dApp',
     'Review all transaction details before confirming',
     'Be cautious of phishing attempts requesting wallet connection'
   ];
