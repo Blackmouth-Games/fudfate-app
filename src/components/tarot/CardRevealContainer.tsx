@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReadingCard } from '@/types/tarot';
@@ -141,7 +142,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
               text={webhookMessage}
               className="text-lg font-medium text-amber-800"
               goldEffect
-              intensity={0.3}
+              intensity="normal"
             />
           </div>
           
