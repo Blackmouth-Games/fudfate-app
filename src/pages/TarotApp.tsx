@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import useTarotData from '@/hooks/useTarotData';
@@ -25,27 +26,38 @@ const TarotApp: React.FC = () => {
   } = useTarotData();
 
   const [showTodayReading, setShowTodayReading] = useState(false);
+  const [hasLoadedReading, setHasLoadedReading] = useState(false);
 
   useEffect(() => {
-    if (connected && historyData.length > 0) {
+    if (connected && historyData.length > 0 && !hasLoadedReading) {
       const today = new Date().toISOString().split('T')[0];
       const todayReading = historyData.find(reading => {
         const readingDate = new Date(reading.reading_date || reading.date).toISOString().split('T')[0];
         return readingDate === today;
       });
 
+      const latestReading = historyData[0]; // Assuming historyData is sorted by date
       const hasNoMoreReadings = userData && !userData.runsToday;
       
       if (hasNoMoreReadings) {
         if (todayReading) {
           setShowTodayReading(true);
           handleTabChange('history');
-        } else {
+        } else if (latestReading) {
+          // If no reading today but has previous readings, show history
           handleTabChange('history');
         }
+        setHasLoadedReading(true);
       }
     }
-  }, [connected, userData, historyData]);
+  }, [connected, userData, historyData, hasLoadedReading, handleTabChange]);
+
+  // Reset the loaded flag when user disconnects
+  useEffect(() => {
+    if (!connected) {
+      setHasLoadedReading(false);
+    }
+  }, [connected]);
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">

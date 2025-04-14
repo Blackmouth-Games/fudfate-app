@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
@@ -163,6 +164,80 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const hideReading = () => {
     setSelectedReading(null);
     setViewingCards([]);
+  };
+
+  // Implementation of the missing functions
+  const copyToClipboard = (reading: Reading) => {
+    if (!reading) return;
+    
+    const cardIds = Array.isArray(reading.cards) ? reading.cards : [];
+    const cardNames = cardIds.map((cardId, index) => {
+      return getCardName(
+        typeof cardId === 'number' ? cardId : 
+        typeof cardId === 'string' ? parseInt(cardId, 10) : index, 
+        index
+      );
+    }).join(', ');
+    
+    let shareMessage = reading.result || reading.response || '';
+    
+    // Truncate if too long
+    if (shareMessage.length > 280) {
+      shareMessage = shareMessage.substring(0, 277) + '...';
+    }
+    
+    const text = t('tarot.shareClipboardText', {
+      cards: cardNames,
+      intention: reading.question || '',
+      interpretation: shareMessage || ''
+    });
+    
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        toast.success(t('tarot.copiedToClipboard'));
+      })
+      .catch(err => {
+        console.error('Could not copy text: ', err);
+        toast.error(t('tarot.copyFailed'));
+      });
+  };
+
+  const shareOnTwitter = (reading: Reading) => {
+    if (!reading) return;
+    
+    const cardIds = Array.isArray(reading.cards) ? reading.cards : [];
+    const cardNames = cardIds.map((cardId, index) => {
+      return getCardName(
+        typeof cardId === 'number' ? cardId : 
+        typeof cardId === 'string' ? parseInt(cardId, 10) : index, 
+        index
+      );
+    }).join(', ');
+    
+    let shareMessage = reading.result || reading.response || '';
+    const maxMsgLength = 180; // Allow room for the URL, hashtags, and token
+    
+    // Truncate message if needed
+    if (shareMessage.length > maxMsgLength) {
+      shareMessage = shareMessage.substring(0, maxMsgLength) + '...';
+    }
+    
+    const intention = reading.question || '';
+    const formattedIntention = intention.length > 30 ? intention.substring(0, 30) + '...' : intention;
+    
+    const text = t('tarot.shareText', {
+      cards: cardNames,
+      intention: formattedIntention,
+      message: shareMessage ? `"${shareMessage}"` : ''
+    });
+    
+    const url = 'https://app.fudfate.xyz/';
+    const token = '$FDft';
+    const hashtags = 'FUDfate,Tarot,Crypto';
+    
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
+    
+    window.open(twitterUrl, '_blank');
   };
 
   // Always allow viewing history, regardless of today's reading status

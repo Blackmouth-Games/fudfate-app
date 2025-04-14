@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CheckCircle2, LockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -67,11 +68,11 @@ const DeckCard: React.FC<DeckCardProps> = ({
           <>
             <motion.div 
               className="absolute top-0 left-0 max-w-[150px] z-0"
-              initial={{ rotateZ: -15, x: -20, y: -5 }}
+              initial={{ rotateZ: -20, x: -30, y: -10 }}
               animate={{ 
-                rotateZ: [-15, -20, -15], 
-                x: [-20, -25, -20], 
-                y: [-5, -8, -5] 
+                rotateZ: [-20, -25, -20], 
+                x: [-30, -35, -30], 
+                y: [-10, -15, -10] 
               }}
               transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
             >
@@ -89,11 +90,11 @@ const DeckCard: React.FC<DeckCardProps> = ({
             
             <motion.div 
               className="absolute top-0 left-0 max-w-[150px] z-0"
-              initial={{ rotateZ: 15, x: 20, y: -2 }}
+              initial={{ rotateZ: 20, x: 30, y: -5 }}
               animate={{ 
-                rotateZ: [15, 20, 15], 
-                x: [20, 25, 20], 
-                y: [-2, -5, -2] 
+                rotateZ: [20, 25, 20], 
+                x: [30, 35, 30], 
+                y: [-5, -10, -5] 
               }}
               transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
             >
