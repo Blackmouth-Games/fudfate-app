@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,12 +29,16 @@ interface ReadingHistoryProps {
   className?: string;
   readings?: any[];
   isLoading?: boolean;
+  todayReadingData?: any;
+  showTodayReading?: boolean;
 }
 
 const ReadingHistory: React.FC<ReadingHistoryProps> = ({ 
   className = '', 
   readings = [], 
-  isLoading = false 
+  isLoading = false,
+  todayReadingData,
+  showTodayReading = false
 }) => {
   const { t } = useTranslation();
   const { userData } = useWallet();
@@ -44,22 +47,18 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const [viewingCards, setViewingCards] = useState<ReadingCard[]>([]);
 
   useEffect(() => {
-    // Log readings data to help with debugging
     console.log("ReadingHistory - readings data:", readings);
   }, [readings]);
   
-  // Format the readings data to match our expected format
   const formattedReadings: Reading[] = readings && readings.length > 0 
     ? readings.map((reading: any) => {
         let parsedCards: number[] = [];
         
-        // Parse the cards array which might be a string like "[11, 0, 5]"
         if (typeof reading.cards === 'string') {
           try {
             parsedCards = JSON.parse(reading.cards);
           } catch (e) {
             console.error("Error parsing cards JSON:", e);
-            // If parse fails, try to extract numbers from the string using regex
             const cardMatches = reading.cards.match(/\d+/g);
             if (cardMatches) {
               parsedCards = cardMatches.map(Number);
@@ -82,16 +81,18 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       })
     : [];
 
-  // Find today's reading if it exists
   const todayReading = React.useMemo(() => {
+    if (todayReadingData) {
+      return todayReadingData;
+    }
+    
     return formattedReadings.find(reading => {
       const readingDate = new Date(reading.date).toISOString().split('T')[0];
       const today = new Date().toISOString().split('T')[0];
       return readingDate === today;
     });
-  }, [formattedReadings]);
+  }, [formattedReadings, todayReadingData]);
 
-  // Helper function to get card name from card ID
   const getCardName = (cardId: number, fallbackIndex: number): string => {
     const cardNames: Record<number, string> = {
       0: "The Degen",
@@ -121,7 +122,6 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     return cardNames[cardId] || `Card ${fallbackIndex + 1}`;
   };
 
-  // Get card image path from card ID
   const getCardImagePath = (cardId: number): string => {
     if (cardId >= 0 && cardId <= 21) {
       return `/img/cards/deck_1/${cardId}_${getCardName(cardId, 0).replace(/\s+/g, '')}.jpg`;
@@ -129,17 +129,14 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     return '/img/cards/deck_1/0_TheDegen.jpg';
   };
 
-  // View a reading's details
   const viewReading = (reading: Reading) => {
     console.log("Viewing reading:", reading);
     setSelectedReading(reading);
     
-    // Convert cards array to ReadingCard format
     const readingCards: ReadingCard[] = Array.isArray(reading.cards) 
       ? reading.cards.map((cardId, index) => {
           let cardNumber: number;
           
-          // Handle different card ID types
           if (typeof cardId === 'number') {
             cardNumber = cardId;
           } else if (typeof cardId === 'string') {
@@ -163,37 +160,34 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     console.log("Set viewing cards to:", readingCards);
   };
 
-  // Hide the selected reading view
   const hideReading = () => {
     console.log("Hiding reading details");
     setSelectedReading(null);
     setViewingCards([]);
   };
 
-  // Check if user has no more readings for today
   const hasNoMoreReadingsToday = userData && !userData.runsToday;
 
-  // If the user has no more readings today but has a reading from today, show it
   useEffect(() => {
-    if (hasNoMoreReadingsToday && todayReading && !selectedReading) {
-      viewReading(todayReading);
+    if (hasNoMoreReadingsToday && (todayReading || showTodayReading) && !selectedReading) {
+      if (todayReading) {
+        viewReading(todayReading);
+      }
     }
-  }, [todayReading, hasNoMoreReadingsToday, selectedReading]);
+  }, [todayReading, hasNoMoreReadingsToday, selectedReading, showTodayReading]);
 
-  // Share reading functions
   const shareOnTwitter = (reading: Reading) => {
     const cardIds = Array.isArray(reading.cards) ? 
       reading.cards.map(c => {
         if (typeof c === 'number') return c;
         if (typeof c === 'string') return parseInt(c, 10);
-        return 0; // Default value if parsing fails
+        return 0;
       }) : [];
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
     let message = reading.result || reading.response || '';
-    // Truncate message if needed
-    const maxMsgLength = 180; // Allow room for the URL, hashtags, and token
+    const maxMsgLength = 180;
     if (message.length > maxMsgLength) {
       message = message.substring(0, maxMsgLength) + '...';
     }
@@ -220,15 +214,15 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       reading.cards.map(c => {
         if (typeof c === 'number') return c;
         if (typeof c === 'string') return parseInt(c, 10);
-        return 0; // Default value if parsing fails
+        return 0;
       }) : [];
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
     let message = reading.result || reading.response || '';
-    // Truncate if too long
-    if (message.length > 280) {
-      message = message.substring(0, 277) + '...';
+    const maxMsgLength = 280;
+    if (message.length > maxMsgLength) {
+      message = message.substring(0, maxMsgLength) + '...';
     }
     
     const text = t('tarot.shareClipboardText', {
@@ -247,9 +241,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       });
   };
 
-  // If we're viewing a reading, show the completed reading view
   if (selectedReading) {
-    console.log("Rendering ReadingDetails component");
     return (
       <ReadingDetails
         reading={selectedReading}
