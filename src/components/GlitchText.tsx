@@ -11,6 +11,10 @@ interface GlitchTextProps {
   glitchColor2?: string;
   noAnimate?: boolean;
   children?: React.ReactNode;
+  // Add the missing props
+  goldEffect?: boolean;
+  intensity?: 'normal' | 'intense' | 'digital';
+  neonEffect?: 'purple' | 'red' | 'blue' | 'none';
 }
 
 const GlitchText: React.FC<GlitchTextProps> = ({
@@ -21,7 +25,11 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   glitchColor1 = '#d86a49',
   glitchColor2 = '#D39948',
   noAnimate = false,
-  children
+  children,
+  // Initialize new props with defaults
+  goldEffect = false,
+  intensity = 'normal',
+  neonEffect = 'none'
 }) => {
   const [shouldAnimate, setShouldAnimate] = useState(!noAnimate);
   const [displayText, setDisplayText] = useState(text);
@@ -47,6 +55,20 @@ const GlitchText: React.FC<GlitchTextProps> = ({
     };
   }, [shouldAnimate]);
 
+  // Apply neon effect if requested
+  let neonClass = '';
+  if (neonEffect === 'purple') neonClass = 'glitch-neon';
+  else if (neonEffect === 'red') neonClass = 'glitch-neon-red';
+  else if (neonEffect === 'blue') neonClass = 'glitch-neon-blue';
+  
+  // Apply intensity variation
+  let intensityClass = '';
+  if (intensity === 'intense') intensityClass = 'intense-glitch';
+  else if (intensity === 'digital') intensityClass = 'digital-distortion';
+
+  // Apply gold effect
+  const goldClass = goldEffect ? 'gold-text' : '';
+
   const style = {
     '--glitch-text-color': color,
     '--glitch-text-before-color': glitchColor1,
@@ -56,7 +78,7 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   const content = (
     <div className="glitch-wrapper">
       <div
-        className={`glitch ${shouldAnimate ? 'glitching' : ''} ${className}`}
+        className={`glitch ${shouldAnimate ? 'glitching' : ''} ${goldClass} ${neonClass} ${intensityClass} ${className}`}
         style={style}
         data-text={displayText}
       >

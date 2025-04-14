@@ -9,9 +9,7 @@ import Footer from '@/components/Footer';
 import CommitSHA from '@/components/CommitSHA';
 import DevToolPanel from '@/components/dev/DevToolPanel';
 import WalletSecurityBanner from '@/components/wallet/WalletSecurityBanner';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoIcon, Twitter, Discord } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import NoReadingsAlert from '@/components/tarot/NoReadingsAlert';
 import { useTranslation } from 'react-i18next';
 
 const TarotApp: React.FC = () => {
@@ -64,27 +62,7 @@ const TarotApp: React.FC = () => {
         ) : (
           <>
             {userData && !userData.runsToday && !showTodayReading && (
-              <Alert className="mb-6 bg-amber-50 border-amber-200">
-                <InfoIcon className="h-4 w-4 text-amber-800" />
-                <AlertTitle className="text-amber-800">
-                  {t('tarot.readingsExhausted')}
-                </AlertTitle>
-                <AlertDescription className="text-amber-700">
-                  <p className="mb-2">
-                    {t('tarot.readingsExhaustedDescription')}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    <Button size="sm" variant="outline" className="flex items-center gap-1">
-                      <Twitter className="h-3 w-3" />
-                      <span>@FUDfate</span>
-                    </Button>
-                    <Button size="sm" variant="outline" className="flex items-center gap-1">
-                      <Discord className="h-3 w-3" />
-                      <span>Discord</span>
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
+              <NoReadingsAlert className="mb-6" />
             )}
 
             <TarotMainContent 
