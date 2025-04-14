@@ -8,6 +8,7 @@ import TarotMainContent from '@/components/tarot/TarotMainContent';
 import Footer from '@/components/Footer';
 import CommitSHA from '@/components/CommitSHA';
 import DevToolPanel from '@/components/dev/DevToolPanel';
+import WalletSecurityBanner from '@/components/wallet/WalletSecurityBanner';
 
 const TarotApp: React.FC = () => {
   const { connected } = useWallet();
@@ -53,6 +54,7 @@ const TarotApp: React.FC = () => {
           { path: '/cookies-policy', name: 'Cookies Policy' }
         ]}
       />
+      <WalletSecurityBanner />
     </div>
   );
 };

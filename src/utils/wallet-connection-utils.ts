@@ -2,13 +2,19 @@
 import { toast } from 'sonner';
 import { logLoginWebhook } from '@/services/webhook-service';
 import { UserData } from '@/types/walletTypes';
+import { checkWalletImplementation } from '@/utils/wallet-security';
 
 /**
  * Connect to Metamask wallet
  */
 export const connectMetamask = async (): Promise<{ address: string | null; networkId: string | null; error?: string }> => {
-  if (!window.ethereum?.isMetaMask) {
-    return { address: null, networkId: null, error: 'Metamask not installed' };
+  // First check if the wallet is properly implemented
+  if (!window.ethereum?.isMetaMask || !checkWalletImplementation('metamask')) {
+    return { 
+      address: null, 
+      networkId: null, 
+      error: 'Metamask not installed or improperly implemented (possible spoofing)' 
+    };
   }
   
   try {
@@ -28,12 +34,42 @@ export const connectMetamask = async (): Promise<{ address: string | null; netwo
       const address = accounts[0];
       const chainIdHex = await window.ethereum.request({ method: 'eth_chainId' });
       const networkId = parseInt(chainIdHex, 16).toString();
+      
+      console.log("Connected to Metamask wallet:", address, "on network:", networkId);
+      
+      // Add security event listeners
+      window.ethereum.on('accountsChanged', (newAccounts: string[]) => {
+        console.log("Metamask accounts changed:", newAccounts);
+        if (newAccounts.length === 0) {
+          // User has disconnected all accounts
+          toast.warning("Metamask accounts disconnected. Please reconnect your wallet.");
+          // Reload page to reset state
+          window.location.reload();
+        }
+      });
+      
       return { address, networkId };
     } else {
-      return { address: null, networkId: null, error: 'No accounts returned from Metamask' };
+      return { 
+        address: null, 
+        networkId: null, 
+        error: 'No accounts returned from Metamask' 
+      };
     }
   } catch (error) {
     console.error('Metamask connection error:', error);
+    
+    // Check for known error types and provide friendly messages
+    if (error instanceof Error) {
+      if (error.message.includes('User rejected')) {
+        return {
+          address: null, 
+          networkId: null, 
+          error: 'Connection rejected by user' 
+        };
+      }
+    }
+    
     return { 
       address: null, 
       networkId: null, 
@@ -46,8 +82,13 @@ export const connectMetamask = async (): Promise<{ address: string | null; netwo
  * Connect to Phantom wallet
  */
 export const connectPhantom = async (): Promise<{ address: string | null; networkId: string | null; error?: string }> => {
-  if (!window.solana?.isPhantom) {
-    return { address: null, networkId: null, error: 'Phantom not installed' };
+  // First check if the wallet is properly implemented
+  if (!window.solana?.isPhantom || !checkWalletImplementation('phantom')) {
+    return { 
+      address: null, 
+      networkId: null, 
+      error: 'Phantom not installed or improperly implemented (possible spoofing)' 
+    };
   }
   
   try {
@@ -63,9 +104,30 @@ export const connectPhantom = async (): Promise<{ address: string | null; networ
     const address = response.publicKey.toString();
     
     console.log("Connected to Phantom wallet:", address);
+    
+    // Add security event listeners
+    window.solana.on('disconnect', () => {
+      console.log("Phantom wallet disconnected");
+      toast.warning("Phantom wallet disconnected. Please reconnect if needed.");
+      // Reload page to reset state
+      window.location.reload();
+    });
+    
     return { address, networkId: 'solana' };
   } catch (error) {
     console.error('Phantom connection error:', error);
+    
+    // Check for known error types and provide friendly messages
+    if (error instanceof Error) {
+      if (error.message.includes('User rejected')) {
+        return {
+          address: null, 
+          networkId: null, 
+          error: 'Connection rejected by user' 
+        };
+      }
+    }
+    
     return { 
       address: null, 
       networkId: null, 

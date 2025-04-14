@@ -6,14 +6,18 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useWallet } from '@/contexts/WalletContext';
-import { ArrowDownToLine, ArrowUpFromLine, ClipboardCopy } from 'lucide-react';
+import { ArrowDownToLine, ArrowUpFromLine, ClipboardCopy, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import { performWalletSecurityCheck, SecurityCheckResult } from '@/utils/wallet-security';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const WalletTab: React.FC = () => {
   const { walletAddress, walletType, userData, connectionLogs, disconnectWallet, overrideUserData } = useWallet();
   const [mockRunsToday, setMockRunsToday] = useState<boolean>(false);
   const [mockUserId, setMockUserId] = useState<string>('');
   const [expandedLogs, setExpandedLogs] = useState<boolean>(false);
+  const [securityResults, setSecurityResults] = useState<SecurityCheckResult[]>([]);
+  const [showSecurityDetails, setShowSecurityDetails] = useState<boolean>(false);
 
   // Load stored values
   useEffect(() => {
@@ -26,7 +30,10 @@ const WalletTab: React.FC = () => {
     if (savedMockUserId) {
       setMockUserId(savedMockUserId);
     }
-  }, []);
+
+    // Run security check
+    setSecurityResults(performWalletSecurityCheck(walletType));
+  }, [walletType]);
 
   // Handle mock runs_today change
   const handleMockRunsTodayChange = (checked: boolean) => {
@@ -58,6 +65,18 @@ const WalletTab: React.FC = () => {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");
   };
+
+  // Get overall security status
+  const getSecurityStatus = () => {
+    const hasWarnings = securityResults.some(result => !result.passed);
+    return {
+      status: hasWarnings ? 'warning' : 'secure',
+      text: hasWarnings ? 'Security warnings detected' : 'Connection secure',
+      color: hasWarnings ? 'text-amber-600' : 'text-green-600'
+    };
+  };
+
+  const securityStatus = getSecurityStatus();
 
   return (
     <>
@@ -103,10 +122,68 @@ const WalletTab: React.FC = () => {
           <span className={`font-medium ${userData?.runsToday ? 'text-green-600' : 'text-red-600'}`}>
             {userData?.runsToday ? 'Yes' : 'No'}
           </span>
+
+          <span className="text-gray-600">Security:</span>
+          <div className="flex items-center gap-1">
+            {securityStatus.status === 'secure' ? (
+              <ShieldCheck className="h-3 w-3 text-green-600" />
+            ) : (
+              <ShieldAlert className="h-3 w-3 text-amber-600" />
+            )}
+            <span className={`font-medium ${securityStatus.color}`}>
+              {securityStatus.text}
+            </span>
+          </div>
         </div>
       </div>
       
       <div className="space-y-2 mt-3">
+        {walletAddress && (
+          <Accordion type="single" collapsible>
+            <AccordionItem value="security">
+              <AccordionTrigger className="text-xs py-1">
+                Security Analysis
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="text-xs space-y-2">
+                  {securityResults.map((result, index) => (
+                    <div key={index} className="border rounded p-2 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium capitalize">{result.checkType} Check</p>
+                        <span className={result.passed ? 'text-green-600' : 'text-amber-600'}>
+                          {result.passed ? 'Passed' : 'Warning'}
+                        </span>
+                      </div>
+                      
+                      {result.warnings.length > 0 && (
+                        <div className="mt-1">
+                          <p className="text-amber-700">Warnings:</p>
+                          <ul className="list-disc pl-4 text-amber-600">
+                            {result.warnings.map((warning, idx) => (
+                              <li key={idx}>{warning}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {result.recommendations.length > 0 && (
+                        <div className="mt-1">
+                          <p className="text-gray-700">Recommendations:</p>
+                          <ul className="list-disc pl-4 text-gray-600">
+                            {result.recommendations.map((rec, idx) => (
+                              <li key={idx}>{rec}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+
         <div className="flex items-center justify-between">
           <Label htmlFor="mock-runs-today" className="cursor-pointer text-xs">Allow Daily Reading</Label>
           <Switch 
