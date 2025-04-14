@@ -3,7 +3,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { InfoIcon, Twitter, MessageSquare } from 'lucide-react';
+import { InfoIcon, SendHorizontal } from 'lucide-react';
+import { socialLinks } from '@/config/socialConfig';
 
 interface NoReadingsAlertProps {
   className?: string;
@@ -32,23 +33,13 @@ const NoReadingsAlert: React.FC<NoReadingsAlertProps> = ({
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
           <a 
-            href="https://twitter.com/FUDfate" 
+            href={socialLinks.telegram}
             target="_blank" 
             rel="noopener noreferrer"
           >
             <Button size="sm" variant="outline" className="flex items-center gap-1">
-              <Twitter className="h-3 w-3" />
-              <span>@FUDfate</span>
-            </Button>
-          </a>
-          <a 
-            href="https://discord.gg/fudfate" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            <Button size="sm" variant="outline" className="flex items-center gap-1">
-              <MessageSquare className="h-3 w-3" />
-              <span>Discord</span>
+              <SendHorizontal className="h-3 w-3" />
+              <span>Telegram</span>
             </Button>
           </a>
         </div>

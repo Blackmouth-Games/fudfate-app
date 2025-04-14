@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import useTarotData from '@/hooks/useTarotData';
@@ -31,7 +30,6 @@ const TarotApp: React.FC = () => {
   // Check if user has a reading from today
   useEffect(() => {
     if (connected && userData && historyData.length > 0) {
-      // Find today's reading if it exists
       const today = new Date().toISOString().split('T')[0];
       
       const todayReading = historyData.find(reading => {
@@ -40,20 +38,20 @@ const TarotApp: React.FC = () => {
       });
       
       setShowTodayReading(!!todayReading);
-      
-      // If we have a reading from today and user has no runs left, switch to history tab
-      if (todayReading && !userData.runsToday && activeTab !== 'history') {
-        handleTabChange('history');
-      }
     }
-  }, [connected, userData, historyData, activeTab, handleTabChange]);
+  }, [connected, userData, historyData]);
+
+  // Allow navigation to decks and history even if no readings available
+  const handleNavigationChange = (tab: string) => {
+    handleTabChange(tab);
+  };
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <TarotHeader 
         connected={connected} 
         activeTab={activeTab} 
-        onTabChange={handleTabChange} 
+        onTabChange={handleNavigationChange}
       />
 
       <main className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
@@ -61,7 +59,7 @@ const TarotApp: React.FC = () => {
           <WelcomeScreen />
         ) : (
           <>
-            {userData && !userData.runsToday && (
+            {userData && !userData.runsToday && activeTab === 'reading' && (
               <NoReadingsAlert className="mb-6" showTodayReading={showTodayReading} />
             )}
 
