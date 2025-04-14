@@ -1,3 +1,4 @@
+
 {
   "common": {
     "appName": "FUD Fate Oracle",
@@ -108,9 +109,7 @@
     "cosmicMessageReceived": "Cosmic Message Received",
     "readingHistory": "Your Reading History",
     "cards": "Cards",
-    "response": "Interpretation",
-    "todayReadingDone": "Today's Reading is Complete",
-    "todayReadingDoneDescription": "You have already completed your reading for today. Feel free to explore your previous readings or browse our tarot decks. Return tomorrow for a new reading!"
+    "response": "Interpretation"
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",

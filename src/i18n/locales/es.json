@@ -1,3 +1,4 @@
+
 {
   "common": {
     "appName": "Oráculo FUD Fate",
@@ -108,9 +109,7 @@
     "cosmicMessageReceived": "Mensaje Cósmico Recibido",
     "readingHistory": "Tu Historial de Lecturas",
     "cards": "Cartas",
-    "response": "Interpretación",
-    "todayReadingDone": "La Lectura de Hoy está Completa",
-    "todayReadingDoneDescription": "Ya has completado tu lectura de hoy. Explora tus lecturas anteriores o navega por nuestros mazos de tarot. ¡Vuelve mañana para una nueva lectura!"
+    "response": "Interpretación"
   },
   "errors": {
     "readingFailed": "Error al iniciar la lectura. Por favor, inténtalo de nuevo más tarde.",

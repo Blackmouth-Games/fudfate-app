@@ -46,11 +46,10 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
     setIsCardDetailsOpen(true);
   };
   
-  // Handle back button click with explicit navigation
+  // Handle back button click with explicit prevention of default
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log("Back button clicked");
     onBack();
   };
   
@@ -61,12 +60,7 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
           <h3 className="text-xl font-semibold text-amber-800">
             {reading.question || t('tarot.noQuestion')}
           </h3>
-          <Button 
-            variant="outline" 
-            onClick={handleBackClick}
-            type="button"
-            className="border-amber-300 hover:bg-amber-50"
-          >
+          <Button variant="outline" onClick={handleBackClick}>
             {t('tarot.backToHistory')}
           </Button>
         </div>
@@ -76,7 +70,6 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
           selectedCards={viewingCards}
           resetReading={resetReading}
           hideResetButton={true}
-          onCardClick={viewCardDetails}
         />
         
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -91,7 +84,7 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
           
           <Button
             onClick={() => onShareOnTwitter(reading)}
-            className="w-full sm:w-auto flex items-center gap-2 bg-[#000000] hover:bg-[#333333]"
+            className="w-full sm:w-auto flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#0c85d0]"
           >
             <Twitter className="h-4 w-4" />
             {t('tarot.shareOnX')}

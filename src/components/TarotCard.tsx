@@ -38,10 +38,10 @@ const TarotCard = ({
           <GlitchText 
             text={title} 
             goldEffect={true} 
+            fontSize="1.125rem" 
             className="font-pixel-2p"
             intensity={glitchEffect}
             neonEffect={neonTitle}
-            fontSize="1.125rem"
           />
         ) : (
           <span className="gold-text text-lg font-pixel-2p">

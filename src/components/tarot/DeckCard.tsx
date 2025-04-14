@@ -73,8 +73,8 @@ const DeckCard: React.FC<DeckCardProps> = ({
           <>
             <motion.div 
               className="absolute top-0 left-0 max-w-[150px] z-0"
-              initial={{ rotateZ: -15, x: -20, y: -10 }}
-              animate={{ rotateZ: [-15, -25, -15], x: [-20, -30, -20], y: [-10, -15, -10] }}
+              initial={{ rotateZ: -5, x: -10, y: -5 }}
+              animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
               transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
             >
               <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
@@ -91,8 +91,8 @@ const DeckCard: React.FC<DeckCardProps> = ({
             
             <motion.div 
               className="absolute top-0 left-0 max-w-[150px] z-0"
-              initial={{ rotateZ: 15, x: 20, y: -5 }}
-              animate={{ rotateZ: [15, 25, 15], x: [20, 30, 20], y: [-5, -10, -5] }}
+              initial={{ rotateZ: 5, x: 10, y: -2 }}
+              animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
               transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
             >
               <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">

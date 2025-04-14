@@ -4,10 +4,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import IntentionForm from '@/components/tarot/IntentionForm';
 import ReadingHistory from '@/components/tarot/ReadingHistory';
 import DeckSelector from '@/components/tarot/DeckSelector';
-import CardSelection from '@/components/tarot/CardSelection';
-import CardReading from '@/components/tarot/CardReading';
 import { DeckInfo } from '@/utils/deck-utils';
-import { useTarot } from '@/contexts/TarotContext';
 
 interface TarotMainContentProps {
   activeTab: string;
@@ -15,8 +12,6 @@ interface TarotMainContentProps {
   isLoadingHistory: boolean;
   availableDecks: DeckInfo[];
   isLoadingDecks: boolean;
-  todayReadingData?: any;
-  showTodayReading?: boolean;
 }
 
 const TarotMainContent: React.FC<TarotMainContentProps> = ({
@@ -24,30 +19,13 @@ const TarotMainContent: React.FC<TarotMainContentProps> = ({
   historyData,
   isLoadingHistory,
   availableDecks,
-  isLoadingDecks,
-  todayReadingData,
-  showTodayReading
+  isLoadingDecks
 }) => {
-  const { phase } = useTarot();
-  
-  // Adding a console log to verify changes are being applied
-  console.log("TarotMainContent rendering with phase:", phase, "and activeTab:", activeTab);
-  
   return (
     <div className="max-w-4xl mx-auto my-8 w-full">
       <Tabs value={activeTab} className="w-full">
         <TabsContent value="reading" className="mt-0">
-          {phase === 'intention' && (
-            <IntentionForm className="w-full" />
-          )}
-          
-          {phase === 'selection' && (
-            <CardSelection className="w-full" />
-          )}
-          
-          {(phase === 'reading' || phase === 'complete') && (
-            <CardReading className="w-full" />
-          )}
+          <IntentionForm className="w-full" />
         </TabsContent>
         
         <TabsContent value="history" className="mt-0">
@@ -55,8 +33,6 @@ const TarotMainContent: React.FC<TarotMainContentProps> = ({
             className="w-full" 
             readings={historyData} 
             isLoading={isLoadingHistory} 
-            todayReadingData={todayReadingData}
-            showTodayReading={showTodayReading}
           />
         </TabsContent>
         

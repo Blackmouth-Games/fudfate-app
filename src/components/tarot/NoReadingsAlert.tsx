@@ -3,20 +3,16 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { InfoIcon, SendHorizontal, History } from 'lucide-react';
-import { socialLinks } from '@/config/socialConfig';
-import { useNavigate } from 'react-router-dom';
+import { InfoIcon, Twitter, MessageSquare } from 'lucide-react';
 
 interface NoReadingsAlertProps {
   className?: string;
   showTodayReading?: boolean;
-  onViewHistory?: () => void;
 }
 
 const NoReadingsAlert: React.FC<NoReadingsAlertProps> = ({ 
   className = '',
-  showTodayReading = false,
-  onViewHistory
+  showTodayReading = false
 }) => {
   const { t } = useTranslation();
   
@@ -34,29 +30,27 @@ const NoReadingsAlert: React.FC<NoReadingsAlertProps> = ({
             ? t('tarot.todayReadingDoneDescription') 
             : t('tarot.readingsExhaustedDescription')}
         </p>
-        <div className="flex flex-wrap gap-2 mt-4 justify-between">
+        <div className="flex flex-wrap gap-2 mt-4">
           <a 
-            href={socialLinks.telegram}
+            href="https://twitter.com/FUDfate" 
             target="_blank" 
             rel="noopener noreferrer"
           >
             <Button size="sm" variant="outline" className="flex items-center gap-1">
-              <SendHorizontal className="h-3 w-3" />
-              <span>Telegram</span>
+              <Twitter className="h-3 w-3" />
+              <span>@FUDfate</span>
             </Button>
           </a>
-          
-          {onViewHistory && (
-            <Button 
-              size="sm" 
-              variant="outline" 
-              onClick={onViewHistory}
-              className="flex items-center gap-1 border-amber-300 hover:bg-amber-50"
-            >
-              <History className="h-3 w-3" />
-              <span>{t('tarot.viewHistory')}</span>
+          <a 
+            href="https://discord.gg/fudfate" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <Button size="sm" variant="outline" className="flex items-center gap-1">
+              <MessageSquare className="h-3 w-3" />
+              <span>Discord</span>
             </Button>
-          )}
+          </a>
         </div>
       </AlertDescription>
     </Alert>

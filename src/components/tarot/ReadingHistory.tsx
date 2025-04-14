@@ -30,16 +30,12 @@ interface ReadingHistoryProps {
   className?: string;
   readings?: any[];
   isLoading?: boolean;
-  todayReadingData?: any;
-  showTodayReading?: boolean;
 }
 
 const ReadingHistory: React.FC<ReadingHistoryProps> = ({ 
   className = '', 
   readings = [], 
-  isLoading = false,
-  todayReadingData,
-  showTodayReading = false
+  isLoading = false 
 }) => {
   const { t } = useTranslation();
   const { userData } = useWallet();
@@ -48,35 +44,22 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const [viewingCards, setViewingCards] = useState<ReadingCard[]>([]);
 
   useEffect(() => {
+    // Log readings data to help with debugging
     console.log("ReadingHistory - readings data:", readings);
   }, [readings]);
   
-  // Helper function to safely create a Date object
-  const safeParseDate = (dateStr: string | undefined | null): Date | null => {
-    if (!dateStr) return null;
-    
-    try {
-      const date = new Date(dateStr);
-      // Check if date is valid by testing if it's NaN
-      if (isNaN(date.getTime())) {
-        return null;
-      }
-      return date;
-    } catch (e) {
-      console.error("Error parsing date:", e, dateStr);
-      return null;
-    }
-  };
-  
+  // Format the readings data to match our expected format
   const formattedReadings: Reading[] = readings && readings.length > 0 
     ? readings.map((reading: any) => {
         let parsedCards: number[] = [];
         
+        // Parse the cards array which might be a string like "[11, 0, 5]"
         if (typeof reading.cards === 'string') {
           try {
             parsedCards = JSON.parse(reading.cards);
           } catch (e) {
             console.error("Error parsing cards JSON:", e);
+            // If parse fails, try to extract numbers from the string using regex
             const cardMatches = reading.cards.match(/\d+/g);
             if (cardMatches) {
               parsedCards = cardMatches.map(Number);
@@ -86,12 +69,9 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           parsedCards = reading.cards;
         }
         
-        // Safely parse date, use current date as fallback if invalid
-        const readingDate = safeParseDate(reading.reading_date || reading.date) || new Date();
-        
         return {
           id: reading.id || String(Math.random()),
-          date: readingDate.toISOString(),
+          date: reading.reading_date || reading.date || new Date().toISOString(),
           question: reading.question || reading.intention || '',
           cards: parsedCards,
           result: reading.result || reading.message || '',
@@ -102,24 +82,14 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       })
     : [];
 
-  const todayReading = React.useMemo(() => {
-    if (todayReadingData) {
-      return todayReadingData;
-    }
-    
+  // Find today's reading if it exists
+  const todayReading = formattedReadings.find(reading => {
+    const readingDate = new Date(reading.date).toISOString().split('T')[0];
     const today = new Date().toISOString().split('T')[0];
-    
-    return formattedReadings.find(reading => {
-      try {
-        const readingDate = new Date(reading.date).toISOString().split('T')[0];
-        return readingDate === today;
-      } catch (e) {
-        console.error("Error comparing dates:", e, reading.date);
-        return false;
-      }
-    });
-  }, [formattedReadings, todayReadingData]);
+    return readingDate === today;
+  });
 
+  // Helper function to get card name from card ID
   const getCardName = (cardId: number, fallbackIndex: number): string => {
     const cardNames: Record<number, string> = {
       0: "The Degen",
@@ -149,6 +119,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     return cardNames[cardId] || `Card ${fallbackIndex + 1}`;
   };
 
+  // Get card image path from card ID
   const getCardImagePath = (cardId: number): string => {
     if (cardId >= 0 && cardId <= 21) {
       return `/img/cards/deck_1/${cardId}_${getCardName(cardId, 0).replace(/\s+/g, '')}.jpg`;
@@ -156,14 +127,17 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     return '/img/cards/deck_1/0_TheDegen.jpg';
   };
 
+  // View a reading's details
   const viewReading = (reading: Reading) => {
     console.log("Viewing reading:", reading);
     setSelectedReading(reading);
     
+    // Convert cards array to ReadingCard format
     const readingCards: ReadingCard[] = Array.isArray(reading.cards) 
       ? reading.cards.map((cardId, index) => {
           let cardNumber: number;
           
+          // Handle different card ID types
           if (typeof cardId === 'number') {
             cardNumber = cardId;
           } else if (typeof cardId === 'string') {
@@ -176,7 +150,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           return {
             id: String(cardNumber),
             name: getCardName(cardNumber, index),
-            image: getCardImagePath(cardNumber),
+            image: `/img/cards/deck_1/${cardNumber}_${getCardName(cardNumber, index).replace(/\s+/g, '')}.jpg`,
             description: "",
             revealed: true
           };
@@ -187,34 +161,37 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     console.log("Set viewing cards to:", readingCards);
   };
 
+  // Hide the selected reading view
   const hideReading = () => {
     console.log("Hiding reading details");
     setSelectedReading(null);
     setViewingCards([]);
   };
 
+  // Check if user has no more readings for today
   const hasNoMoreReadingsToday = userData && !userData.runsToday;
 
+  // If the user has no more readings today but has a reading from today, show it
   useEffect(() => {
-    if (hasNoMoreReadingsToday && (todayReading || showTodayReading) && !selectedReading) {
-      if (todayReading) {
-        viewReading(todayReading);
-      }
+    if (hasNoMoreReadingsToday && todayReading && !selectedReading) {
+      viewReading(todayReading);
     }
-  }, [todayReading, hasNoMoreReadingsToday, selectedReading, showTodayReading]);
+  }, [todayReading, hasNoMoreReadingsToday, selectedReading]);
 
+  // Share reading functions
   const shareOnTwitter = (reading: Reading) => {
     const cardIds = Array.isArray(reading.cards) ? 
       reading.cards.map(c => {
         if (typeof c === 'number') return c;
         if (typeof c === 'string') return parseInt(c, 10);
-        return 0;
+        return 0; // Default value if parsing fails
       }) : [];
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
     let message = reading.result || reading.response || '';
-    const maxMsgLength = 180;
+    // Truncate message if needed
+    const maxMsgLength = 180; // Allow room for the URL, hashtags, and token
     if (message.length > maxMsgLength) {
       message = message.substring(0, maxMsgLength) + '...';
     }
@@ -241,15 +218,15 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       reading.cards.map(c => {
         if (typeof c === 'number') return c;
         if (typeof c === 'string') return parseInt(c, 10);
-        return 0;
+        return 0; // Default value if parsing fails
       }) : [];
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
     let message = reading.result || reading.response || '';
-    const maxMsgLength = 280;
-    if (message.length > maxMsgLength) {
-      message = message.substring(0, maxMsgLength) + '...';
+    // Truncate if too long
+    if (message.length > 280) {
+      message = message.substring(0, 277) + '...';
     }
     
     const text = t('tarot.shareClipboardText', {
@@ -268,7 +245,9 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       });
   };
 
+  // If we're viewing a reading, show the completed reading view
   if (selectedReading) {
+    console.log("Rendering ReadingDetails component");
     return (
       <ReadingDetails
         reading={selectedReading}

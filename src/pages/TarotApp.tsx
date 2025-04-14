@@ -13,8 +13,8 @@ import NoReadingsAlert from '@/components/tarot/NoReadingsAlert';
 import { useTranslation } from 'react-i18next';
 
 const TarotApp: React.FC = () => {
-  const { t } = useTranslation();
   const { connected, userData } = useWallet();
+  const { t } = useTranslation();
   
   // Use the custom hook for data fetching and tab state
   const {
@@ -27,68 +27,33 @@ const TarotApp: React.FC = () => {
   } = useTarotData();
 
   const [showTodayReading, setShowTodayReading] = useState(false);
-  const [todayReadingData, setTodayReadingData] = useState<any>(null);
-
-  // Helper function to safely create a Date object
-  const safeParseDate = (dateStr: string | undefined | null): Date | null => {
-    if (!dateStr) return null;
-    
-    try {
-      const date = new Date(dateStr);
-      // Check if date is valid by testing if it's NaN
-      if (isNaN(date.getTime())) {
-        return null;
-      }
-      return date;
-    } catch (e) {
-      console.error("Error parsing date:", e, dateStr);
-      return null;
-    }
-  };
 
   // Check if user has a reading from today
   useEffect(() => {
-    if (connected && userData && historyData.length > 0) {
+    if (connected && userData && !userData.runsToday && historyData.length > 0) {
+      // Find today's reading if it exists
       const today = new Date().toISOString().split('T')[0];
       
       const todayReading = historyData.find(reading => {
-        try {
-          // Safely parse the reading date
-          const readingDate = safeParseDate(reading.reading_date || reading.date);
-          if (!readingDate) return false;
-          
-          return readingDate.toISOString().split('T')[0] === today;
-        } catch (e) {
-          console.error("Error comparing dates:", e, reading);
-          return false;
-        }
+        const readingDate = new Date(reading.reading_date || reading.date).toISOString().split('T')[0];
+        return readingDate === today;
       });
       
-      if (todayReading) {
-        setShowTodayReading(true);
-        setTodayReadingData(todayReading);
-      } else {
-        setShowTodayReading(false);
-        setTodayReadingData(null);
+      setShowTodayReading(!!todayReading);
+      
+      // If we have a reading from today, switch to history tab
+      if (todayReading && activeTab !== 'history') {
+        handleTabChange('history');
       }
     }
-  }, [connected, userData, historyData]);
-
-  // Allow navigation to decks and history even if no readings available
-  const handleNavigationChange = (tab: string) => {
-    handleTabChange(tab);
-  };
-
-  const handleViewHistory = () => {
-    handleTabChange('history');
-  };
+  }, [connected, userData, historyData, activeTab]);
 
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <TarotHeader 
         connected={connected} 
         activeTab={activeTab} 
-        onTabChange={handleNavigationChange}
+        onTabChange={handleTabChange} 
       />
 
       <main className="container mx-auto px-4 py-8 flex-grow flex flex-col items-center justify-center">
@@ -96,12 +61,8 @@ const TarotApp: React.FC = () => {
           <WelcomeScreen />
         ) : (
           <>
-            {userData && !userData.runsToday && activeTab === 'reading' && (
-              <NoReadingsAlert 
-                className="mb-6" 
-                showTodayReading={showTodayReading} 
-                onViewHistory={handleViewHistory}
-              />
+            {userData && !userData.runsToday && !showTodayReading && (
+              <NoReadingsAlert className="mb-6" />
             )}
 
             <TarotMainContent 
@@ -110,8 +71,6 @@ const TarotApp: React.FC = () => {
               isLoadingHistory={isLoadingHistory}
               availableDecks={availableDecks}
               isLoadingDecks={isLoadingDecks}
-              todayReadingData={todayReadingData}
-              showTodayReading={showTodayReading}
             />
           </>
         )}

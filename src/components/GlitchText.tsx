@@ -15,7 +15,6 @@ interface GlitchTextProps {
   goldEffect?: boolean;
   intensity?: 'normal' | 'intense' | 'digital';
   neonEffect?: 'purple' | 'red' | 'blue' | 'none';
-  fontSize?: string;
 }
 
 const GlitchText: React.FC<GlitchTextProps> = ({
@@ -30,8 +29,7 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   // Initialize new props with defaults
   goldEffect = false,
   intensity = 'normal',
-  neonEffect = 'none',
-  fontSize
+  neonEffect = 'none'
 }) => {
   const [shouldAnimate, setShouldAnimate] = useState(!noAnimate);
   const [displayText, setDisplayText] = useState(text);
@@ -75,7 +73,6 @@ const GlitchText: React.FC<GlitchTextProps> = ({
     '--glitch-text-color': color,
     '--glitch-text-before-color': glitchColor1,
     '--glitch-text-after-color': glitchColor2,
-    fontSize: fontSize,
   } as React.CSSProperties;
 
   const content = (

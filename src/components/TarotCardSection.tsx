@@ -14,7 +14,7 @@ import {
 import tarotCards from '@/data/tarotCards';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { X } from 'lucide-react';
-import { getCardBackPath, getAvailableDecks, DeckInfo } from '@/utils/deck-utils';
+import { getCardBackPath, getAvailableDecks } from '@/utils/deck-utils';
 import DeckDetailsDialog from '@/components/tarot/DeckDetailsDialog';
 import { motion } from 'framer-motion';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -118,13 +118,13 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
                     onMouseEnter={() => setHoveredDeck(index)}
                     onMouseLeave={() => setHoveredDeck(null)}
                   >
-                    {/* Animated deck cards - positioned behind with more pronounced rotation */}
+                    {/* Animated deck cards - positioned behind */}
                     {hoveredDeck === index && (
                       <>
                         <motion.div 
                           className="absolute top-0 left-0 w-full z-0"
-                          initial={{ rotateZ: -10, x: -15, y: -10 }}
-                          animate={{ rotateZ: [-10, -15, -10], x: [-15, -20, -15], y: [-10, -15, -10] }}
+                          initial={{ rotateZ: -5, x: -10, y: -5 }}
+                          animate={{ rotateZ: [-5, -8, -5], x: [-10, -12, -10], y: [-5, -8, -5] }}
                           transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
                         >
                           <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
@@ -141,8 +141,8 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
                         
                         <motion.div 
                           className="absolute top-0 left-0 w-full z-0"
-                          initial={{ rotateZ: 10, x: 15, y: -5 }}
-                          animate={{ rotateZ: [10, 15, 10], x: [15, 20, 15], y: [-5, -10, -5] }}
+                          initial={{ rotateZ: 5, x: 10, y: -2 }}
+                          animate={{ rotateZ: [5, 8, 5], x: [10, 13, 10], y: [-2, -5, -2] }}
                           transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
                         >
                           <div className="w-full aspect-[5/8] overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
@@ -186,6 +186,7 @@ const TarotCardSection = ({ deckId = 'deck_1' }: TarotCardSectionProps) => {
           deckId={openDeckId}
           decks={availableDecks}
           deckCards={openDeckCards}
+          onCardClick={viewCard}
           t={t}
         />
       </TooltipProvider>

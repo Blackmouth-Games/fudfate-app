@@ -1,3 +1,4 @@
+
 /**
  * Wallet Connection Security Utilities
  * This module provides security-focused functions for wallet connections.
@@ -13,35 +14,6 @@ export interface SecurityCheckResult {
   warnings: string[];
   recommendations: string[];
 }
-
-// Security status for wallet connections
-export interface SecurityStatus {
-  secure: boolean;
-  message: string;
-  details: string;
-}
-
-/**
- * Check the security of a wallet connection
- */
-export const checkConnectionSecurity = (walletAddress: string): SecurityStatus => {
-  // Perform security checks (simplified example)
-  const isSecure = walletAddress.length > 30; // Basic check for address length
-  
-  if (isSecure) {
-    return {
-      secure: true,
-      message: 'Your wallet connection is secure',
-      details: 'No security issues detected'
-    };
-  } else {
-    return {
-      secure: false,
-      message: 'Your wallet connection may be insecure',
-      details: 'Please verify your wallet address and connection'
-    };
-  }
-};
 
 /**
  * Verify the page connection is secure

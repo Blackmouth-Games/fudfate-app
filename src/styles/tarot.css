@@ -129,20 +129,6 @@
 .tarot-selection-card:hover {
   border-color: rgba(255, 215, 0, 0.7);
   z-index: 50 !important;
-  transform: translateX(10px) translateY(-10px) rotate(5deg);
-}
-
-/* Different hover effects for cards in deck */
-.tarot-selection-card:nth-child(3n+1):hover {
-  transform: translateX(-10px) translateY(-10px) rotate(-5deg);
-}
-
-.tarot-selection-card:nth-child(3n+2):hover {
-  transform: translateY(-15px);
-}
-
-.tarot-selection-card:nth-child(3n+3):hover {
-  transform: translateX(10px) translateY(-10px) rotate(5deg);
 }
 
 /* Full card layout */
@@ -167,40 +153,4 @@
 
 .card-selecting {
   animation: pulse-border 1.5s infinite;
-}
-
-/* Spread cards in deck slightly */
-.deck-fan {
-  position: relative;
-}
-
-.deck-fan > div:nth-child(3n+1) {
-  transform: rotate(-3deg) translateX(-5px);
-  z-index: 1;
-}
-
-.deck-fan > div:nth-child(3n+2) {
-  transform: translateY(-3px);
-  z-index: 2;
-}
-
-.deck-fan > div:nth-child(3n+3) {
-  transform: rotate(3deg) translateX(5px);
-  z-index: 3;
-}
-
-/* Enhanced hover effects */
-.deck-fan > div:nth-child(3n+1):hover {
-  transform: rotate(-5deg) translateY(-10px) translateX(-10px);
-  z-index: 10;
-}
-
-.deck-fan > div:nth-child(3n+2):hover {
-  transform: translateY(-15px);
-  z-index: 10;
-}
-
-.deck-fan > div:nth-child(3n+3):hover {
-  transform: rotate(5deg) translateY(-10px) translateX(10px);
-  z-index: 10;
 }
