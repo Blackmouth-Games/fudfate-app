@@ -5,14 +5,14 @@ import { X } from 'lucide-react';
 import TarotCard from '@/components/TarotCard';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Deck } from '@/types/tarot';
+import { DeckInfo } from '@/utils/deck-utils';
 import GlitchText from '@/components/GlitchText';
 
 interface DeckDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   deckId: string | null;
-  decks: Deck[];
+  decks: DeckInfo[];
   deckCards: any[];
   onCardClick?: (cardId: string) => void;
   t: any; // Translation function
@@ -81,7 +81,7 @@ const DeckDetailsDialog: React.FC<DeckDetailsDialogProps> = ({
           ))}
         </div>
         
-        {/* Card grid */}
+        {/* Card grid - Remove card click functionality */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 p-2">
           {deckCards.map(card => (
             <div 

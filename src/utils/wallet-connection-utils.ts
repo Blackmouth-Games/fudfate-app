@@ -1,8 +1,17 @@
-
 import { toast } from 'sonner';
 import { logLoginWebhook } from '@/services/webhook-service';
 import { UserData } from '@/types/walletTypes';
 import { checkWalletImplementation } from '@/utils/wallet-security';
+
+/**
+ * Get a shortened version of a wallet address for display
+ */
+export const getShortWalletAddress = (address: string): string => {
+  if (!address || address.length < 10) return address || '';
+  
+  // Format: first 6 chars...last 4 chars
+  return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+};
 
 /**
  * Connect to Metamask wallet

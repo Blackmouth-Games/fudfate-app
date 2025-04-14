@@ -14,7 +14,7 @@ import {
 import tarotCards from '@/data/tarotCards';
 import { Dialog, DialogContent, DialogTitle, DialogHeader, DialogClose } from "@/components/ui/dialog";
 import { X } from 'lucide-react';
-import { getCardBackPath, getAvailableDecks } from '@/utils/deck-utils';
+import { getCardBackPath, getAvailableDecks, DeckInfo } from '@/utils/deck-utils';
 import DeckDetailsDialog from '@/components/tarot/DeckDetailsDialog';
 import { motion } from 'framer-motion';
 import { TooltipProvider } from '@/components/ui/tooltip';

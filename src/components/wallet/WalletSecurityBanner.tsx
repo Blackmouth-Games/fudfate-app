@@ -19,6 +19,9 @@ const WalletSecurityBanner = () => {
   });
   const [show, setShow] = useState(false);
 
+  // Auto-hide timeout in milliseconds (5-7 seconds)
+  const autoHideTimeout = 6000; // 6 seconds
+
   useEffect(() => {
     if (connected && walletAddress) {
       const status = checkConnectionSecurity(walletAddress);
@@ -27,10 +30,10 @@ const WalletSecurityBanner = () => {
       if (!status.secure) {
         setShow(true);
         
-        // Auto-hide banner after 6 seconds
+        // Auto-hide banner after specified seconds
         const timer = setTimeout(() => {
           setShow(false);
-        }, 6000);
+        }, autoHideTimeout);
         
         return () => clearTimeout(timer);
       }
