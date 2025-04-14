@@ -50,6 +50,7 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
   const handleBackClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log("Back button clicked");
     onBack();
   };
   
@@ -90,7 +91,7 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
           
           <Button
             onClick={() => onShareOnTwitter(reading)}
-            className="w-full sm:w-auto flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#0c85d0]"
+            className="w-full sm:w-auto flex items-center gap-2 bg-[#000000] hover:bg-[#333333]"
           >
             <Twitter className="h-4 w-4" />
             {t('tarot.shareOnX')}

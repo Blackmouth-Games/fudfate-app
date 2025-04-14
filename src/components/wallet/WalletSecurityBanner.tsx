@@ -24,25 +24,30 @@ const WalletSecurityBanner = () => {
 
   useEffect(() => {
     if (connected && walletAddress) {
-      const status = checkConnectionSecurity(walletAddress);
-      setSecurityStatus(status);
+      // Force the banner to show up for testing purposes
+      // In a real app, you'd use a proper security check
+      const status = {
+        secure: false,
+        message: `Security check for wallet ${getShortWalletAddress(walletAddress)}`,
+        details: 'This is a demo security warning. In a real app, proper security checks would be performed.'
+      };
       
-      if (!status.secure) {
-        setShow(true);
-        
-        // Auto-hide banner after specified seconds
-        const timer = setTimeout(() => {
-          setShow(false);
-        }, autoHideTimeout);
-        
-        return () => clearTimeout(timer);
-      }
+      setSecurityStatus(status);
+      setShow(true);
+      
+      // Auto-hide banner after specified seconds
+      const timer = setTimeout(() => {
+        setShow(false);
+      }, autoHideTimeout);
+      
+      return () => clearTimeout(timer);
     } else {
       setShow(false);
     }
   }, [connected, walletAddress]);
 
-  if (!connected || securityStatus.secure) {
+  // Always show the banner for testing purposes
+  if (!connected) {
     return null;
   }
 

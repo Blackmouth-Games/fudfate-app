@@ -2,7 +2,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Share2, ExternalLink } from "lucide-react";
+import { Share2 } from "lucide-react";
 import ReadingCardPreview from './ReadingCardPreview';
 
 interface Reading {
@@ -51,25 +51,6 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <h4 className="font-medium text-amber-800">{formattedDate}</h4>
-            <div className="flex gap-2">
-              <Button
-                variant="ghost" 
-                size="sm"
-                onClick={() => onShare(reading)}
-                title={t('tarot.copyReading')}
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline" 
-                size="sm"
-                onClick={() => onView(reading)}
-                className="flex items-center gap-1"
-              >
-                <ExternalLink className="h-4 w-4" />
-                {t('tarot.view')}
-              </Button>
-            </div>
           </div>
           <p className="font-medium text-gray-700 mb-2">
             {reading.question || t('tarot.noQuestion')}
@@ -80,8 +61,8 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
           </p>
         </div>
         
-        {/* Right side: Cards */}
-        <div className="flex-shrink-0">
+        {/* Center: Cards */}
+        <div className="flex-shrink-0 flex items-center">
           <div className="flex gap-1">
             {cardIds.map((cardId, index) => (
               <ReadingCardPreview
@@ -93,6 +74,26 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
               />
             ))}
           </div>
+        </div>
+
+        {/* Right: Buttons */}
+        <div className="flex-shrink-0 flex items-center gap-2">
+          <Button
+            variant="outline" 
+            size="sm"
+            onClick={() => onView(reading)}
+          >
+            {t('tarot.view')}
+          </Button>
+          
+          <Button
+            variant="ghost" 
+            size="sm"
+            onClick={() => onShare(reading)}
+            title={t('tarot.copyReading')}
+          >
+            <Share2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

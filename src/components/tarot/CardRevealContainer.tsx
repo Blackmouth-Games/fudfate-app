@@ -115,6 +115,10 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
                   delay: index * 0.2
                 }
               }}
+              whileHover={{
+                translateY: -10,
+                transition: { duration: 0.3 }
+              }}
             >
               <CardItem
                 card={card}
