@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,6 +51,23 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     console.log("ReadingHistory - readings data:", readings);
   }, [readings]);
   
+  // Helper function to safely create a Date object
+  const safeParseDate = (dateStr: string | undefined | null): Date | null => {
+    if (!dateStr) return null;
+    
+    try {
+      const date = new Date(dateStr);
+      // Check if date is valid by testing if it's NaN
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date;
+    } catch (e) {
+      console.error("Error parsing date:", e, dateStr);
+      return null;
+    }
+  };
+  
   const formattedReadings: Reading[] = readings && readings.length > 0 
     ? readings.map((reading: any) => {
         let parsedCards: number[] = [];
@@ -68,9 +86,12 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           parsedCards = reading.cards;
         }
         
+        // Safely parse date, use current date as fallback if invalid
+        const readingDate = safeParseDate(reading.reading_date || reading.date) || new Date();
+        
         return {
           id: reading.id || String(Math.random()),
-          date: reading.reading_date || reading.date || new Date().toISOString(),
+          date: readingDate.toISOString(),
           question: reading.question || reading.intention || '',
           cards: parsedCards,
           result: reading.result || reading.message || '',
@@ -86,10 +107,16 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       return todayReadingData;
     }
     
+    const today = new Date().toISOString().split('T')[0];
+    
     return formattedReadings.find(reading => {
-      const readingDate = new Date(reading.date).toISOString().split('T')[0];
-      const today = new Date().toISOString().split('T')[0];
-      return readingDate === today;
+      try {
+        const readingDate = new Date(reading.date).toISOString().split('T')[0];
+        return readingDate === today;
+      } catch (e) {
+        console.error("Error comparing dates:", e, reading.date);
+        return false;
+      }
     });
   }, [formattedReadings, todayReadingData]);
 
