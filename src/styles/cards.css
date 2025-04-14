@@ -165,3 +165,20 @@
     background-position-x: -200%;
   }
 }
+
+/* Force 3D perspective for Safari */
+@supports (-webkit-touch-callout: none) {
+  .card-container {
+    transform: translateZ(0);
+  }
+  
+  .card {
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+  }
+  
+  .card-face {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}

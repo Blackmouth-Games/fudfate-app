@@ -39,7 +39,11 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
       if (typeof c === 'number') return c;
       if (typeof c === 'string') return parseInt(c, 10);
       return 0; // Default value if parsing fails
-    }) : [];
+    }) : 
+    // Handle string format like "[11, 0, 5]"
+    (typeof reading.cards === 'string' && reading.cards.startsWith('[') && reading.cards.endsWith(']')) ?
+      JSON.parse(reading.cards) :
+      [];
   
   return (
     <div className="border border-amber-200 rounded-lg p-4 hover:bg-amber-50 transition-colors">

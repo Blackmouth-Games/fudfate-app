@@ -1,101 +1,90 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/glitch.css';
-import GoldGlitchText from './core/GoldGlitchText';
 
 interface GlitchTextProps {
   text: string;
-  goldEffect?: boolean;
   className?: string;
-  fontSize?: string;
-  lineHeight?: string;
-  neonEffect?: 'purple' | 'red' | 'blue' | 'none';
-  intensity?: 'normal' | 'intense' | 'digital';
+  tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div';
+  color?: string;
+  glitchColor1?: string;
+  glitchColor2?: string;
+  noAnimate?: boolean;
+  children?: React.ReactNode;
 }
 
-export const GlitchText: React.FC<GlitchTextProps> = ({
-  text,
-  goldEffect = false,
+const GlitchText: React.FC<GlitchTextProps> = ({
+  text = '',
   className = '',
-  fontSize,
-  lineHeight,
-  neonEffect = 'none',
-  intensity = 'normal'
+  tag = 'p',
+  color = '#FAD12B',
+  glitchColor1 = '#d86a49',
+  glitchColor2 = '#D39948',
+  noAnimate = false,
+  children
 }) => {
-  // If gold effect is requested, use the specialized component
-  if (goldEffect) {
-    return (
-      <GoldGlitchText 
-        text={text} 
-        className={className} 
-        fontSize={fontSize} 
-        lineHeight={lineHeight} 
-      />
-    );
-  }
-  
-  // Apply neon effect if requested
-  let neonClass = '';
-  if (neonEffect === 'purple') neonClass = 'glitch-neon';
-  else if (neonEffect === 'red') neonClass = 'glitch-neon-red';
-  else if (neonEffect === 'blue') neonClass = 'glitch-neon-blue';
-  
-  // Apply intensity variation
-  let intensityClass = '';
-  if (intensity === 'intense') intensityClass = 'intense-glitch';
-  else if (intensity === 'digital') intensityClass = 'digital-distortion';
-  
-  const containerStyle: React.CSSProperties = {
-    fontSize,
-    lineHeight,
-    position: 'relative',
-    display: 'inline-block',
-    width: 'fit-content',
-    maxWidth: '100%'
-  };
+  const [shouldAnimate, setShouldAnimate] = useState(!noAnimate);
+  const [displayText, setDisplayText] = useState(text);
 
-  const textStyle: React.CSSProperties = {
-    fontSize,
-    lineHeight,
-    display: 'inline-block',
-    position: 'relative',
-    zIndex: 10
-  };
+  useEffect(() => {
+    setDisplayText(text);
+  }, [text]);
 
-  const glitchStyle: React.CSSProperties = {
-    fontSize,
-    lineHeight,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    pointerEvents: 'none',
-    userSelect: 'none'
-  };
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
 
-  return (
-    <div 
-      className={`text-container ${className} ${intensityClass}`} 
-      style={containerStyle}
-    >
-      <span className={`text-base ${neonClass}`} style={textStyle}>
-        {text}
-      </span>
-      <span 
-        className={`text-glitch-effect-1 ${neonClass}`} 
-        aria-hidden="true"
-        style={glitchStyle}
+    if (shouldAnimate) {
+      interval = setInterval(() => {
+        setShouldAnimate(false);
+        setTimeout(() => {
+          setShouldAnimate(true);
+        }, 3000 + Math.random() * 3000);
+      }, 8000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [shouldAnimate]);
+
+  const style = {
+    '--glitch-text-color': color,
+    '--glitch-text-before-color': glitchColor1,
+    '--glitch-text-after-color': glitchColor2,
+  } as React.CSSProperties;
+
+  const content = (
+    <div className="glitch-wrapper">
+      <div
+        className={`glitch ${shouldAnimate ? 'glitching' : ''} ${className}`}
+        style={style}
+        data-text={displayText}
       >
-        {text}
-      </span>
-      <span 
-        className={`text-glitch-effect-2 ${neonClass}`} 
-        aria-hidden="true"
-        style={glitchStyle}
-      >
-        {text}
-      </span>
+        {displayText || children}
+      </div>
     </div>
   );
+
+  switch (tag) {
+    case 'h1':
+      return <h1>{content}</h1>;
+    case 'h2':
+      return <h2>{content}</h2>;
+    case 'h3':
+      return <h3>{content}</h3>;
+    case 'h4':
+      return <h4>{content}</h4>;
+    case 'h5':
+      return <h5>{content}</h5>;
+    case 'h6':
+      return <h6>{content}</h6>;
+    case 'span':
+      return <span>{content}</span>;
+    case 'div':
+      return <div>{content}</div>;
+    default:
+      return <p>{content}</p>;
+  }
 };
 
 export default GlitchText;

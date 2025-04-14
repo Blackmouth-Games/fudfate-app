@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -42,6 +42,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const { resetReading } = useTarot();
   const [selectedReading, setSelectedReading] = useState<Reading | null>(null);
   const [viewingCards, setViewingCards] = useState<ReadingCard[]>([]);
+
+  useEffect(() => {
+    // Log readings data to help with debugging
+    console.log("ReadingHistory - readings data:", readings);
+  }, [readings]);
   
   // Format the readings data to match our expected format
   const formattedReadings: Reading[] = readings && readings.length > 0 
@@ -124,6 +129,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
 
   // View a reading's details
   const viewReading = (reading: Reading) => {
+    console.log("Viewing reading:", reading);
     setSelectedReading(reading);
     
     // Convert cards array to ReadingCard format
@@ -152,10 +158,12 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       : [];
     
     setViewingCards(readingCards);
+    console.log("Set viewing cards to:", readingCards);
   };
 
   // Hide the selected reading view
   const hideReading = () => {
+    console.log("Hiding reading details");
     setSelectedReading(null);
     setViewingCards([]);
   };
@@ -164,9 +172,11 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const hasNoMoreReadingsToday = userData && !userData.runsToday;
 
   // If the user has no more readings today but has a reading from today, show it
-  if (hasNoMoreReadingsToday && todayReading && !selectedReading) {
-    viewReading(todayReading);
-  }
+  useEffect(() => {
+    if (hasNoMoreReadingsToday && todayReading && !selectedReading) {
+      viewReading(todayReading);
+    }
+  }, [todayReading, hasNoMoreReadingsToday, selectedReading]);
 
   // Share reading functions
   const shareOnTwitter = (reading: Reading) => {
@@ -179,20 +189,26 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
+    let message = reading.result || reading.response || '';
+    // Truncate message if needed
+    const maxMsgLength = 180; // Allow room for the URL, hashtags, and token
+    if (message.length > maxMsgLength) {
+      message = message.substring(0, maxMsgLength) + '...';
+    }
+    
     const text = t('tarot.shareText', {
       cards: cardNames,
       intention: reading.question && reading.question.length > 30 
         ? reading.question.substring(0, 30) + '...' 
         : reading.question || '',
-      message: reading.result 
-        ? `"${reading.result.substring(0, 60)}${reading.result.length > 60 ? '...' : ''}"` 
-        : ''
+      message: message ? `"${message}"` : ''
     });
     
-    const url = 'https://app-fudfate.blackmouthgames.com/';
+    const url = 'https://app.fudfate.xyz/';
+    const token = '$FDft';
     const hashtags = 'FUDfate,Tarot,Crypto';
     
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
     
     window.open(twitterUrl, '_blank');
   };
@@ -207,10 +223,16 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     
     const cardNames = cardIds.map(id => getCardName(id, 0)).join(', ');
     
+    let message = reading.result || reading.response || '';
+    // Truncate if too long
+    if (message.length > 280) {
+      message = message.substring(0, 277) + '...';
+    }
+    
     const text = t('tarot.shareClipboardText', {
       cards: cardNames,
       intention: reading.question || '',
-      interpretation: reading.result || reading.response || ''
+      interpretation: message
     });
     
     navigator.clipboard.writeText(text)
@@ -225,6 +247,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
 
   // If we're viewing a reading, show the completed reading view
   if (selectedReading) {
+    console.log("Rendering ReadingDetails component");
     return (
       <ReadingDetails
         reading={selectedReading}

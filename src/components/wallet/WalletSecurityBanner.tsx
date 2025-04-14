@@ -9,12 +9,19 @@ import { Button } from '@/components/ui/button';
 const WalletSecurityBanner: React.FC = () => {
   const { walletType, connected } = useWallet();
   const [securityResults, setSecurityResults] = useState<SecurityCheckResult[]>([]);
-  const [showBanner, setShowBanner] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
   
   useEffect(() => {
     if (connected && walletType) {
       setSecurityResults(performWalletSecurityCheck(walletType));
       setShowBanner(true);
+      
+      // Auto-dismiss after 6 seconds
+      const timer = setTimeout(() => {
+        setShowBanner(false);
+      }, 6000);
+      
+      return () => clearTimeout(timer);
     }
   }, [connected, walletType]);
   

@@ -4,6 +4,7 @@ import { ReadingCard } from '@/types/tarot';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
+import ImageLoader from '@/components/ui/image-loader';
 
 interface CardItemProps {
   card: ReadingCard;
@@ -62,39 +63,6 @@ const CardItem: React.FC<CardItemProps> = ({
     }
   };
 
-  // Pre-load images
-  useEffect(() => {
-    const preloadImages = async () => {
-      try {
-        // Create image objects to preload both front and back
-        const frontImg = new Image();
-        frontImg.src = frontImageSrc;
-        const backImg = new Image();
-        backImg.src = backImageSrc;
-
-        // Set event handlers
-        frontImg.onload = () => {
-          setIsImageLoading(false);
-          setHasError(false);
-        };
-        frontImg.onerror = () => {
-          console.warn(`Failed to load card image: ${frontImageSrc}, using fallback`);
-          setHasError(true);
-          setFrontImageSrc('/img/cards/deck_1/0_TheDegen.jpg');
-          // Try the fallback
-          const fallbackImg = new Image();
-          fallbackImg.src = '/img/cards/deck_1/0_TheDegen.jpg';
-          fallbackImg.onload = () => setIsImageLoading(false);
-        };
-      } catch (err) {
-        console.error("Error preloading images:", err);
-        setIsImageLoading(false);
-      }
-    };
-
-    preloadImages();
-  }, [frontImageSrc, backImageSrc]);
-
   return (
     <motion.div
       className="card-container cursor-pointer"
@@ -108,46 +76,27 @@ const CardItem: React.FC<CardItemProps> = ({
       <div className={`card-wrapper relative ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
         <div className={`card ${isRevealed ? 'is-flipped' : ''}`}>
           {/* Card Back */}
-          <div className="card-face card-back relative">
-            {isImageLoading ? (
-              <AspectRatio ratio={5/8}>
-                <Skeleton className="w-full h-full rounded-lg" />
-              </AspectRatio>
-            ) : (
-              <AspectRatio ratio={5/8}>
-                <img 
-                  src={backImageSrc} 
-                  alt="Card Back" 
-                  className="w-full h-full object-cover rounded-lg"
-                  onError={() => {
-                    console.warn(`Failed to load card back image: ${backImageSrc}, using fallback`);
-                    setBackImageSrc('/img/cards/deck_default/99_BACK.jpg');
-                  }}
-                />
-              </AspectRatio>
-            )}
+          <div className="card-face card-back">
+            <ImageLoader
+              src={backImageSrc} 
+              alt="Card Back" 
+              className="w-full h-full rounded-lg"
+              fallbackSrc="/img/cards/deck_default/99_BACK.jpg"
+              aspectRatio={5/8}
+              skeletonClassName="bg-amber-100"
+            />
           </div>
           
           {/* Card Front */}
-          <div className="card-face card-front relative">
-            {isImageLoading ? (
-              <AspectRatio ratio={5/8}>
-                <Skeleton className="w-full h-full rounded-lg bg-amber-100" />
-              </AspectRatio>
-            ) : (
-              <AspectRatio ratio={5/8}>
-                <img 
-                  src={frontImageSrc} 
-                  alt={card?.name || 'Tarot Card'}
-                  className="w-full h-full object-cover rounded-lg" 
-                  onError={() => {
-                    console.warn(`Failed to load card image: ${frontImageSrc}, using fallback`);
-                    setHasError(true);
-                    setFrontImageSrc('/img/cards/deck_1/0_TheDegen.jpg');
-                  }}
-                />
-              </AspectRatio>
-            )}
+          <div className="card-face card-front">
+            <ImageLoader
+              src={frontImageSrc} 
+              alt={card?.name || 'Tarot Card'}
+              className="w-full h-full rounded-lg"
+              fallbackSrc="/img/cards/deck_1/0_TheDegen.jpg"
+              aspectRatio={5/8}
+              skeletonClassName="bg-amber-100"
+            />
             {isRevealed && (
               <motion.div 
                 className="absolute inset-0 bg-amber-400/20 rounded-lg"

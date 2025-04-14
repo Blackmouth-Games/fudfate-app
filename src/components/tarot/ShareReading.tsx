@@ -54,18 +54,25 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
       .map(card => card.name)
       .join(', ');
     
-    const shareMessage = getWebhookMessage();
+    let shareMessage = getWebhookMessage();
+    const maxMsgLength = 180; // Allow room for the URL, hashtags, and token
+    
+    // Truncate message if needed
+    if (shareMessage.length > maxMsgLength) {
+      shareMessage = shareMessage.substring(0, maxMsgLength) + '...';
+    }
     
     const text = t('tarot.shareText', {
       cards: cardNames,
       intention: intention.length > 30 ? intention.substring(0, 30) + '...' : intention,
-      message: shareMessage ? `"${shareMessage.substring(0, 60)}${shareMessage.length > 60 ? '...' : ''}"` : ''
+      message: shareMessage ? `"${shareMessage}"` : ''
     });
     
-    const url = 'https://app-fudfate.blackmouthgames.com/';
+    const url = 'https://app.fudfate.xyz/';
+    const token = '$FDft';
     const hashtags = 'FUDfate,Tarot,Crypto';
     
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
     
     window.open(twitterUrl, '_blank');
   };
@@ -77,7 +84,12 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
       .map(card => card.name)
       .join(', ');
     
-    const shareMessage = getWebhookMessage();
+    let shareMessage = getWebhookMessage();
+    
+    // Truncate if too long
+    if (shareMessage.length > 280) {
+      shareMessage = shareMessage.substring(0, 277) + '...';
+    }
     
     const text = t('tarot.shareClipboardText', {
       cards: cardNames,

@@ -32,11 +32,11 @@ const ReadingCardPreview: React.FC<ReadingCardPreviewProps> = ({
         </div>
       </HoverCardTrigger>
       <HoverCardContent className="p-0 hover-card-content w-40">
-        <div className="w-40 h-64">
+        <div className="w-40">
           <ImageLoader
             src={imagePath} 
-            alt={`Card ${index + 1}`}
-            className="w-full h-full rounded-lg"
+            alt={cardName}
+            className="w-full h-full rounded-t-lg"
             fallbackSrc="/img/cards/deck_1/0_TheDegen.jpg"
             aspectRatio={5/8}
             skeletonClassName="bg-amber-100"

@@ -46,6 +46,13 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
     setIsCardDetailsOpen(true);
   };
   
+  // Handle back button click with explicit prevention of default
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onBack();
+  };
+  
   return (
     <Card className={`border-amber-400/50 shadow-md ${className}`}>
       <CardContent className="p-6">
@@ -53,7 +60,7 @@ const ReadingDetails: React.FC<ReadingDetailsProps> = ({
           <h3 className="text-xl font-semibold text-amber-800">
             {reading.question || t('tarot.noQuestion')}
           </h3>
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={handleBackClick}>
             {t('tarot.backToHistory')}
           </Button>
         </div>
