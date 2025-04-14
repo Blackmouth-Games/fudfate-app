@@ -30,6 +30,7 @@
   -webkit-backface-visibility: hidden;
   border-radius: 0.5rem;
   overflow: hidden;
+  border: 2px solid rgba(255, 215, 0, 0.3);
 }
 
 .card-back {
@@ -107,4 +108,24 @@
 
 .card-revealing {
   animation: reveal-glow 2s ease-out;
+}
+
+/* Card in history styles */
+.history-card {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  transition: border-color 0.3s ease;
+}
+
+.history-card:hover {
+  border-color: rgba(255, 215, 0, 0.7);
+}
+
+/* Improved hover card styles */
+.hover-card-content {
+  border: 2px solid rgba(255, 215, 0, 0.5);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }

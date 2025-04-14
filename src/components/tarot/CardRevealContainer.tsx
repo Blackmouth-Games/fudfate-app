@@ -57,8 +57,12 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   // Handle card click directly without queueing
   const handleCardReveal = (index: number) => {
     // Only check if loading (not if already revealed)
-    if (loading) return;
+    if (loading) {
+      console.log("Card click ignored - loading state:", loading);
+      return;
+    }
     
+    console.log("Handling card reveal for index:", index);
     // Directly reveal the card
     handleCardClick(index);
   };

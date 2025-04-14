@@ -229,7 +229,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     const text = t('tarot.shareClipboardText', {
       cards: cardNames,
       intention: reading.question || '',
-      interpretation: reading.result || ''
+      interpretation: reading.result || reading.response || ''
     });
     
     navigator.clipboard.writeText(text)
@@ -308,7 +308,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           ) : formattedReadings.length > 0 ? (
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-6">
-                {formattedReadings.map((reading) => {
+                {formattedReadings.slice(0, 7).map((reading) => {
                   const formattedDate = new Date(reading.date).toLocaleDateString();
                   
                   const cardIds = Array.isArray(reading.cards) ? 
@@ -364,12 +364,12 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                             {cardIds.map((cardId, index) => (
                               <HoverCard key={`${reading.id}-card-${index}`}>
                                 <HoverCardTrigger asChild>
-                                  <div className="w-8 h-12 shrink-0 cursor-pointer">
+                                  <div className="w-8 h-12 shrink-0 cursor-pointer history-card">
                                     <AspectRatio ratio={5/8}>
                                       <img 
                                         src={getCardImagePath(cardId)} 
                                         alt={`Card ${index + 1}`}
-                                        className="w-full h-full object-cover rounded-sm"
+                                        className="w-full h-full object-cover"
                                         onError={(e) => {
                                           console.warn(`Failed to load card image: ${getCardImagePath(cardId)}`);
                                           (e.target as HTMLImageElement).src = '/img/cards/deck_1/0_TheDegen.jpg';
@@ -378,18 +378,18 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                                     </AspectRatio>
                                   </div>
                                 </HoverCardTrigger>
-                                <HoverCardContent className="p-0 border-none shadow-xl">
+                                <HoverCardContent className="p-0 hover-card-content w-40">
                                   <div className="w-40 h-64">
                                     <AspectRatio ratio={5/8}>
                                       <img 
                                         src={getCardImagePath(cardId)} 
                                         alt={`Card ${index + 1}`}
-                                        className="w-full h-full object-cover rounded-md"
+                                        className="w-full h-full object-cover"
                                       />
                                     </AspectRatio>
                                   </div>
-                                  <div className="p-2 text-center">
-                                    <p className="text-sm font-medium">
+                                  <div className="p-2 text-center bg-amber-50">
+                                    <p className="text-sm font-medium text-amber-800">
                                       {getCardName(cardId, index)}
                                     </p>
                                   </div>

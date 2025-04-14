@@ -101,6 +101,9 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
             neonEffect="purple"
           />
         </h3>
+        <p className="text-sm text-gray-600">
+          {!finalMessage ? t('tarot.tapToReveal') : t('tarot.readingCompleteDescription')}
+        </p>
       </div>
       
       {!finalMessage ? (
@@ -112,14 +115,11 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           cardBackImage={cardBackImage}
         />
       ) : (
-        <>
-          <CompletedReading 
-            finalMessage={finalMessage}
-            selectedCards={selectedCards}
-            resetReading={resetReading}
-          />
-          <ShareReading className="mt-6" />
-        </>
+        <CompletedReading 
+          finalMessage={finalMessage}
+          selectedCards={selectedCards}
+          resetReading={resetReading}
+        />
       )}
     </div>
   );

@@ -91,23 +91,19 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
       </motion.div>
       
       {!hideResetButton && (
-        <>
-          <ShareReading className="mb-6" />
-          
-          <motion.div 
-            className="flex justify-center pt-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5 }}
+        <motion.div 
+          className="flex justify-center pt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1, duration: 0.5 }}
+        >
+          <Button
+            onClick={resetReading}
+            className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium px-6 py-2 text-lg"
           >
-            <Button
-              onClick={resetReading}
-              className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium px-6 py-2 text-lg"
-            >
-              {t('tarot.startNewReading')}
-            </Button>
-          </motion.div>
-        </>
+            {t('tarot.startNewReading')}
+          </Button>
+        </motion.div>
       )}
     </div>
   );

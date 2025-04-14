@@ -25,7 +25,7 @@ const CardItem: React.FC<CardItemProps> = ({
 }) => {
   const [hasError, setHasError] = useState(false);
   const [frontImageSrc, setFrontImageSrc] = useState('');
-  const [backImageSrc, setBackImageSrc] = useState('');
+  const [backImageSrc, setBackImageSrc] = useState('/img/cards/deck_default/99_BACK.jpg'); // Default fallback
   
   // Set up image sources with proper fallbacks
   useEffect(() => {
@@ -39,11 +39,15 @@ const CardItem: React.FC<CardItemProps> = ({
     }
     
     // For card back
-    setBackImageSrc(cardBackImage || '/img/cards/deck_1/99_BACK.jpg');
+    if (cardBackImage) {
+      setBackImageSrc(cardBackImage);
+    } else {
+      setBackImageSrc('/img/cards/deck_default/99_BACK.jpg');
+    }
   }, [card, cardBackImage]);
 
   const handleClick = () => {
-    console.log("Card clicked:", { isRevealed, cardId: card?.id });
+    console.log("Card clicked:", { isRevealed, cardId: card?.id, index });
     if (isRevealed && onCardView) {
       onCardView();
     } else {
@@ -72,7 +76,7 @@ const CardItem: React.FC<CardItemProps> = ({
                 className="w-full h-full object-cover rounded-lg"
                 onError={() => {
                   console.warn(`Failed to load card back image: ${backImageSrc}, using fallback`);
-                  setBackImageSrc('/img/cards/deck_1/99_BACK.jpg');
+                  setBackImageSrc('/img/cards/deck_default/99_BACK.jpg');
                 }}
               />
             </AspectRatio>
