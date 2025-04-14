@@ -4,26 +4,15 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon, Share2, Twitter } from "lucide-react";
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { InfoIcon } from "lucide-react";
+import { TooltipProvider } from '@/components/ui/tooltip';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import CompletedReading from './CompletedReading';
 import { ReadingCard } from '@/types/tarot';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
-import CardDetailsDialog from './CardDetailsDialog';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import ReadingListItem from './ReadingListItem';
+import ReadingDetails from './ReadingDetails';
 
 interface Reading {
   id: string;
@@ -53,8 +42,6 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   const { resetReading } = useTarot();
   const [selectedReading, setSelectedReading] = useState<Reading | null>(null);
   const [viewingCards, setViewingCards] = useState<ReadingCard[]>([]);
-  const [isCardDetailsOpen, setIsCardDetailsOpen] = useState(false);
-  const [selectedCardDetails, setSelectedCardDetails] = useState<any>(null);
   
   // Format the readings data to match our expected format
   const formattedReadings: Reading[] = readings && readings.length > 0 
@@ -97,38 +84,6 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     return readingDate === today;
   });
 
-  // View a reading's details
-  const viewReading = (reading: Reading) => {
-    setSelectedReading(reading);
-    
-    // Convert cards array to ReadingCard format
-    const readingCards: ReadingCard[] = Array.isArray(reading.cards) 
-      ? reading.cards.map((cardId, index) => {
-          let cardNumber: number;
-          
-          // Handle different card ID types
-          if (typeof cardId === 'number') {
-            cardNumber = cardId;
-          } else if (typeof cardId === 'string') {
-            cardNumber = parseInt(cardId, 10);
-            if (isNaN(cardNumber)) cardNumber = index;
-          } else {
-            cardNumber = index;
-          }
-              
-          return {
-            id: String(cardNumber),
-            name: getCardName(cardNumber, index),
-            image: `/img/cards/deck_1/${cardNumber}_${getCardName(cardNumber, index).replace(/\s+/g, '')}.jpg`,
-            description: "",
-            revealed: true
-          };
-        })
-      : [];
-    
-    setViewingCards(readingCards);
-  };
-
   // Helper function to get card name from card ID
   const getCardName = (cardId: number, fallbackIndex: number): string => {
     const cardNames: Record<number, string> = {
@@ -167,10 +122,36 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     return '/img/cards/deck_1/0_TheDegen.jpg';
   };
 
-  // View card details
-  const viewCardDetails = (card: any) => {
-    setSelectedCardDetails(card);
-    setIsCardDetailsOpen(true);
+  // View a reading's details
+  const viewReading = (reading: Reading) => {
+    setSelectedReading(reading);
+    
+    // Convert cards array to ReadingCard format
+    const readingCards: ReadingCard[] = Array.isArray(reading.cards) 
+      ? reading.cards.map((cardId, index) => {
+          let cardNumber: number;
+          
+          // Handle different card ID types
+          if (typeof cardId === 'number') {
+            cardNumber = cardId;
+          } else if (typeof cardId === 'string') {
+            cardNumber = parseInt(cardId, 10);
+            if (isNaN(cardNumber)) cardNumber = index;
+          } else {
+            cardNumber = index;
+          }
+              
+          return {
+            id: String(cardNumber),
+            name: getCardName(cardNumber, index),
+            image: `/img/cards/deck_1/${cardNumber}_${getCardName(cardNumber, index).replace(/\s+/g, '')}.jpg`,
+            description: "",
+            revealed: true
+          };
+        })
+      : [];
+    
+    setViewingCards(readingCards);
   };
 
   // Hide the selected reading view
@@ -245,50 +226,15 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   // If we're viewing a reading, show the completed reading view
   if (selectedReading) {
     return (
-      <Card className={`border-amber-400/50 shadow-md ${className}`}>
-        <CardContent className="p-6">
-          <div className="mb-6 flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-amber-800">
-              {selectedReading.question || t('tarot.noQuestion')}
-            </h3>
-            <Button variant="outline" onClick={hideReading}>
-              {t('tarot.backToHistory')}
-            </Button>
-          </div>
-          
-          <CompletedReading 
-            finalMessage={selectedReading.result || selectedReading.response || t('tarot.noMessageAvailable')}
-            selectedCards={viewingCards}
-            resetReading={resetReading}
-            hideResetButton={true}
-          />
-          
-          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => copyToClipboard(selectedReading)}
-              className="w-full sm:w-auto flex items-center gap-2 border-amber-300 hover:bg-amber-50"
-            >
-              <Share2 className="h-4 w-4" />
-              {t('tarot.copyReading')}
-            </Button>
-            
-            <Button
-              onClick={() => shareOnTwitter(selectedReading)}
-              className="w-full sm:w-auto flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#0c85d0]"
-            >
-              <Twitter className="h-4 w-4" />
-              {t('tarot.shareOnX')}
-            </Button>
-          </div>
-          
-          <CardDetailsDialog 
-            open={isCardDetailsOpen} 
-            onOpenChange={setIsCardDetailsOpen}
-            cardDetails={selectedCardDetails}
-          />
-        </CardContent>
-      </Card>
+      <ReadingDetails
+        reading={selectedReading}
+        viewingCards={viewingCards}
+        onBack={hideReading}
+        onCopyToClipboard={copyToClipboard}
+        onShareOnTwitter={shareOnTwitter}
+        resetReading={resetReading}
+        className={className}
+      />
     );
   }
 
@@ -308,108 +254,17 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           ) : formattedReadings.length > 0 ? (
             <ScrollArea className="h-[400px] pr-4">
               <div className="space-y-6">
-                {formattedReadings.slice(0, 7).map((reading) => {
-                  const formattedDate = new Date(reading.date).toLocaleDateString();
-                  
-                  const cardIds = Array.isArray(reading.cards) ? 
-                    reading.cards.map(c => {
-                      if (typeof c === 'number') return c;
-                      if (typeof c === 'string') return parseInt(c, 10);
-                      return 0; // Default value if parsing fails
-                    }) : [];
-                  
-                  return (
-                    <div 
-                      key={reading.id} 
-                      className="border border-amber-200 rounded-lg p-4 hover:bg-amber-50 transition-colors"
-                    >
-                      <div className="flex flex-col space-y-3">
-                        <div className="flex justify-between items-center">
-                          <h4 className="font-medium text-amber-800">{formattedDate}</h4>
-                          <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => viewReading(reading)}
-                            >
-                              {t('tarot.view')}
-                            </Button>
-                            <Button
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => copyToClipboard(reading)}
-                              title={t('tarot.copyReading')}
-                            >
-                              <Share2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => shareOnTwitter(reading)}
-                              title={t('tarot.shareOnX')}
-                              className="text-[#1DA1F2]"
-                            >
-                              <Twitter className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <p className="font-medium text-gray-700">
-                          {reading.question || t('tarot.noQuestion')}
-                        </p>
-                        
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1">{t('tarot.cards')}:</p>
-                          <div className="flex overflow-x-auto pb-2 gap-1">
-                            {cardIds.map((cardId, index) => (
-                              <HoverCard key={`${reading.id}-card-${index}`}>
-                                <HoverCardTrigger asChild>
-                                  <div className="w-8 h-12 shrink-0 cursor-pointer history-card">
-                                    <AspectRatio ratio={5/8}>
-                                      <img 
-                                        src={getCardImagePath(cardId)} 
-                                        alt={`Card ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                          console.warn(`Failed to load card image: ${getCardImagePath(cardId)}`);
-                                          (e.target as HTMLImageElement).src = '/img/cards/deck_1/0_TheDegen.jpg';
-                                        }}
-                                      />
-                                    </AspectRatio>
-                                  </div>
-                                </HoverCardTrigger>
-                                <HoverCardContent className="p-0 hover-card-content w-40">
-                                  <div className="w-40 h-64">
-                                    <AspectRatio ratio={5/8}>
-                                      <img 
-                                        src={getCardImagePath(cardId)} 
-                                        alt={`Card ${index + 1}`}
-                                        className="w-full h-full object-cover"
-                                      />
-                                    </AspectRatio>
-                                  </div>
-                                  <div className="p-2 text-center bg-amber-50">
-                                    <p className="text-sm font-medium text-amber-800">
-                                      {getCardName(cardId, index)}
-                                    </p>
-                                  </div>
-                                </HoverCardContent>
-                              </HoverCard>
-                            ))}
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <p className="text-sm text-gray-500 mb-1">{t('tarot.response')}:</p>
-                          <p className="text-sm text-gray-700 line-clamp-3">
-                            {reading.result || reading.response || 
-                             <span className="text-gray-400 italic">{t('tarot.noResponse')}</span>}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                {formattedReadings.slice(0, 7).map((reading) => (
+                  <ReadingListItem
+                    key={reading.id}
+                    reading={reading}
+                    onView={viewReading}
+                    onShare={copyToClipboard}
+                    onTwitterShare={shareOnTwitter}
+                    getCardName={getCardName}
+                    getCardImagePath={getCardImagePath}
+                  />
+                ))}
               </div>
             </ScrollArea>
           ) : (
