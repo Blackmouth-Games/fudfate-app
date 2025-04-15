@@ -1,4 +1,6 @@
 
+import { Environment } from '@/config/webhooks';
+
 // Interface for the webhook log
 export interface WebhookLog {
   id: string;
@@ -16,7 +18,7 @@ export interface WebhookLog {
 export interface WebhookRequestOptions {
   url: string;
   data: any;
-  environment?: string;
+  environment?: Environment;
   method?: string;
 }
 

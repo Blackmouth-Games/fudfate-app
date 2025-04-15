@@ -72,6 +72,9 @@ const TarotApp: React.FC = () => {
     }
   }, [connected]);
 
+  // Get commit SHA from environment variable
+  const commitSha = import.meta.env.VITE_COMMIT_SHA || '';
+
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <TarotHeader 
@@ -101,7 +104,7 @@ const TarotApp: React.FC = () => {
       </main>
 
       <Footer />
-      <CommitSHA />
+      <CommitSHA sha={commitSha} />
       <DevToolPanel 
         routes={[
           { path: '/', name: 'Home' },

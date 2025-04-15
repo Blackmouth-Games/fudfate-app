@@ -12,6 +12,7 @@ import {
 } from '@/utils/wallet-connection-utils';
 import { useWalletStorage } from '@/hooks/useWalletStorage';
 import { logLoginWebhook } from '@/services/webhook';
+import { Environment } from '@/config/webhooks';
 
 export const useWalletConnection = (
   walletAddress: string | null,
@@ -206,7 +207,7 @@ const callLoginWebhook = async (
   webhookUrl: string,
   address: string,
   walletType: string,
-  environment: string,
+  environment: Environment,
   addConnectionLog: (action: string, details: string) => void
 ): Promise<any> => {
   addConnectionLog('Login WebhookCall', `Calling login webhook with ${walletType}, ${address}`);

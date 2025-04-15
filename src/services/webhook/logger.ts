@@ -1,4 +1,12 @@
+
 import { Environment } from '@/config/webhooks';
+
+// Extend the Window interface to include the addWebhookLog function
+declare global {
+  interface Window {
+    addWebhookLog?: (log: any) => void;
+  }
+}
 
 /**
  * Log a webhook call to localStorage and dispatch an event
@@ -28,7 +36,6 @@ export const logWebhookCall = (
 
   // Add to DevTools logs if available
   if (typeof window !== 'undefined' && window.addWebhookLog) {
-    // @ts-ignore - Global function added by DevTools
     window.addWebhookLog(log);
   }
 
@@ -85,7 +92,7 @@ export const logDeckSelectWebhook = (
     responseData?: any, 
     error?: any, 
     status?: number, 
-    environment?: string 
+    environment?: Environment 
   }
 ) => {
   const { url, requestData, responseData, error, status, environment = 'production' } = params;

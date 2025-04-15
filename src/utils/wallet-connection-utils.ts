@@ -1,8 +1,8 @@
-
 import { toast } from 'sonner';
 import { logLoginWebhook } from '@/services/webhook-service';
 import { UserData } from '@/types/walletTypes';
 import { checkWalletImplementation } from '@/utils/wallet-security';
+import { Environment } from '@/config/webhooks';
 
 /**
  * Connect to Metamask wallet
@@ -143,7 +143,7 @@ export const callLoginWebhook = async (
   webhookUrl: string,
   address: string,
   walletType: string,
-  environment: string,
+  environment: Environment,
   addConnectionLog: (action: string, details: string) => void
 ): Promise<any> => {
   addConnectionLog('Login WebhookCall', `Calling login webhook with ${walletType}, ${address}`);
@@ -241,7 +241,7 @@ export const parseUserData = (response: any): UserData | null => {
 export const fetchAvailableDecks = async (
   webhookUrl: string,
   userId: string,
-  environment: string
+  environment: Environment
 ): Promise<any[]> => {
   try {
     console.log(`Calling deck webhook for user: ${userId}`);

@@ -2,6 +2,7 @@
 import { callWebhook } from './core';
 import { logDeckSelectWebhook } from './logger';
 import { toast } from 'sonner';
+import { Environment } from '@/config/webhooks';
 
 /**
  * Call webhook to select a deck
@@ -10,7 +11,7 @@ export const callSelectDeckWebhook = async (
   webhookUrl: string,
   userId: string,
   deckToSelect: string,
-  environment: string = 'production'
+  environment: Environment = 'production'
 ): Promise<boolean> => {
   try {
     const requestData = {

@@ -1,6 +1,8 @@
+
 import { WebhookRequestOptions, WebhookCallResult } from '@/types/webhook';
 import { logWebhookCall } from './logger';
 import { toast } from 'sonner';
+import { Environment } from '@/config/webhooks';
 
 // Almacenar las últimas llamadas al webhook
 const lastWebhookCalls: { [key: string]: number } = {};
@@ -32,7 +34,7 @@ export async function callWebhook<T>(
   lastWebhookCalls[callKey] = now;
 
   // Log the attempt before making the call
-  logWebhookCall(logType, url, data, null, undefined, undefined, environment, method);
+  logWebhookCall(logType, url, data, null, undefined, undefined, environment as Environment, method);
   
   try {
     const response = await fetch(url, {
@@ -54,7 +56,7 @@ export async function callWebhook<T>(
     }
     
     // Log the response
-    logWebhookCall(logType, url, data, responseData, undefined, status, environment, method);
+    logWebhookCall(logType, url, data, responseData, undefined, status, environment as Environment, method);
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${status}`);
@@ -68,7 +70,7 @@ export async function callWebhook<T>(
   } catch (error) {
     // Log the error
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logWebhookCall(logType, url, data, null, error, undefined, environment, method);
+    logWebhookCall(logType, url, data, null, error, undefined, environment as Environment, method);
     
     return {
       success: false,
@@ -82,7 +84,7 @@ export async function callWebhook<T>(
  */
 export function generateMockData<T>(mockData: T, logType: string, url: string, requestData: any, environment: string): WebhookCallResult<T> {
   // Log the mock response for traceability
-  logWebhookCall(logType, url, requestData, mockData, undefined, 200, environment, 'POST');
+  logWebhookCall(logType, url, requestData, mockData, undefined, 200, environment as Environment, 'POST');
   
   toast.warning(`Using mock ${logType.toLowerCase()} data for development`, {
     description: "Webhook call failed, but continuing with mock data"
