@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { UserData, WalletType } from '@/types/walletTypes';
@@ -112,9 +111,10 @@ export const useWalletConnection = (
         console.error("Error calling login webhook:", error);
         
         if (environment === 'development') {
-          const mockUserData = {
+          const mockUserData: UserData = {
             userId: `mock_${Math.random().toString(16).substring(2, 8)}`,
-            runsToday: false
+            runsToday: false,
+            whitelisted: false
           };
           
           addConnectionLog('Login Mock', `Using mock user data in development: ${mockUserData.userId}`);
@@ -165,7 +165,6 @@ export const useWalletConnection = (
     setUserData(null);
     clearWalletData();
     
-    // Also clear the session restoration flag
     sessionStorage.removeItem('walletSessionRestored');
     
     console.log("Wallet disconnected");
@@ -175,10 +174,11 @@ export const useWalletConnection = (
     addConnectionLog('Override UserData', `Updated user data: ${JSON.stringify(data)}`);
     
     if (!userData) {
-      const newUserData = {
+      const newUserData: UserData = {
         userId: data.userId || `mock_${Math.random().toString(16).substring(2, 10)}`,
         runsToday: data.runsToday !== undefined ? data.runsToday : false,
-        ...data
+        whitelisted: data.whitelisted !== undefined ? data.whitelisted : false,
+        ...(data.selectedDeck ? { selectedDeck: data.selectedDeck } : {})
       };
       
       setUserData(newUserData);
@@ -186,9 +186,10 @@ export const useWalletConnection = (
       return;
     }
     
-    const updatedUserData = {
+    const updatedUserData: UserData = {
       ...userData,
-      ...data
+      ...data,
+      whitelisted: data.whitelisted !== undefined ? data.whitelisted : userData.whitelisted
     };
     
     setUserData(updatedUserData);
@@ -231,7 +232,6 @@ const callLoginWebhook = async (
     if (!response.ok) {
       const errorText = await response.text();
       addConnectionLog('Login Error', `HTTP error! status: ${status}, ${errorText}`);
-      // Update to use object parameter format
       logLoginWebhook({
         url: webhookUrl,
         requestData: { wallet: address, type: walletType },
@@ -246,7 +246,6 @@ const callLoginWebhook = async (
     console.log('Login webhook response:', data);
     
     addConnectionLog('Login Success', `Received response with status ${status}`);
-    // Update to use object parameter format
     logLoginWebhook({
       url: webhookUrl,
       requestData: { wallet: address, type: walletType },

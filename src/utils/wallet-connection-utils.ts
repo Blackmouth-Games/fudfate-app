@@ -1,3 +1,4 @@
+
 import { ethers } from 'ethers';
 import { PublicKey } from '@solana/web3.js';
 import { UserData, WalletType } from '@/types/walletTypes';
@@ -68,7 +69,8 @@ export const parseUserData = (data: any): UserData | null => {
   return {
     userId,
     runsToday,
-    whitelisted: isWhitelisted
+    whitelisted: isWhitelisted,
+    selectedDeck: data.selectedDeck
   };
 };
 
