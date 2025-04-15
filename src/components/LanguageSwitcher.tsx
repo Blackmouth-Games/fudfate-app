@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
           size="sm"
           className={cn("font-pixel gap-1.5 flex items-center", className)}
         >
-          <Globe className="h-3.5 w-3.5" />
+          <Globe className="h-3.5 w-3.5 lucide-react" />
           <span>{currentLanguage.flag}</span>
         </Button>
       </DropdownMenuTrigger>
@@ -63,7 +62,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
               <span>{lang.flag}</span>
               <span>{lang.name}</span>
             </span>
-            {i18n.language === lang.code && <Check className="h-4 w-4" />}
+            {i18n.language === lang.code && <Check className="h-4 w-4 lucide-react" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

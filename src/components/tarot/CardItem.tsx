@@ -1,10 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { ReadingCard } from '@/types/tarot';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import ImageLoader from '@/components/ui/image-loader';
+import { useTarot } from '@/contexts/TarotContext';
 
 interface CardItemProps {
   card: ReadingCard;
@@ -25,37 +24,55 @@ const CardItem: React.FC<CardItemProps> = ({
   cardBackImage,
   onCardView
 }) => {
+  const { selectedDeck } = useTarot();
   const [hasError, setHasError] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [frontImageSrc, setFrontImageSrc] = useState('');
-  const [backImageSrc, setBackImageSrc] = useState('/img/cards/deck_default/99_BACK.jpg'); // Default fallback
+  const [backImageSrc, setBackImageSrc] = useState('');
+  
+  // Placeholder constants
+  const PLACEHOLDER_BACK = '/img/cards/deck_default/99_BACK.jpg';
+  const PLACEHOLDER_FRONT = '/img/cards/deck_default/0_TheDegen.jpg';
   
   // Set up image sources with proper fallbacks
   useEffect(() => {
     // For card front (when revealed)
     if (card?.image) {
-      // Always ensure we use jpg extension
-      const imageSrc = card.image.endsWith('.png') 
-        ? card.image.replace('.png', '.jpg') 
-        : card.image;
+      // Log the image path for debugging
+      console.log('Card image path:', card.image);
+      
+      // Ensure the image path starts with /img/
+      const imagePath = card.image.startsWith('/') ? card.image : `/img/cards/${card.image}`;
+      
+      // Use the correct deck path
+      const imageSrc = imagePath.includes(`${selectedDeck}/`) 
+        ? imagePath 
+        : imagePath.replace('/cards/', `/cards/${selectedDeck}/`);
+      
+      console.log('Processed image path:', imageSrc);
       setFrontImageSrc(imageSrc);
     } else {
-      setFrontImageSrc('/img/cards/deck_1/0_TheDegen.jpg');
+      console.warn('No image provided for card:', card);
+      setFrontImageSrc(PLACEHOLDER_FRONT);
     }
     
     // For card back
     if (cardBackImage) {
-      setBackImageSrc(cardBackImage);
+      // Ensure the back image path starts with /img/
+      const backPath = cardBackImage.startsWith('/') 
+        ? cardBackImage 
+        : `/img/cards/${selectedDeck}/99_BACK.jpg`;
+      console.log('Card back image path:', backPath);
+      setBackImageSrc(backPath);
     } else {
-      setBackImageSrc('/img/cards/deck_default/99_BACK.jpg');
+      setBackImageSrc(PLACEHOLDER_BACK);
     }
 
     // Reset loading state when card changes
     setIsImageLoading(true);
-  }, [card, cardBackImage]);
+  }, [card, cardBackImage, selectedDeck]);
 
   const handleClick = () => {
-    console.log("Card clicked:", { isRevealed, cardId: card?.id, index });
     if (isRevealed && onCardView) {
       onCardView();
     } else if (!loading) {
@@ -73,39 +90,39 @@ const CardItem: React.FC<CardItemProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
     >
-      <div className={`card-wrapper relative ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
-        <div className={`card ${isRevealed ? 'is-flipped' : ''}`}>
-          {/* Card Back */}
-          <div className="card-face card-back">
-            <ImageLoader
-              src={backImageSrc} 
-              alt="Card Back" 
-              className="w-full h-full rounded-lg"
-              fallbackSrc="/img/cards/deck_default/99_BACK.jpg"
-              aspectRatio={5/8}
-              skeletonClassName="bg-amber-100"
+      <div className={`tarot-card ${loading ? 'opacity-70 pointer-events-none' : ''} ${isRevealed ? 'is-flipped' : ''}`}>
+        <div className="card-face card-back">
+          <ImageLoader
+            src={backImageSrc} 
+            alt="Card Back" 
+            className="w-full h-full object-cover rounded-lg"
+            fallbackSrc={PLACEHOLDER_BACK}
+            aspectRatio={5/8}
+            skeletonClassName="bg-amber-100"
+            onLoad={() => setIsImageLoading(false)}
+            onError={() => setHasError(true)}
+          />
+        </div>
+        
+        <div className="card-face card-front">
+          <ImageLoader
+            src={frontImageSrc} 
+            alt={card?.name || 'Tarot Card'}
+            className="w-full h-full object-cover rounded-lg"
+            fallbackSrc={PLACEHOLDER_FRONT}
+            aspectRatio={5/8}
+            skeletonClassName="bg-amber-100"
+            onLoad={() => setIsImageLoading(false)}
+            onError={() => setHasError(true)}
+          />
+          {isRevealed && (
+            <motion.div 
+              className="absolute inset-0 bg-amber-400/20 rounded-lg"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
             />
-          </div>
-          
-          {/* Card Front */}
-          <div className="card-face card-front">
-            <ImageLoader
-              src={frontImageSrc} 
-              alt={card?.name || 'Tarot Card'}
-              className="w-full h-full rounded-lg"
-              fallbackSrc="/img/cards/deck_1/0_TheDegen.jpg"
-              aspectRatio={5/8}
-              skeletonClassName="bg-amber-100"
-            />
-            {isRevealed && (
-              <motion.div 
-                className="absolute inset-0 bg-amber-400/20 rounded-lg"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              />
-            )}
-          </div>
+          )}
         </div>
       </div>
     </motion.div>

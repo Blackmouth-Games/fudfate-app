@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -24,6 +23,7 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
   
   // Reset loading state when src changes
   useEffect(() => {
+    console.log('ImageLoader: Loading image from:', src);
     setIsLoading(true);
     setHasError(false);
     setImageSrc(src);
@@ -31,16 +31,18 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
   
   // Handle image load completion
   const handleLoad = () => {
+    console.log('ImageLoader: Image loaded successfully:', imageSrc);
     setIsLoading(false);
   };
   
   // Handle image load error
   const handleError = () => {
+    console.error('ImageLoader: Failed to load image:', imageSrc);
     setHasError(true);
     setIsLoading(false);
     
     if (fallbackSrc) {
-      console.warn(`Failed to load image: ${imageSrc}, using fallback`);
+      console.log('ImageLoader: Using fallback image:', fallbackSrc);
       setImageSrc(fallbackSrc);
     }
   };
@@ -67,12 +69,19 @@ const ImageLoader: React.FC<ImageLoaderProps> = ({
         alt={alt || "Image"}
         className={cn(
           "w-full h-full object-cover transition-opacity duration-300",
-          isLoading ? "opacity-0" : "opacity-100"
+          isLoading ? "opacity-0" : "opacity-100",
+          hasError ? "opacity-50" : ""
         )}
         onLoad={handleLoad}
         onError={handleError}
         {...props}
       />
+      
+      {hasError && !isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-red-100/50">
+          <p className="text-xs text-red-600">Error loading image</p>
+        </div>
+      )}
     </div>
   );
 };

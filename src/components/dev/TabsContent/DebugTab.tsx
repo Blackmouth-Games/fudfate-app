@@ -1,9 +1,11 @@
-
 import React, { useEffect, useState } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { Trash } from 'lucide-react';
 import tarotCards from '@/data/tarotCards';
 
 const DebugTab = () => {
@@ -11,6 +13,16 @@ const DebugTab = () => {
   const [webhookCards, setWebhookCards] = useState<number[]>([]);
   const [parsedWebhook, setParsedWebhook] = useState<any>(null);
   const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
+  
+  const clearWebhookCache = () => {
+    // Reset the lastCallTimestamp in reading.ts
+    // @ts-ignore - Accessing global variable
+    if (typeof window !== 'undefined') {
+      // @ts-ignore - Accessing global variable
+      window.lastCallTimestamp = 0;
+    }
+    toast.success('Webhook cache cleared');
+  };
   
   useEffect(() => {
     if (webhookResponse) {
@@ -100,11 +112,20 @@ const DebugTab = () => {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold mb-2">Current Phase</h3>
-        <Badge variant="outline" className="bg-amber-50">{phase}</Badge>
+    <div className="space-y-4 p-4">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-semibold">Current Phase</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={clearWebhookCache}
+          className="h-7 text-xs flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700"
+        >
+          <Trash className="h-3 w-3" />
+          Clear Cache
+        </Button>
       </div>
+      <Badge variant="outline" className="bg-amber-50">{phase}</Badge>
       
       <Separator />
       

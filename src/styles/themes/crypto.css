@@ -1,4 +1,3 @@
-
 /* Crypto theme specific colors and styles */
 :root {
   --crypto-gold: #FAD12B;
@@ -7,6 +6,12 @@
   --crypto-background: #FFFFFF;
   --crypto-text: #000000;
   --crypto-accent: #FAD12B;
+}
+
+/* Default styles for lucide-react icons */
+.lucide-react {
+  color: var(--crypto-text);
+  stroke: currentColor;
 }
 
 /* Theme specific card styles that can be reused in other projects */

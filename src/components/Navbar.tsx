@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -87,7 +86,7 @@ const Navbar = () => {
                 onClick={toggleMenu}
                 className="ml-2 inline-flex items-center justify-center p-2 rounded-md text-black hover:text-accent focus:outline-none"
               >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {isMenuOpen ? <X size={24} className="lucide-react" /> : <Menu size={24} className="lucide-react" />}
               </button>
             </div>
           )}

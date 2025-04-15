@@ -1,100 +1,81 @@
-
-import { WebhookLog } from '@/types/webhook';
-import { nanoid } from 'nanoid';
+import { Environment } from '@/config/webhooks';
 
 /**
  * Log a webhook call to localStorage and dispatch an event
  */
 export const logWebhookCall = (
-  type: string, 
+  type: string,
+  url: string,
+  requestData: any,
+  responseData: any,
+  error: any,
+  status?: number,
+  environment: Environment = 'production',
+  method: string = 'POST'
+) => {
+  // Create log entry
+  const log = {
+    type,
+    url,
+    timestamp: new Date().toISOString(),
+    status,
+    error: error ? (error instanceof Error ? error.message : String(error)) : undefined,
+    request: requestData,
+    response: responseData,
+    environment,
+    method
+  };
+
+  // Add to DevTools logs if available
+  if (typeof window !== 'undefined' && window.addWebhookLog) {
+    // @ts-ignore - Global function added by DevTools
+    window.addWebhookLog(log);
+  }
+
+  // Log to console for debugging
+  console.log(`[${type} Webhook] ${method} ${url}`, {
+    status,
+    error: log.error,
+    timestamp: log.timestamp,
+    environment
+  });
+};
+
+// Specific logging functions for different webhook types
+export const logLoginWebhook = (params: { 
   url: string, 
   requestData: any, 
   responseData?: any, 
   error?: any, 
   status?: number, 
-  environment: string = 'production', 
-  method: string = 'POST'
-): void => {
-  // Ensure URL is a string to prevent 'includes' errors
-  const safeUrl = url && typeof url === 'string' ? url : '';
-  
-  // Filter out pushLogs to Grafana to prevent infinite logging
-  if (safeUrl && safeUrl.includes('pushLogsToGrafana')) {
-    return; // Skip logging for Grafana push logs
-  }
-  
-  const logEntry: WebhookLog = {
-    id: nanoid(),
-    timestamp: new Date().toISOString(),
-    type,
-    url: safeUrl,
-    method,
-    request: requestData,
-    response: responseData,
-    error: error ? (error.message || String(error)) : undefined,
-    status,
-    environment
-  };
-
-  // Store in localStorage first to ensure persistence
-  try {
-    const existingLogs = localStorage.getItem('webhookLogs');
-    const logs = existingLogs ? JSON.parse(existingLogs) : [];
-    logs.unshift(logEntry); // Add to the beginning
-    const trimmedLogs = logs.slice(0, 50); // Keep only the last 50 logs
-    localStorage.setItem('webhookLogs', JSON.stringify(trimmedLogs));
-  } catch (err) {
-    console.error('Error storing webhook log:', err);
-  }
-
-  // Dispatch custom event with the log data
-  window.dispatchEvent(new CustomEvent('webhook-log', { detail: logEntry }));
-  
-  // Also log to console for debugging
-  console.log('Webhook log:', logEntry);
+  environment?: Environment 
+}) => {
+  const { url, requestData, responseData, error, status, environment = 'production' } = params;
+  logWebhookCall('Login', url, requestData, responseData, error, status, environment);
 };
 
-// Specific logging functions for different webhook types
-export const logLoginWebhook = (
-  params: { 
-    url: string, 
-    requestData: any, 
-    responseData?: any, 
-    error?: any, 
-    status?: number, 
-    environment?: string 
-  }
-) => {
+export const logReadingWebhook = (params: { 
+  url: string, 
+  requestData: any, 
+  responseData?: any, 
+  error?: any, 
+  status?: number, 
+  environment?: Environment 
+}) => {
   const { url, requestData, responseData, error, status, environment = 'production' } = params;
-  logWebhookCall('Login', url, requestData, responseData, error, status, environment, 'POST');
+  logWebhookCall('Reading', url, requestData, responseData, error, status, environment);
 };
 
-export const logReadingWebhook = (
-  params: { 
-    url: string, 
-    requestData: any, 
-    responseData?: any, 
-    error?: any, 
-    status?: number, 
-    environment?: string 
-  }
-) => {
+export const logDeckWebhook = (params: { 
+  url: string, 
+  requestData: any, 
+  responseData?: any, 
+  error?: any, 
+  status?: number, 
+  environment?: Environment 
+}) => {
   const { url, requestData, responseData, error, status, environment = 'production' } = params;
-  logWebhookCall('Reading', url, requestData, responseData, error, status, environment, 'POST');
-};
-
-export const logDeckWebhook = (
-  params: { 
-    url: string, 
-    requestData: any, 
-    responseData?: any, 
-    error?: any, 
-    status?: number, 
-    environment?: string 
-  }
-) => {
-  const { url, requestData, responseData, error, status, environment = 'production' } = params;
-  logWebhookCall('Deck', url, requestData, responseData, error, status, environment, 'POST');
+  logWebhookCall('Deck', url, requestData, responseData, error, status, environment);
 };
 
 export const logDeckSelectWebhook = (

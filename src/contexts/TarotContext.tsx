@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { useWallet } from './WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -36,31 +35,40 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [finalMessage, setFinalMessage] = useState<string | null>(null);
   const [interpretation, setInterpretation] = useState<Interpretation | null>(null);
   const [webhookResponse, setWebhookResponse] = useState<WebhookResponse | null>(null);
+  const [isCallingWebhook, setIsCallingWebhook] = useState(false);
 
   const startReading = async () => {
     if (!connected) {
-      toast.error(t('errors.walletNotConnected'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      toast.error(t('errors.walletNotConnected'));
       return;
     }
     
     if (!intention.trim()) {
-      toast.error(t('tarot.intentionRequired'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      toast.error(t('tarot.intentionRequired'));
+      return;
+    }
+    
+    if (isCallingWebhook) {
+      console.log('Reading webhook call prevented - already in progress');
       return;
     }
     
     const hasRequiredToken = await checkUserToken();
     if (!hasRequiredToken) {
-      toast.error(t('errors.tokenRequired'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      toast.error(t('errors.tokenRequired'));
       return;
     }
     
     try {
+      console.log('Starting new reading with state:', {
+        isCallingWebhook,
+        phase,
+        connected,
+        hasUserData: !!userData,
+        timestamp: new Date().toISOString()
+      });
+
+      setIsCallingWebhook(true);
       setPhase('preparing');
       
       // Call the reading webhook
@@ -71,17 +79,22 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         environment
       );
       
-      // If we're in production and no webhook data, we can't proceed
-      if (!webhookData && environment !== 'development') {
-        toast.error(t('errors.serverError'), {
-          style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-        });
-        setPhase('intention');
-        return;
+      // If webhook call was debounced or failed
+      if (!webhookData) {
+        if (environment !== 'development') {
+          console.log('Reading webhook call was debounced or failed');
+          toast.error(t('errors.serverError'));
+          setPhase('intention');
+          return;
+        }
       }
       
       setWebhookResponse(webhookData);
-      console.log("Webhook response set:", webhookData);
+      console.log("Webhook response received:", {
+        hasData: !!webhookData,
+        timestamp: new Date().toISOString(),
+        responseType: webhookData ? typeof webhookData : 'null'
+      });
       
       // Parse the webhook response if needed to extract deck information
       let selectedDeckFromWebhook: Deck | undefined;
@@ -89,6 +102,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         try {
           const parsedData = JSON.parse(webhookData.returnwebhoock);
           selectedDeckFromWebhook = parsedData.selected_deck;
+          console.log('Parsed deck from webhook:', selectedDeckFromWebhook);
         } catch (error) {
           console.error("Error parsing webhook response for deck:", error);
         }
@@ -108,20 +122,19 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         (cards) => setAvailableCards(cards)
       );
       
-      if (success) {
-        setPhase('selection');
-        toast.success(t('tarot.readingStarted'), {
-          style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
-        });
-      } else {
-        throw new Error("Failed to prepare card selection");
+      if (!success) {
+        console.error('Failed to prepare card selection');
+        setPhase('intention');
+        return;
       }
+      
+      setPhase('selection');
     } catch (error) {
-      console.error("Error starting reading:", error);
-      toast.error(t('errors.readingFailed'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      console.error('Error in startReading:', error);
+      toast.error(t('errors.serverError'));
       setPhase('intention');
+    } finally {
+      setIsCallingWebhook(false);
     }
   };
 
@@ -129,9 +142,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     if (phase !== 'selection') return;
     
     if (selectedCards.length >= 3) {
-      toast.error(t('tarot.maxCardsSelected'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      toast.error(t('tarot.maxCardsSelected'));
       return;
     }
     
@@ -167,9 +178,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       const allRevealed = updatedCards.every(c => c.revealed);
       
       if (allRevealed) {
-        toast.success(t('tarot.allCardsRevealed'), {
-          style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
-        });
+        toast.success(t('tarot.allCardsRevealed'));
         
         try {
           const interpretationResult = await generateInterpretation(
@@ -189,9 +198,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
           setPhase('complete');
         } catch (error) {
           console.error("Error generating final interpretation:", error);
-          toast.error(t('errors.interpretationFailed'), {
-            style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-          });
+          toast.error(t('errors.interpretationFailed'));
         }
       }
     }
@@ -207,9 +214,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setInterpretation(null);
     setWebhookResponse(null);
     
-    toast.success(t('tarot.newReadingStarted'), {
-      style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
-    });
+    toast.success(t('tarot.newReadingStarted'));
   };
 
   const value = {

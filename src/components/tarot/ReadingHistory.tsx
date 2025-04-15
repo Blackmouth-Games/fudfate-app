@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
@@ -232,10 +231,10 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     });
     
     const url = 'https://app.fudfate.xyz/';
-    const token = '$FDft';
+    const token = '$FDft @fudfate';
     const hashtags = 'FUDfate,Tarot,Crypto';
     
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
     
     window.open(twitterUrl, '_blank');
   };

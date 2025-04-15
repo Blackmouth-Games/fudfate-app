@@ -1,7 +1,10 @@
-
 import { WebhookRequestOptions, WebhookCallResult } from '@/types/webhook';
 import { logWebhookCall } from './logger';
 import { toast } from 'sonner';
+
+// Almacenar las últimas llamadas al webhook
+const lastWebhookCalls: { [key: string]: number } = {};
+const THROTTLE_TIME = 5000; // 5 segundos entre llamadas
 
 /**
  * Base function to make a webhook call with proper logging
@@ -11,6 +14,22 @@ export async function callWebhook<T>(
   logType: string
 ): Promise<WebhookCallResult<T>> {
   const { url, data, environment = 'production', method = 'POST' } = options;
+
+  // Crear una clave única para esta llamada al webhook
+  const callKey = `${url}-${JSON.stringify(data)}`;
+  const now = Date.now();
+
+  // Verificar si se ha hecho una llamada reciente
+  if (lastWebhookCalls[callKey] && (now - lastWebhookCalls[callKey]) < THROTTLE_TIME) {
+    console.log(`Webhook call throttled. Last call was ${(now - lastWebhookCalls[callKey])/1000}s ago`);
+    return {
+      success: false,
+      error: 'Throttled: Too many requests'
+    };
+  }
+
+  // Actualizar el timestamp de la última llamada
+  lastWebhookCalls[callKey] = now;
 
   // Log the attempt before making the call
   logWebhookCall(logType, url, data, null, undefined, undefined, environment, method);

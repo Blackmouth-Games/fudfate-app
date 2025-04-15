@@ -69,7 +69,7 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
     });
     
     const url = 'https://app.fudfate.xyz/';
-    const token = '$FDft';
+    const token = '$FDft @fudfate';
     const hashtags = 'FUDfate,Tarot,Crypto';
     
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;

@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { useTranslation } from 'react-i18next';
@@ -17,20 +16,59 @@ export const useTarotData = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [availableDecks, setAvailableDecks] = useState<DeckInfo[]>([]);
   const [isLoadingDecks, setIsLoadingDecks] = useState(false);
+  const historyFetchedRef = useRef(false);
+  const isHistoryFetchInProgressRef = useRef(false);
+  const debugIdRef = useRef(0);
 
-  // Fetch decks when app loads or when user connects
+  const getCallContext = () => {
+    const stack = new Error().stack;
+    const caller = stack?.split('\n')[3] || 'unknown';
+    return caller.trim();
+  };
+
+  // Consolidated effect for data fetching
   useEffect(() => {
-    if (connected && userData?.userId) {
-      fetchUserDecks();
-    }
+    const fetchData = async () => {
+      if (connected && userData?.userId) {
+        debugIdRef.current += 1;
+        const currentDebugId = debugIdRef.current;
+        const callContext = getCallContext();
+        
+        console.log(`[Debug ${currentDebugId}] Connection state from ${callContext}:`, {
+          connected,
+          userId: userData.userId,
+          historyFetched: historyFetchedRef.current,
+          historyInProgress: isHistoryFetchInProgressRef.current,
+          activeTab,
+          trigger: 'useEffect[connected, userData]'
+        });
+
+        // Always fetch decks on connection
+        await fetchUserDecks();
+
+        // Only fetch history if not already fetched
+        if (!historyFetchedRef.current) {
+          console.log(`[Debug ${currentDebugId}] Initiating history fetch from connection effect...`);
+          await fetchUserHistory();
+        } else {
+          console.log(`[Debug ${currentDebugId}] Skipping history fetch - already fetched (connection effect)`);
+        }
+      }
+    };
+
+    fetchData();
   }, [connected, userData]);
 
-  // Also fetch history when the user connects
+  // Reset flags on disconnect
   useEffect(() => {
-    if (connected && userData?.userId) {
-      fetchUserHistory();
+    if (!connected) {
+      const currentDebugId = debugIdRef.current + 1;
+      const callContext = getCallContext();
+      console.log(`[Debug ${currentDebugId}] Resetting flags due to disconnect from ${callContext}`);
+      historyFetchedRef.current = false;
+      isHistoryFetchInProgressRef.current = false;
     }
-  }, [connected, userData]);
+  }, [connected]);
 
   const fetchUserDecks = async () => {
     if (!userData?.userId) return;
@@ -105,11 +143,29 @@ export const useTarotData = () => {
   };
 
   const fetchUserHistory = async () => {
-    if (!userData?.userId) return;
+    if (!userData?.userId || isHistoryFetchInProgressRef.current) {
+      const callContext = getCallContext();
+      console.log(`[History] Fetch prevented from ${callContext}:`, {
+        hasUserId: !!userData?.userId,
+        inProgress: isHistoryFetchInProgressRef.current,
+        historyFetched: historyFetchedRef.current,
+        trigger: 'fetchUserHistory'
+      });
+      return;
+    }
     
+    const currentDebugId = debugIdRef.current;
+    const callContext = getCallContext();
+    console.log(`[Debug ${currentDebugId}] Starting history fetch from ${callContext}...`);
+    isHistoryFetchInProgressRef.current = true;
     setIsLoadingHistory(true);
+    
     try {
-      console.log("Calling history webhook with userid:", userData.userId);
+      console.log(`[Debug ${currentDebugId}] Calling history webhook for user from ${callContext}:`, {
+        userId: userData.userId,
+        activeTab,
+        historyFetched: historyFetchedRef.current
+      });
       
       // Log the webhook request about to be made
       logWebhookCall('History', webhooks.history, {
@@ -152,8 +208,9 @@ export const useTarotData = () => {
         console.warn("Unexpected history data format:", data);
         setHistoryData([]);
       }
+      historyFetchedRef.current = true;
     } catch (error) {
-      console.error('Error calling history webhook:', error);
+      console.error(`[Debug ${currentDebugId}] Error calling history webhook from ${callContext}:`, error);
       
       // Log the webhook error
       logWebhookCall('History', webhooks.history, {
@@ -166,7 +223,9 @@ export const useTarotData = () => {
       });
       setHistoryData([]);
     } finally {
+      console.log(`[Debug ${currentDebugId}] History fetch completed`);
       setIsLoadingHistory(false);
+      isHistoryFetchInProgressRef.current = false;
     }
   };
 
@@ -175,7 +234,7 @@ export const useTarotData = () => {
     
     if (value === 'decks' && userData?.userId && availableDecks.length === 0) {
       await fetchUserDecks();
-    } else if (value === 'history' && userData?.userId) {
+    } else if (value === 'history' && userData?.userId && !historyFetchedRef.current) {
       await fetchUserHistory();
     }
   };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -32,7 +31,7 @@ const NoReadingsAlert: React.FC<NoReadingsAlertProps> = ({
         </p>
         <div className="flex flex-wrap gap-2 mt-4">
           <a 
-            href="https://twitter.com/FUDfate" 
+            href="https://x.com/FudFate" 
             target="_blank" 
             rel="noopener noreferrer"
           >

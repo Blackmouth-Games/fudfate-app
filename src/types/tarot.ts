@@ -1,4 +1,3 @@
-
 export type Deck = 'deck_1' | 'deck_2' | 'deck_3' | string;
 export type ReadingPhase = 'intention' | 'preparing' | 'selection' | 'reading' | 'complete';
 
@@ -22,14 +21,12 @@ export interface Interpretation {
 }
 
 export interface WebhookResponse {
-  selected_cards?: number[];
-  message?: string;
-  selected_deck?: string;
-  returnwebhoock?: string;
-  userid?: string;
-  intention?: string;
-  cards?: any[];
-  reading?: string;
+  selected_cards: number[];
+  message: string;
+  reading?: string | null;
+  cards?: any[] | null;
+  returnwebhoock?: string | null;
+  isTemporary?: boolean;
 }
 
 export interface TarotContextType {

@@ -1,8 +1,11 @@
-
 import { WebhookResponse } from '@/types/tarot';
-import { callWebhook, generateMockData } from './core';
+import { callWebhook } from './core';
 import { logReadingWebhook } from './logger';
 import { toast } from 'sonner';
+import { Environment } from '@/config/webhooks';
+
+// Variable para almacenar la promesa de la lectura real
+let pendingReading: Promise<WebhookResponse> | null = null;
 
 /**
  * Call the reading webhook to get a tarot reading
@@ -11,83 +14,71 @@ export const callReadingWebhook = async (
   webhookUrl: string, 
   userId?: string, 
   intention?: string,
-  environment: string = 'production'
-): Promise<WebhookResponse | null> => {
+  environment: Environment = 'production'
+): Promise<WebhookResponse> => {
   if (!userId) {
     console.error("No user ID available for webhook call");
-    return null;
+    throw new Error("No user ID available");
   }
 
-  const requestData = {
-    date: new Date().toISOString(),
-    userid: userId,
-    intention: intention
+  // Generar respuesta temporal para la fase de selección
+  const tempResponse: WebhookResponse = {
+    selected_cards: Array.from({ length: 3 }, () => Math.floor(Math.random() * 78)),
+    message: "Selecciona tus cartas del tarot...",
+    reading: null,
+    cards: null,
+    returnwebhoock: null,
+    isTemporary: true // Flag para identificar respuesta temporal
   };
 
-  try {
-    console.log("Calling reading webhook with userid:", userId);
-    console.log("Using webhook URL:", webhookUrl);
-    
-    const result = await callWebhook<WebhookResponse>(
-      { url: webhookUrl, data: requestData, environment },
-      'Reading'
-    );
-    
-    if (result.success) {
-      console.log('Reading webhook response:', result.data);
-      return result.data;
-    }
-    
-    // For development environment, return mock data
-    if (environment === 'development') {
-      console.log("Using mock data for development environment");
-      const mockData: WebhookResponse = {
-        selected_cards: [0, 1, 2],
-        message: "This is a mock reading for development purposes.",
-        returnwebhoock: JSON.stringify({
-          selected_cards: [0, 1, 2],
-          message: "This is a mock reading for development purposes."
-        })
-      };
-      
-      return generateMockData(mockData, 'Reading', webhookUrl, requestData, environment).data;
-    }
-    
-    toast.error("Error calling reading webhook. Please try again later.", {
-      style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-    });
-    
-    throw new Error(result.error);
-  } catch (error) {
-    console.error('Error calling reading webhook:', error);
-    // Update to use object parameter format
-    logReadingWebhook({
-      url: webhookUrl,
-      requestData,
-      error: error instanceof Error ? error.message : String(error),
-      environment
-    });
-    
-    // For development environment, return mock data
-    if (environment === 'development') {
-      console.log("Using mock data for development environment");
-      const mockData: WebhookResponse = {
-        selected_cards: [0, 1, 2],
-        message: "This is a mock reading for development purposes.",
-        returnwebhoock: JSON.stringify({
-          selected_cards: [0, 1, 2],
-          message: "This is a mock reading for development purposes."
-        })
-      };
-      
-      return generateMockData(mockData, 'Reading', webhookUrl, requestData, environment).data;
-    }
-    
-    toast.error("Error calling reading webhook. Please try again later.", {
-      style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-    });
-    
-    // In production, fail the reading
-    throw error;
+  // Si ya hay una lectura pendiente, retornar la respuesta temporal
+  if (pendingReading) {
+    return tempResponse;
   }
+
+  // Iniciar la lectura real en segundo plano
+  pendingReading = (async () => {
+    try {
+      const result = await callWebhook<WebhookResponse>(
+        { 
+          url: webhookUrl, 
+          data: { userid: userId, intention }, 
+          environment 
+        },
+        'Reading'
+      );
+
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'No data received');
+      }
+
+      // Solo procesar y logear si tenemos una respuesta válida
+      if (result.data.selected_cards && result.data.message) {
+        logReadingWebhook({
+          url: webhookUrl,
+          requestData: { userid: userId, intention },
+          responseData: result.data,
+          status: result.status,
+          environment
+        });
+
+        // Emitir evento cuando la lectura real esté lista
+        window.dispatchEvent(new CustomEvent('readingReady', { 
+          detail: result.data 
+        }));
+
+        return result.data;
+      }
+
+      throw new Error('Invalid webhook response format');
+    } catch (error) {
+      console.error('Error in webhook call:', error);
+      throw error;
+    } finally {
+      pendingReading = null;
+    }
+  })();
+
+  // Retornar respuesta temporal inmediatamente
+  return tempResponse;
 };

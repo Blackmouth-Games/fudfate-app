@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
@@ -105,22 +104,35 @@ export const useTarotOperations = () => {
       // replace the selected cards with the ones from the webhook
       if (webhookCards.length > 0 && selectedCards.filter(c => c.revealed).length === 0) {
         console.log("Using webhook cards for reveal:", webhookCards);
-        console.log("Current selected deck:", selectedDeck);
         
         const webhookDeckCards = getCardsByIndices(selectedDeck, webhookCards);
         console.log("Cards by indices:", webhookDeckCards);
         
         if (webhookDeckCards.length > 0) {
-          // Replace all cards but keep the current request to reveal
-          const newSelectedCards = webhookDeckCards.map((card, i) => ({
-            ...card,
-            revealed: i === index,
-            interpretation: undefined
-          }));
-          
-          setSelectedCards(newSelectedCards);
-          setLoading(false);
-          return true;
+          try {
+            // Get interpretation for the revealed card
+            const interpretation = webhookDeckCards[index].id ? await generateCardInterpretation(webhookDeckCards[index].id, intention) : undefined;
+            
+            // Replace all cards but keep the current request to reveal
+            const newSelectedCards = webhookDeckCards.map((card, i) => ({
+              ...card,
+              revealed: i === index,
+              interpretation: i === index ? interpretation : undefined
+            }));
+            
+            setSelectedCards(newSelectedCards);
+            
+            // If this is the last card to be revealed, show the webhook message
+            if (webhookMessage && newSelectedCards.every(c => c.revealed)) {
+              setFinalMessage(webhookMessage);
+            }
+            
+            setLoading(false);
+            return true;
+          } catch (error) {
+            console.error("Error generating interpretation for webhook card:", error);
+            return false;
+          }
         }
       }
       
@@ -136,7 +148,7 @@ export const useTarotOperations = () => {
       
       setSelectedCards(updatedCards);
       
-      // Check if all cards are revealed, and if so, show the final message from webhook
+      // Check if all cards are revealed, and if so, show the webhook message
       const allRevealed = updatedCards.every(c => c.revealed);
       if (allRevealed && webhookMessage) {
         console.log("All cards revealed, showing webhook message:", webhookMessage);
