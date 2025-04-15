@@ -48,7 +48,15 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   
   // Debug log when selected cards change
   useEffect(() => {
-    console.log("CardRevealContainer - Selected Cards:", selectedCards);
+    console.log("CardRevealContainer - Selected Cards:", 
+      selectedCards.map((card, index) => ({
+        position: index,
+        id: card.id,
+        name: card.name,
+        revealed: card.revealed,
+        deck: card.deck
+      }))
+    );
     console.log("CardRevealContainer - Card Back Image:", cardBackImage);
   }, [selectedCards, cardBackImage]);
   

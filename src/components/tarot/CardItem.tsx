@@ -32,10 +32,16 @@ const CardItem: React.FC<CardItemProps> = ({
   const [frontImageSrc, setFrontImageSrc] = useState('');
   const [backImageSrc, setBackImageSrc] = useState('');
   
-  // Console log to debug card data
+  // Console log to debug card data with more detailed information
   useEffect(() => {
-    console.log(`Card ${index} data:`, card);
-    console.log(`Selected deck: ${selectedDeck}, Card deck: ${card.deck || 'not specified'}`);
+    console.log(`Card ${index} data:`, {
+      ...card,
+      selectedDeck,
+      id: card.id,
+      name: card.name,
+      deck: card.deck || selectedDeck,
+      revealed: card.revealed
+    });
   }, [card, index, selectedDeck]);
 
   // Set up image sources with proper fallbacks
@@ -57,13 +63,13 @@ const CardItem: React.FC<CardItemProps> = ({
         imagePath = `${imagePath}.jpg`;
       }
       
-      console.log(`Card ${index} image path:`, imagePath);
+      console.log(`Card ${index} front image path:`, imagePath);
       setFrontImageSrc(imagePath);
     } else if (card?.id) {
       // Use the card ID to construct a path
       const deckToUse = card.deck || selectedDeck;
       const imagePath = getCardPath(deckToUse, card.id);
-      console.log(`Card ${index} generated image path:`, imagePath);
+      console.log(`Card ${index} generated front image path:`, imagePath);
       setFrontImageSrc(imagePath);
     } else {
       console.warn(`Card ${index} has no image or ID:`, card);
@@ -72,10 +78,12 @@ const CardItem: React.FC<CardItemProps> = ({
     
     // For card back, use the provided cardBackImage directly
     if (cardBackImage) {
+      console.log(`Card ${index} back image path:`, cardBackImage);
       setBackImageSrc(cardBackImage);
     } else {
       // Fallback to using the selectedDeck
       const backPath = getCardBackPath(card.deck || selectedDeck);
+      console.log(`Card ${index} fallback back image path:`, backPath);
       setBackImageSrc(backPath);
     }
 
@@ -87,6 +95,7 @@ const CardItem: React.FC<CardItemProps> = ({
     if (isRevealed && onCardView) {
       onCardView();
     } else if (!loading) {
+      console.log(`Clicking card at index ${index}`);
       handleCardClick(index);
     }
   };
@@ -123,8 +132,10 @@ const CardItem: React.FC<CardItemProps> = ({
                   <img 
                     src={frontImageSrc} 
                     alt={card?.name || 'Tarot Card'}
+                    onLoad={() => setIsImageLoading(false)}
                     onError={(e) => {
                       console.error(`Failed to load front image: ${frontImageSrc}`);
+                      setHasError(true);
                       // Use card's deck if available, otherwise use the selected deck
                       const cardDeck = card.deck || selectedDeck;
                       const fallbackImage = cardDeck === 'deck_2' ? 

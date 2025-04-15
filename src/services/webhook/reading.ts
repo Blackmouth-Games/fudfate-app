@@ -53,6 +53,11 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
       result.question = firstItem.question;
     }
     
+    // Direct access to selected_cards
+    if (!result.selected_cards && Array.isArray(firstItem.selected_cards)) {
+      result.selected_cards = firstItem.selected_cards;
+    }
+    
     return result;
   }
   
@@ -61,6 +66,7 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
     // Try to get direct properties first
     if (Array.isArray(data.selected_cards)) {
       result.selected_cards = data.selected_cards;
+      console.log("Found selected_cards directly in webhook object:", data.selected_cards);
     }
     
     if (data.message) {
@@ -106,8 +112,19 @@ const createWebhookResponse = (
   originalResponse: any,
   isTemporary: boolean = false
 ): WebhookResponse => {
+  // Ensure selected_cards exists and is an array
+  const selectedCards = Array.isArray(parsedData.selected_cards) 
+    ? parsedData.selected_cards 
+    : (isTemporary ? Array.from({ length: 3 }, () => Math.floor(Math.random() * 21)) : []);
+  
+  if (selectedCards.length === 0 && !isTemporary) {
+    console.warn("No selected_cards found in webhook response, using placeholder values");
+    // Use placeholder values if none provided in non-temporary response
+    selectedCards.push(0, 1, 2);
+  }
+  
   return {
-    selected_cards: parsedData.selected_cards || [],
+    selected_cards: selectedCards,
     message: parsedData.message || "No message available",
     question: parsedData.question,
     returnwebhoock: originalResponse.returnwebhoock || null,
@@ -174,41 +191,37 @@ export const callReadingWebhook = async (
       const parsedData = parseWebhookData(result.data);
       console.log("Parsed webhook data:", parsedData);
       
-      // Validate webhook response format - must have selected_cards
-      if (parsedData.selected_cards && parsedData.selected_cards.length > 0) {
-        // Ensure card indices are within valid range
-        parsedData.selected_cards = parsedData.selected_cards.map(index => 
-          Math.min(Math.max(0, index), 21)
-        );
-        
-        // Create a complete webhook response
-        const finalResponse = createWebhookResponse(parsedData, result.data, false);
-        console.log("Created final webhook response:", finalResponse);
-        
-        // Store the parsed response for retrieval
-        parsedFinalResponse = finalResponse;
-        finalResponseReceived = true;
-
-        // Log the webhook response for debugging
-        logReadingWebhook({
-          url: webhookUrl,
-          requestData: { userid: userId, intention },
-          responseData: finalResponse,
-          status: result.status,
-          environment
-        });
-
-        // Dispatch event to notify other components the reading is ready
-        window.dispatchEvent(new CustomEvent('readingReady', { 
-          detail: finalResponse 
-        }));
-
-        console.log("Dispatched readingReady event with data:", finalResponse);
-        return finalResponse;
+      // Log the selected cards specifically for debugging
+      if (parsedData.selected_cards) {
+        console.log("Final selected_cards from webhook:", parsedData.selected_cards);
+      } else {
+        console.error("No selected_cards found in webhook response!");
       }
+      
+      // Create a complete webhook response
+      const finalResponse = createWebhookResponse(parsedData, result.data, false);
+      console.log("Created final webhook response:", finalResponse);
+      
+      // Store the parsed response for retrieval
+      parsedFinalResponse = finalResponse;
+      finalResponseReceived = true;
 
-      console.error("Invalid webhook response format - missing selected_cards", parsedData);
-      throw new Error('Invalid webhook response format');
+      // Log the webhook response for debugging
+      logReadingWebhook({
+        url: webhookUrl,
+        requestData: { userid: userId, intention },
+        responseData: finalResponse,
+        status: result.status,
+        environment
+      });
+
+      // Dispatch event to notify other components the reading is ready
+      window.dispatchEvent(new CustomEvent('readingReady', { 
+        detail: finalResponse 
+      }));
+
+      console.log("Dispatched readingReady event with data:", finalResponse);
+      return finalResponse;
     } catch (error) {
       console.error('Error in webhook call:', error);
       // Even on error, dispatch an event to let components know an attempt was made

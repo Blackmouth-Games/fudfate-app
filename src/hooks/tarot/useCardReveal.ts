@@ -47,7 +47,15 @@ export const useCardReveal = () => {
       setRetryCount(0);
       setIsWaitingForWebhook(false);
       
-      // Get interpretation for the revealed card
+      // Get card ID from the webhook response selected_cards array based on position
+      // Log for debugging what card we're actually revealing
+      console.log(`Revealing card at index ${index}:`, {
+        cardInPosition: card,
+        webhookCardIndex: webhookResponse.selected_cards?.[index],
+        allWebhookCards: webhookResponse.selected_cards
+      });
+      
+      // Get interpretation for the revealed card - use the card's actual ID
       const interpretation = await generateCardInterpretation(card.id, intention);
       
       const updatedCards = [...selectedCards];
