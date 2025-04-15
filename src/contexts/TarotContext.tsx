@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useWallet } from './WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -14,7 +13,11 @@ import {
   WebhookResponse,
   TarotContextType 
 } from '@/types/tarot';
-import { callReadingWebhook, resetWebhookState } from '@/services/webhook/reading';
+import { 
+  callReadingWebhook, 
+  resetWebhookState, 
+  getFinalWebhookResponse 
+} from '@/services/webhook/reading';
 import { getRandomCards, checkUserToken } from '@/services/tarot-service';
 import { useTarotOperations } from '@/hooks/useTarotOperations';
 
@@ -26,7 +29,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const { t } = useTranslation();
   const { loading, isWaitingForWebhook, prepareCardSelection, handleCardReveal, generateInterpretation } = useTarotOperations();
   
-  // State variables
   const [selectedDeck, setSelectedDeck] = useState<Deck>('deck_1');
   const [intention, setIntention] = useState<string>('');
   const [phase, setPhase] = useState<ReadingPhase>('intention');
@@ -39,14 +41,12 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [isCallingWebhook, setIsCallingWebhook] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
 
-  // Reset webhook state when component unmounts
   useEffect(() => {
     return () => {
       resetWebhookState();
     };
   }, []);
 
-  // Handle readingReady events to update the webhook response
   const handleReadingReady = useCallback((event: CustomEvent) => {
     const readingData = event.detail;
     if (readingData && !readingData.isTemporary) {
@@ -54,20 +54,17 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setWebhookResponse(readingData);
       setWebhookError(null);
       
-      // Update the UI to show we have the data
       if (phase === 'selection') {
         setPhase('reading');
       }
     }
   }, [phase]);
 
-  // Handle reading error events
   const handleReadingError = useCallback((event: CustomEvent) => {
     const errorData = event.detail;
     console.error("Reading error event received:", errorData);
     setWebhookError(errorData.error);
     
-    // Show error toast if we're in the right phase
     if (phase === 'preparing' || phase === 'selection') {
       toast.error(`Error getting reading: ${errorData.error}`, {
         duration: 5000
@@ -75,7 +72,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [phase]);
   
-  // Listen for readingReady and readingError events
   useEffect(() => {
     window.addEventListener('readingReady', handleReadingReady as EventListener);
     window.addEventListener('readingError', handleReadingError as EventListener);
@@ -85,6 +81,23 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       window.removeEventListener('readingError', handleReadingError as EventListener);
     };
   }, [handleReadingReady, handleReadingError]);
+
+  useEffect(() => {
+    if ((phase === 'preparing' || phase === 'selection' || phase === 'reading') && 
+        (webhookResponse?.isTemporary || !webhookResponse)) {
+      
+      const finalResponse = getFinalWebhookResponse();
+      if (finalResponse && !finalResponse.isTemporary) {
+        console.log("Found final webhook response in periodic check:", finalResponse);
+        setWebhookResponse(finalResponse);
+        setWebhookError(null);
+        
+        if (phase === 'selection') {
+          setPhase('reading');
+        }
+      }
+    }
+  }, [phase, webhookResponse]);
 
   const startReading = async () => {
     if (!connected) {
@@ -117,12 +130,10 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         timestamp: new Date().toISOString()
       });
 
-      // Reset any previous webhook error
       setWebhookError(null);
       setIsCallingWebhook(true);
       setPhase('preparing');
       
-      // Call the reading webhook
       const tempWebhookData = await callReadingWebhook(
         webhooks.reading, 
         userData?.userId, 
@@ -130,13 +141,11 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         environment
       );
       
-      // Set the temporary webhook response first
       if (tempWebhookData) {
         console.log("Setting temporary webhook response:", tempWebhookData);
         setWebhookResponse(tempWebhookData);
       }
       
-      // If webhook call failed completely
       if (!tempWebhookData && environment !== 'development') {
         console.log('Reading webhook call failed');
         toast.error(t('errors.serverError'));
@@ -144,7 +153,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       
-      // Parse the webhook response if needed to extract deck information
       let selectedDeckFromWebhook: Deck | undefined;
       if (tempWebhookData?.returnwebhoock) {
         try {
@@ -156,12 +164,10 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         }
       }
       
-      // If webhook returned a selected deck, use it
       if (selectedDeckFromWebhook) {
         setSelectedDeck(selectedDeckFromWebhook);
       }
       
-      // Prepare cards for selection
       const success = await prepareCardSelection(
         intention,
         selectedDeck,
@@ -197,9 +203,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     const card = availableCards.find(c => c.id === cardId);
     if (!card) return;
     
-    // We no longer filter the availableCards - the CardSelectionDeck component
-    // will handle rendering only unselected cards
-    
     const updatedSelectedCards = [
       ...selectedCards, 
       { ...card, revealed: false }
@@ -211,7 +214,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const revealCard = async (index: number) => {
     if (phase !== 'reading') return;
     
-    // Check if we're still waiting for the webhook
     if (isWaitingForWebhook && webhookResponse?.isTemporary) {
       toast.error("Reading data not ready yet. Please wait a moment.");
       return;
@@ -243,8 +245,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
           
           setInterpretation(interpretationResult);
           
-          // If finalMessage hasn't been set yet by handleCardReveal,
-          // set it from the interpretation summary
           if (!finalMessage) {
             setFinalMessage(interpretationResult.summary);
           }
@@ -259,10 +259,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const resetReading = () => {
-    // Reset webhook state first
     resetWebhookState();
     
-    // Then reset all the local state
     setIntention('');
     setPhase('intention');
     setAvailableCards([]);

@@ -6,7 +6,6 @@ import GlitchText from '@/components/GlitchText';
 import { getCardBackPath } from '@/utils/deck-utils';
 import CompletedReading from './CompletedReading';
 import CardRevealContainer from './CardRevealContainer';
-import ShareReading from './ShareReading';
 
 interface CardReadingProps {
   className?: string;
@@ -37,19 +36,15 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         setWebhookMessage(null);
         setWebhookQuestion(null);
         
+        // Skip if this is a temporary response
+        if (webhookResponse.isTemporary) {
+          console.log("Skipping temporary webhook response in CardReading");
+          return;
+        }
+        
         // Handle case where webhookResponse is an array
         if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
           const firstResponse = webhookResponse[0];
-          
-          // Try to get message directly
-          if (firstResponse.message) {
-            setWebhookMessage(firstResponse.message);
-          }
-          
-          // Try to get question directly
-          if (firstResponse.question) {
-            setWebhookQuestion(firstResponse.question);
-          }
           
           // Try to parse returnwebhoock
           if (typeof firstResponse.returnwebhoock === 'string') {
@@ -69,15 +64,19 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
               console.error("Error parsing webhook message in CardReading:", error);
             }
           }
+          
+          // Try to get message directly
+          if (!webhookMessage && firstResponse.message) {
+            setWebhookMessage(firstResponse.message);
+          }
+          
+          // Try to get question directly
+          if (!webhookQuestion && firstResponse.question) {
+            setWebhookQuestion(firstResponse.question);
+          }
         } 
         // Handle case where webhookResponse is an object
         else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
-          // Skip if this is a temporary response
-          if (webhookResponse.isTemporary) {
-            console.log("Skipping temporary webhook response in CardReading");
-            return;
-          }
-          
           // Try to get message directly from the response
           if (webhookResponse.message) {
             setWebhookMessage(webhookResponse.message);
@@ -93,11 +92,11 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
             try {
               const parsedData = JSON.parse(webhookResponse.returnwebhoock);
               if (parsedData) {
-                if (parsedData.message) {
+                if (!webhookMessage && parsedData.message) {
                   setWebhookMessage(parsedData.message);
                   console.log("Found message in parsed webhook object:", parsedData.message);
                 }
-                if (parsedData.question) {
+                if (!webhookQuestion && parsedData.question) {
                   setWebhookQuestion(parsedData.question);
                   console.log("Found question in parsed webhook object:", parsedData.question);
                 }

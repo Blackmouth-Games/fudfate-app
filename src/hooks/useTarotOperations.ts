@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
@@ -9,7 +8,10 @@ import {
   generateCardInterpretation, 
   generateFinalMessage 
 } from '@/services/tarot-service';
-import { isFinalResponseReceived } from '@/services/webhook/reading';
+import { 
+  isFinalResponseReceived, 
+  getFinalWebhookResponse 
+} from '@/services/webhook/reading';
 
 export const useTarotOperations = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -79,10 +81,11 @@ export const useTarotOperations = () => {
       
       // Check if we have a final webhook response
       if (!webhookResponse || webhookResponse.isTemporary === true) {
-        // Check if the final response has been received using the service function
+        // Check if the final response has been received
         const finalReceived = isFinalResponseReceived();
+        const finalResponse = getFinalWebhookResponse();
         
-        if (!finalReceived) {
+        if (!finalReceived || !finalResponse) {
           console.log(`Waiting for non-temporary webhook response... (attempt ${retryCount + 1})`);
           setIsWaitingForWebhook(true);
           setRetryCount(prev => prev + 1);
@@ -101,11 +104,10 @@ export const useTarotOperations = () => {
           return false;
         }
         
-        // If we get here, the final response was received but not yet updated in the context
-        console.log("Final response received but context not updated. Please try again in a moment.");
-        toast.error("Reading data is being processed. Please try again in a moment.");
-        setLoading(false);
-        return false;
+        // If we get here but the context doesn't have the final response yet,
+        // use the one from the service directly
+        webhookResponse = finalResponse;
+        console.log("Using final response from service for card reveal:", webhookResponse);
       }
       
       // Reset the retry counter and waiting state when we have a valid response
@@ -135,28 +137,6 @@ export const useTarotOperations = () => {
         // Try to get question directly from the response
         if (webhookResponse.question) {
           webhookQuestion = webhookResponse.question;
-        }
-        
-        // Try to parse returnwebhoock if it exists
-        if (typeof webhookResponse.returnwebhoock === 'string') {
-          try {
-            const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-            
-            if (Array.isArray(parsedData.selected_cards)) {
-              webhookCards = parsedData.selected_cards;
-              console.log("Found selected_cards in parsed webhook:", webhookCards);
-            }
-            
-            if (parsedData.message) {
-              webhookMessage = parsedData.message;
-            }
-            
-            if (parsedData.question) {
-              webhookQuestion = parsedData.question;
-            }
-          } catch (error) {
-            console.error("Error parsing webhook response:", error);
-          }
         }
       }
       

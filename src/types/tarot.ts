@@ -23,15 +23,28 @@ export interface Interpretation {
   };
 }
 
-export interface WebhookResponse {
-  selected_cards: number[];
-  message: string;
+export interface ParsedWebhookData {
+  selected_cards?: number[];
+  message?: string;
   question?: string | null;
-  reading: any;
-  cards: any;
-  returnwebhoock: any;
+}
+
+export interface WebhookResponse {
+  selected_cards?: number[];
+  message?: string;
+  question?: string | null;
+  reading?: any;
+  cards?: any;
+  returnwebhoock?: any;
   isTemporary?: boolean;
 }
+
+export interface WebhookArrayResponse extends Array<{
+  returnwebhoock?: string;
+  message?: string;
+  question?: string | null;
+  [key: string]: any;
+}> {}
 
 export interface TarotContextType {
   selectedDeck: Deck;

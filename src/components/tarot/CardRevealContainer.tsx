@@ -70,7 +70,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   };
   
   // Show error message if data isn't ready yet
-  const showErrorMessage = error || !webhookMessage;
+  const showErrorMessage = error || (!webhookMessage && !allRevealed);
   
   return (
     <div className="space-y-8">
@@ -78,7 +78,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4 mr-2" />
           <AlertDescription>
-            Reading data not ready yet. Please wait a moment and try again.
+            {error || "Reading data not ready yet. Please wait a moment and try again."}
           </AlertDescription>
         </Alert>
       )}

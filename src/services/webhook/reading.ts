@@ -1,5 +1,5 @@
 
-import { WebhookResponse } from '@/types/tarot';
+import { WebhookResponse, WebhookArrayResponse, ParsedWebhookData } from '@/types/tarot';
 import { callWebhook } from './core';
 import { logReadingWebhook } from './logger';
 import { toast } from 'sonner';
@@ -7,6 +7,113 @@ import { Environment } from '@/config/webhooks';
 
 let pendingReading: Promise<WebhookResponse> | null = null;
 let finalResponseReceived = false;
+let parsedFinalResponse: WebhookResponse | null = null;
+
+/**
+ * Parse webhook data from possibly nested structure
+ */
+const parseWebhookData = (data: any): ParsedWebhookData => {
+  let result: ParsedWebhookData = {};
+  
+  // Handle array response format
+  if (Array.isArray(data) && data.length > 0) {
+    console.log("Parsing array webhook response:", data);
+    
+    // Try to get first item in the array
+    const firstItem = data[0];
+    
+    // Try to parse returnwebhoock if it exists
+    if (firstItem.returnwebhoock && typeof firstItem.returnwebhoock === 'string') {
+      try {
+        const parsedReturnData = JSON.parse(firstItem.returnwebhoock);
+        console.log("Successfully parsed returnwebhoock in array response:", parsedReturnData);
+        
+        if (Array.isArray(parsedReturnData.selected_cards)) {
+          result.selected_cards = parsedReturnData.selected_cards;
+        }
+        
+        if (parsedReturnData.message) {
+          result.message = parsedReturnData.message;
+        }
+        
+        if (parsedReturnData.question) {
+          result.question = parsedReturnData.question;
+        }
+      } catch (error) {
+        console.error("Error parsing returnwebhoock in array response:", error);
+      }
+    }
+    
+    // If direct properties exist, use them as fallback
+    if (!result.message && firstItem.message) {
+      result.message = firstItem.message;
+    }
+    
+    if (!result.question && firstItem.question) {
+      result.question = firstItem.question;
+    }
+    
+    return result;
+  }
+  
+  // Handle object response format
+  if (data && typeof data === 'object') {
+    // Try to get direct properties first
+    if (Array.isArray(data.selected_cards)) {
+      result.selected_cards = data.selected_cards;
+    }
+    
+    if (data.message) {
+      result.message = data.message;
+    }
+    
+    if (data.question) {
+      result.question = data.question;
+    }
+    
+    // Try to parse returnwebhoock if it exists
+    if (data.returnwebhoock && typeof data.returnwebhoock === 'string') {
+      try {
+        const parsedData = JSON.parse(data.returnwebhoock);
+        console.log("Successfully parsed returnwebhoock in object response:", parsedData);
+        
+        // Only use these if not already set
+        if (!result.selected_cards && Array.isArray(parsedData.selected_cards)) {
+          result.selected_cards = parsedData.selected_cards;
+        }
+        
+        if (!result.message && parsedData.message) {
+          result.message = parsedData.message;
+        }
+        
+        if (!result.question && parsedData.question) {
+          result.question = parsedData.question;
+        }
+      } catch (error) {
+        console.error("Error parsing returnwebhoock in object response:", error);
+      }
+    }
+  }
+  
+  return result;
+};
+
+/**
+ * Convert parsed data to a complete webhook response
+ */
+const createWebhookResponse = (
+  parsedData: ParsedWebhookData,
+  originalResponse: any,
+  isTemporary: boolean = false
+): WebhookResponse => {
+  return {
+    selected_cards: parsedData.selected_cards || [],
+    message: parsedData.message || "No message available",
+    question: parsedData.question,
+    returnwebhoock: originalResponse.returnwebhoock || null,
+    isTemporary: isTemporary
+  };
+};
 
 /**
  * Call the reading webhook to get a tarot reading
@@ -24,6 +131,7 @@ export const callReadingWebhook = async (
 
   // Reset the final response flag when starting a new reading
   finalResponseReceived = false;
+  parsedFinalResponse = null;
 
   // Create temporary response while waiting for actual webhook response
   const tempResponse: WebhookResponse = {
@@ -46,7 +154,7 @@ export const callReadingWebhook = async (
       console.log(`Calling reading webhook: ${webhookUrl} with userId: ${userId}`);
       
       // Make the actual webhook call
-      const result = await callWebhook<WebhookResponse>(
+      const result = await callWebhook<any>(
         { 
           url: webhookUrl, 
           data: { userid: userId, intention }, 
@@ -60,43 +168,46 @@ export const callReadingWebhook = async (
         throw new Error(result.error || 'No data received');
       }
 
-      console.log("Webhook response received:", result.data);
+      console.log("Reading webhook raw response received:", result.data);
       
-      // Validate webhook response format
-      if (result.data.selected_cards) {
+      // Parse the webhook data
+      const parsedData = parseWebhookData(result.data);
+      console.log("Parsed webhook data:", parsedData);
+      
+      // Validate webhook response format - must have selected_cards
+      if (parsedData.selected_cards && parsedData.selected_cards.length > 0) {
         // Ensure card indices are within valid range
-        result.data.selected_cards = result.data.selected_cards.map(index => 
+        parsedData.selected_cards = parsedData.selected_cards.map(index => 
           Math.min(Math.max(0, index), 21)
         );
-
-        // Add the question to the response for display
-        if (!result.data.question && intention) {
-          result.data.question = intention;
-        }
         
-        // Mark this response as non-temporary
-        result.data.isTemporary = false;
+        // Create a complete webhook response
+        const finalResponse = createWebhookResponse(parsedData, result.data, false);
+        console.log("Created final webhook response:", finalResponse);
+        
+        // Store the parsed response for retrieval
+        parsedFinalResponse = finalResponse;
         finalResponseReceived = true;
 
         // Log the webhook response for debugging
         logReadingWebhook({
           url: webhookUrl,
           requestData: { userid: userId, intention },
-          responseData: result.data,
+          responseData: finalResponse,
           status: result.status,
           environment
         });
 
         // Dispatch event to notify other components the reading is ready
         window.dispatchEvent(new CustomEvent('readingReady', { 
-          detail: result.data 
+          detail: finalResponse 
         }));
 
-        console.log("Dispatched readingReady event with data:", result.data);
-        return result.data;
+        console.log("Dispatched readingReady event with data:", finalResponse);
+        return finalResponse;
       }
 
-      console.error("Invalid webhook response format - missing selected_cards");
+      console.error("Invalid webhook response format - missing selected_cards", parsedData);
       throw new Error('Invalid webhook response format');
     } catch (error) {
       console.error('Error in webhook call:', error);
@@ -126,9 +237,17 @@ export const isFinalResponseReceived = (): boolean => {
 };
 
 /**
+ * Get the final parsed webhook response if available
+ */
+export const getFinalWebhookResponse = (): WebhookResponse | null => {
+  return parsedFinalResponse;
+};
+
+/**
  * Reset the webhook state (for debugging and testing)
  */
 export const resetWebhookState = (): void => {
   finalResponseReceived = false;
   pendingReading = null;
+  parsedFinalResponse = null;
 };
