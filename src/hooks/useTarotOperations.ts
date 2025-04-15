@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
 import { 
@@ -9,9 +9,20 @@ import {
   generateCardInterpretation, 
   generateFinalMessage 
 } from '@/services/tarot-service';
+import { isFinalResponseReceived } from '@/services/webhook/reading';
 
 export const useTarotOperations = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [isWaitingForWebhook, setIsWaitingForWebhook] = useState<boolean>(false);
+  const [retryCount, setRetryCount] = useState<number>(0);
+
+  // Reset retry count when component unmounts
+  useEffect(() => {
+    return () => {
+      setRetryCount(0);
+      setIsWaitingForWebhook(false);
+    };
+  }, []);
 
   const prepareCardSelection = async (
     intention: string, 
@@ -66,13 +77,40 @@ export const useTarotOperations = () => {
     try {
       setLoading(true);
       
-      // Skip temporary webhook responses
+      // Check if we have a final webhook response
       if (!webhookResponse || webhookResponse.isTemporary === true) {
-        console.log("Waiting for non-temporary webhook response...");
-        toast.error("Reading data not ready yet. Please wait a moment and try again.");
+        // Check if the final response has been received using the service function
+        const finalReceived = isFinalResponseReceived();
+        
+        if (!finalReceived) {
+          console.log(`Waiting for non-temporary webhook response... (attempt ${retryCount + 1})`);
+          setIsWaitingForWebhook(true);
+          setRetryCount(prev => prev + 1);
+          
+          // Show different message based on retry count
+          if (retryCount > 2) {
+            toast.error("Reading data not ready yet. Please wait a moment and try again.", {
+              duration: 3000,
+              position: 'bottom-center'
+            });
+          } else {
+            toast.error("Reading data not ready yet. Please wait a moment and try again.");
+          }
+          
+          setLoading(false);
+          return false;
+        }
+        
+        // If we get here, the final response was received but not yet updated in the context
+        console.log("Final response received but context not updated. Please try again in a moment.");
+        toast.error("Reading data is being processed. Please try again in a moment.");
         setLoading(false);
         return false;
       }
+      
+      // Reset the retry counter and waiting state when we have a valid response
+      setRetryCount(0);
+      setIsWaitingForWebhook(false);
       
       console.log("Using non-temporary webhook response for card reveal:", webhookResponse);
       
@@ -279,6 +317,7 @@ export const useTarotOperations = () => {
 
   return {
     loading,
+    isWaitingForWebhook,
     prepareCardSelection,
     handleCardReveal,
     generateInterpretation

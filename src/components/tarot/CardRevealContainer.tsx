@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { ReadingCard } from '@/types/tarot';
 import CardItem from './CardItem';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, AlertCircle, RefreshCw } from 'lucide-react';
 import CardDetailsDialog from './CardDetailsDialog';
 import ShareReading from './ShareReading';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CardRevealContainerProps {
   selectedCards: ReadingCard[];
@@ -15,6 +16,7 @@ interface CardRevealContainerProps {
   webhookMessage: string | null;
   webhookQuestion?: string | null;
   cardBackImage: string;
+  error?: string | null;
 }
 
 const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
@@ -23,7 +25,8 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   loading,
   webhookMessage,
   webhookQuestion,
-  cardBackImage
+  cardBackImage,
+  error
 }) => {
   const { t } = useTranslation();
   
@@ -66,8 +69,20 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
     setIsDetailsOpen(true);
   };
   
+  // Show error message if data isn't ready yet
+  const showErrorMessage = error || !webhookMessage;
+  
   return (
     <div className="space-y-8">
+      {showErrorMessage && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertDescription>
+            Reading data not ready yet. Please wait a moment and try again.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {selectedCards.map((card, index) => (
           <CardItem

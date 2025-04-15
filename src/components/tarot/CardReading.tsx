@@ -13,7 +13,7 @@ interface CardReadingProps {
 }
 
 const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
-  const { selectedCards, revealCard, loading, finalMessage, resetReading, webhookResponse, selectedDeck } = useTarot();
+  const { selectedCards, revealCard, loading, finalMessage, resetReading, webhookResponse, webhookError, selectedDeck } = useTarot();
   const { t } = useTranslation();
   
   // State for webhook message and question
@@ -26,12 +26,17 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
     selectedDeck,
     finalMessage: !!finalMessage,
     webhookResponse: webhookResponse,
+    webhookError
   });
   
   // Parse webhook message and question if available
   useEffect(() => {
     if (webhookResponse) {
       try {
+        // First clear the previous values when new response arrives
+        setWebhookMessage(null);
+        setWebhookQuestion(null);
+        
         // Handle case where webhookResponse is an array
         if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
           const firstResponse = webhookResponse[0];
@@ -67,6 +72,12 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         } 
         // Handle case where webhookResponse is an object
         else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
+          // Skip if this is a temporary response
+          if (webhookResponse.isTemporary) {
+            console.log("Skipping temporary webhook response in CardReading");
+            return;
+          }
+          
           // Try to get message directly from the response
           if (webhookResponse.message) {
             setWebhookMessage(webhookResponse.message);
@@ -132,6 +143,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           webhookMessage={webhookMessage}
           webhookQuestion={webhookQuestion}
           cardBackImage={cardBackImage}
+          error={webhookError}
         />
       ) : (
         <CompletedReading 
