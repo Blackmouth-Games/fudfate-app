@@ -7,13 +7,13 @@ export interface Card {
   name: string;
   image: string;
   description: string;
-  deck?: string; // Add the deck property to Card interface
+  deck?: string;
 }
 
 export interface ReadingCard extends Card {
   interpretation?: string;
   revealed: boolean;
-  deck?: string; // Ensure it's also inherited properly in ReadingCard 
+  deck?: string;
 }
 
 export interface Interpretation {
