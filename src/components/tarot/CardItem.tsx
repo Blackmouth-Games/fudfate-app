@@ -47,7 +47,9 @@ const CardItem: React.FC<CardItemProps> = ({
       
       // Make sure to handle different image path formats
       if (!imagePath.startsWith('/')) {
-        imagePath = `/img/cards/${card.deck || selectedDeck}/${imagePath}`;
+        // Use card's deck if available, otherwise use the selected deck
+        const cardDeck = card.deck || selectedDeck;
+        imagePath = `/img/cards/${cardDeck}/${imagePath}`;
       }
       
       // Convert png to jpg if needed
@@ -123,7 +125,9 @@ const CardItem: React.FC<CardItemProps> = ({
                     alt={card?.name || 'Tarot Card'}
                     onError={(e) => {
                       console.error(`Failed to load front image: ${frontImageSrc}`);
-                      const fallbackImage = card?.deck === 'deck_2' ? 
+                      // Use card's deck if available, otherwise use the selected deck
+                      const cardDeck = card.deck || selectedDeck;
+                      const fallbackImage = cardDeck === 'deck_2' ? 
                         "/img/cards/deck_2/0_the fool.jpg" : 
                         "/img/cards/deck_1/0_TheDegen.jpg";
                       e.currentTarget.src = fallbackImage;

@@ -1,3 +1,4 @@
+
 export type Deck = 'deck_1' | 'deck_2' | 'deck_3' | string;
 export type ReadingPhase = 'intention' | 'preparing' | 'selection' | 'reading' | 'complete';
 
@@ -6,11 +7,13 @@ export interface Card {
   name: string;
   image: string;
   description: string;
+  deck?: string; // Add the deck property to Card interface
 }
 
 export interface ReadingCard extends Card {
   interpretation?: string;
   revealed: boolean;
+  deck?: string; // Ensure it's also inherited properly in ReadingCard 
 }
 
 export interface Interpretation {
