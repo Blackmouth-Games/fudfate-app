@@ -1,3 +1,4 @@
+
 /* Crypto theme specific colors and styles */
 :root {
   --crypto-gold: #FAD12B;
@@ -6,6 +7,11 @@
   --crypto-background: #FFFFFF;
   --crypto-text: #000000;
   --crypto-accent: #FAD12B;
+  
+  /* Glitch effect variables */
+  --glitch-text-color: var(--crypto-gold);
+  --glitch-text-before-color: #d86a49;
+  --glitch-text-after-color: #D39948;
 }
 
 /* Default styles for lucide-react icons */
@@ -18,6 +24,12 @@
 .crypto-card {
   border: 4px solid var(--crypto-gold);
   box-shadow: 0 0 10px rgba(250, 209, 43, 0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.crypto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(250, 209, 43, 0.8);
 }
 
 .crypto-text {
@@ -29,6 +41,55 @@
   color: var(--crypto-gold);
   text-shadow: 0 0 5px rgba(250, 209, 43, 0.8);
   font-family: 'Press Start 2P', monospace;
+  position: relative;
+  display: inline-block;
+}
+
+/* Add a subtle glitch effect to crypto titles */
+.crypto-title::before,
+.crypto-title::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.crypto-title:hover::before {
+  color: rgba(250, 209, 43, 0.8);
+  animation: crypto-title-glitch 2s infinite;
+  opacity: 0.5;
+}
+
+.crypto-title:hover::after {
+  color: rgba(216, 106, 73, 0.8);
+  animation: crypto-title-glitch 2.5s 0.3s infinite;
+  opacity: 0.5;
+}
+
+@keyframes crypto-title-glitch {
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
 }
 
 .crypto-button {
@@ -36,4 +97,53 @@
   color: var(--crypto-black);
   border: 4px solid var(--crypto-black);
   font-family: 'VT323', monospace;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.crypto-button:hover {
+  background-color: var(--crypto-black);
+  color: var(--crypto-gold);
+  border-color: var(--crypto-gold);
+  text-shadow: 0 0 5px var(--crypto-gold);
+  box-shadow: 0 0 15px rgba(250, 209, 43, 0.6);
+}
+
+.crypto-button::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 1;
+  transition: all 0.6s ease;
+  opacity: 0;
+}
+
+.crypto-button:hover::before {
+  animation: crypto-button-shine 1.5s infinite;
+  opacity: 1;
+}
+
+@keyframes crypto-button-shine {
+  0% {
+    left: -50%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    left: 150%;
+    opacity: 0;
+  }
 }

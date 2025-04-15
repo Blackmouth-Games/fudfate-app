@@ -11,7 +11,6 @@ interface GlitchTextProps {
   glitchColor2?: string;
   noAnimate?: boolean;
   children?: React.ReactNode;
-  // Add the missing props
   goldEffect?: boolean;
   intensity?: 'normal' | 'intense' | 'digital';
   neonEffect?: 'purple' | 'red' | 'blue' | 'none';
@@ -27,7 +26,6 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   glitchColor2 = '#D39948',
   noAnimate = false,
   children,
-  // Initialize new props with defaults
   goldEffect = false,
   intensity = 'normal',
   neonEffect = 'none',

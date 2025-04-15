@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReadingCard } from '@/types/tarot';
@@ -58,6 +59,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   
   // Share to Twitter/X
   const shareToX = () => {
+    // Only share final message without duplicating it
     const text = `I just got a crypto tarot reading! ${webhookMessage || 'Check out my fortune!'}`;
     const url = window.location.href;
     const hashtags = 'CryptoTarot,FUDFate';

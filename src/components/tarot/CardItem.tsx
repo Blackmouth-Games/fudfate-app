@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { ReadingCard } from '@/types/tarot';
 import { motion } from 'framer-motion';
@@ -30,30 +31,39 @@ const CardItem: React.FC<CardItemProps> = ({
   const [frontImageSrc, setFrontImageSrc] = useState('');
   const [backImageSrc, setBackImageSrc] = useState('');
   
-  // Placeholder constants
-  const PLACEHOLDER_BACK = '/img/cards/deck_default/99_BACK.jpg';
-  const PLACEHOLDER_FRONT = '/img/cards/deck_default/0_TheDegen.jpg';
-  
+  // Console log to debug card data
+  useEffect(() => {
+    console.log(`Card ${index} data:`, card);
+  }, [card, index]);
+
   // Set up image sources with proper fallbacks
   useEffect(() => {
     // For card front (when revealed)
     if (card?.image) {
-      // Log the image path for debugging
-      console.log('Card image path:', card.image);
+      let imagePath = '';
       
-      // Ensure the image path starts with /img/
-      const imagePath = card.image.startsWith('/') ? card.image : `/img/cards/${card.image}`;
+      // Make sure to handle different image path formats
+      if (card.image.startsWith('/img/')) {
+        imagePath = card.image;
+      } else if (card.image.includes('/')) {
+        imagePath = `/img/${card.image}`;
+      } else {
+        imagePath = `/img/cards/${selectedDeck}/${card.image}`;
+      }
       
-      // Use the correct deck path
-      const imageSrc = imagePath.includes(`${selectedDeck}/`) 
-        ? imagePath 
-        : imagePath.replace('/cards/', `/cards/${selectedDeck}/`);
+      // Convert png to jpg if needed
+      if (!imagePath.endsWith('.jpg') && !imagePath.endsWith('.png')) {
+        imagePath = `${imagePath}.jpg`;
+      } else if (imagePath.endsWith('.png')) {
+        imagePath = imagePath.replace('.png', '.jpg');
+      }
       
-      console.log('Processed image path:', imageSrc);
-      setFrontImageSrc(imageSrc);
+      console.log(`Card ${index} image path:`, imagePath);
+      setFrontImageSrc(imagePath);
+      setHasError(false);
     } else {
-      console.warn('No image provided for card:', card);
-      setFrontImageSrc(PLACEHOLDER_FRONT);
+      console.warn(`Card ${index} has no image:`, card);
+      setFrontImageSrc(`/img/cards/deck_default/0_TheDegen.jpg`);
     }
     
     // For card back
@@ -62,15 +72,15 @@ const CardItem: React.FC<CardItemProps> = ({
       const backPath = cardBackImage.startsWith('/') 
         ? cardBackImage 
         : `/img/cards/${selectedDeck}/99_BACK.jpg`;
-      console.log('Card back image path:', backPath);
+      
       setBackImageSrc(backPath);
     } else {
-      setBackImageSrc(PLACEHOLDER_BACK);
+      setBackImageSrc(`/img/cards/${selectedDeck}/99_BACK.jpg`);
     }
 
     // Reset loading state when card changes
     setIsImageLoading(true);
-  }, [card, cardBackImage, selectedDeck]);
+  }, [card, cardBackImage, selectedDeck, index]);
 
   const handleClick = () => {
     if (isRevealed && onCardView) {
@@ -96,11 +106,14 @@ const CardItem: React.FC<CardItemProps> = ({
             src={backImageSrc} 
             alt="Card Back" 
             className="w-full h-full object-cover rounded-lg"
-            fallbackSrc={PLACEHOLDER_BACK}
+            fallbackSrc="/img/cards/deck_default/99_BACK.jpg"
             aspectRatio={5/8}
             skeletonClassName="bg-amber-100"
             onLoad={() => setIsImageLoading(false)}
-            onError={() => setHasError(true)}
+            onError={() => {
+              console.error(`Failed to load back image: ${backImageSrc}`);
+              setHasError(true);
+            }}
           />
         </div>
         
@@ -109,11 +122,14 @@ const CardItem: React.FC<CardItemProps> = ({
             src={frontImageSrc} 
             alt={card?.name || 'Tarot Card'}
             className="w-full h-full object-cover rounded-lg"
-            fallbackSrc={PLACEHOLDER_FRONT}
+            fallbackSrc="/img/cards/deck_default/0_TheDegen.jpg"
             aspectRatio={5/8}
             skeletonClassName="bg-amber-100"
             onLoad={() => setIsImageLoading(false)}
-            onError={() => setHasError(true)}
+            onError={() => {
+              console.error(`Failed to load front image: ${frontImageSrc}`);
+              setHasError(true);
+            }}
           />
           {isRevealed && (
             <motion.div 
