@@ -148,8 +148,11 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                     </Button>
                   </div>
 
-                  <Tabs defaultValue="webhooks" className="flex-grow overflow-hidden flex flex-col">
+                  <Tabs defaultValue="reading" className="flex-grow overflow-hidden flex flex-col">
                     <TabsList className="justify-start px-2 pt-2 border-b border-gray-100 h-10 overflow-x-auto">
+                      <TabsTrigger value="reading" className="text-xs py-1 px-2 h-7">
+                        Reading
+                      </TabsTrigger>
                       <TabsTrigger value="webhooks" className="text-xs py-1 px-2 h-7">
                         API Logs
                       </TabsTrigger>
@@ -176,10 +179,14 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                     </TabsList>
 
                     <div className="flex-grow overflow-hidden">
+                      <TabsContent value="reading" className="h-full m-0">
+                        <ReadingLogsTab />
+                      </TabsContent>
+                      
                       <TabsContent value="webhooks" className="h-full m-0">
                         <WebhookLogTab />
                       </TabsContent>
-                      
+
                       <TabsContent value="logs" className="h-full m-0">
                         <ConnectionLogsTab />
                       </TabsContent>

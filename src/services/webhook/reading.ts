@@ -1,11 +1,9 @@
-
 import { WebhookResponse } from '@/types/tarot';
 import { callWebhook } from './core';
 import { logReadingWebhook } from './logger';
 import { toast } from 'sonner';
 import { Environment } from '@/config/webhooks';
 
-// Variable para almacenar la promesa de la lectura real
 let pendingReading: Promise<WebhookResponse> | null = null;
 
 /**
@@ -22,22 +20,19 @@ export const callReadingWebhook = async (
     throw new Error("No user ID available");
   }
 
-  // Generar respuesta temporal para la fase de selección
   const tempResponse: WebhookResponse = {
-    selected_cards: Array.from({ length: 3 }, () => Math.floor(Math.random() * 78)),
+    selected_cards: Array.from({ length: 3 }, () => Math.floor(Math.random() * 21)),
     message: "Selecciona tus cartas del tarot...",
     reading: null,
     cards: null,
     returnwebhoock: null,
-    isTemporary: true // Flag para identificar respuesta temporal
+    isTemporary: true
   };
 
-  // Si ya hay una lectura pendiente, retornar la respuesta temporal
   if (pendingReading) {
     return tempResponse;
   }
 
-  // Iniciar la lectura real en segundo plano
   pendingReading = (async () => {
     try {
       const result = await callWebhook<WebhookResponse>(
@@ -53,8 +48,11 @@ export const callReadingWebhook = async (
         throw new Error(result.error || 'No data received');
       }
 
-      // Solo procesar y logear si tenemos una respuesta válida
       if (result.data.selected_cards && result.data.message) {
+        result.data.selected_cards = result.data.selected_cards.map(index => 
+          Math.min(Math.max(0, index), 21)
+        );
+
         logReadingWebhook({
           url: webhookUrl,
           requestData: { userid: userId, intention },
@@ -63,7 +61,6 @@ export const callReadingWebhook = async (
           environment
         });
 
-        // Emitir evento cuando la lectura real esté lista
         window.dispatchEvent(new CustomEvent('readingReady', { 
           detail: result.data 
         }));
@@ -80,6 +77,5 @@ export const callReadingWebhook = async (
     }
   })();
 
-  // Retornar respuesta temporal inmediatamente
   return tempResponse;
 };
