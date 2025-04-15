@@ -6,6 +6,7 @@ export type WalletType = 'metamask' | 'phantom' | null;
 export interface UserData {
   userId: string;
   runsToday: boolean;
+  whitelisted: boolean;
   selectedDeck?: string;
 }
 

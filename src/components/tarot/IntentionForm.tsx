@@ -13,12 +13,10 @@ import PreparingReading from './PreparingReading';
 import CardSelection from './CardSelection';
 import CardReading from './CardReading';
 import ShareReading from './ShareReading';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
-interface IntentionFormProps {
-  className?: string;
-}
-
-const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
+const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { t } = useTranslation();
   const { userData } = useWallet();
   const { 
@@ -29,32 +27,26 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
   
   const [loading, setLoading] = useState(false);
   
-  // Log userData to see what's happening with runsToday
-  useEffect(() => {
-    console.log('IntentionForm userData:', userData);
-  }, [userData]);
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!userData?.whitelisted) {
+      toast.error(t('errors.notWhitelisted') || 'You are not whitelisted to use this feature');
+      return;
+    }
+    
     if (intention.trim().length < 3) {
-      toast.error(t('tarot.intentionTooShort'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      toast.error(t('tarot.intentionTooShort'));
       return;
     }
     
     setLoading(true);
     try {
       await startReading();
-      toast.success(t('tarot.readingStarted'), {
-        style: { backgroundColor: '#F2FCE2', color: '#166534', border: '1px solid #16A34A' }
-      });
+      toast.success(t('tarot.readingStarted'));
     } catch (error) {
       console.error('Error starting reading:', error);
-      toast.error(t('errors.readingFailed'), {
-        style: { backgroundColor: '#FEE2E2', color: '#B91C1C', border: '1px solid #DC2626' }
-      });
+      toast.error(t('errors.readingFailed'));
     } finally {
       setLoading(false);
     }
@@ -64,7 +56,6 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
     setIntention('');
   };
 
-  // Different phases of reading
   const renderPhaseContent = () => {
     switch (phase) {
       case 'preparing':
@@ -83,6 +74,15 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
         return (
           <Card className="border-amber-400/50 shadow-md">
             <CardContent className="pt-6">
+              {!userData?.whitelisted && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {t('errors.notWhitelisted') || 'You are not whitelisted to use this feature'}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
               <div className="text-center mb-6">
                 <div className="mb-2 overflow-visible">
                   <GlitchText 
@@ -96,8 +96,6 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
                 </p>
               </div>
               
-              {/* Only show form if user has readings available 
-                  Note: userData.runsToday=true means user CAN make readings */}
               {userData && userData.runsToday ? (
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="relative">
@@ -106,6 +104,7 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
                       onChange={(e) => setIntention(e.target.value)}
                       placeholder={t('tarot.enterYourQuestion')}
                       className="pr-8 text-center"
+                      disabled={!userData.whitelisted}
                     />
                     {intention && (
                       <button 
@@ -121,7 +120,7 @@ const IntentionForm: React.FC<IntentionFormProps> = ({ className = '' }) => {
                   <div className="pt-2 flex justify-center">
                     <Button 
                       type="submit" 
-                      disabled={intention.trim().length < 3 || loading}
+                      disabled={intention.trim().length < 3 || loading || !userData.whitelisted}
                       className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
                     >
                       <Sparkles size={14} /> {t('tarot.seekGuidance')}
