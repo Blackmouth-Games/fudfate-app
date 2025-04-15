@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ReadingCard, WebhookResponse, Deck } from '@/types/tarot';
 import { generateCardInterpretation } from '@/services/tarot-service';
 import { toast } from 'sonner';
+import tarotCards from '@/data/tarotCards';
 
 export const useCardReveal = () => {
   const [loading, setLoading] = useState<boolean>(false);

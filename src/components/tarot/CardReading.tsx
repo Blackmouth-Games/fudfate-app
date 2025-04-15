@@ -19,6 +19,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
   const [webhookQuestion, setWebhookQuestion] = useState<string | null>(null);
   
+  // Log important state for debugging
   console.log("CardReading rendering with:", {
     cardBackImage: getCardBackPath(selectedDeck),
     selectedCards: selectedCards?.length || 0,
@@ -50,6 +51,8 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           if (typeof firstResponse.returnwebhoock === 'string') {
             try {
               const parsedData = JSON.parse(firstResponse.returnwebhoock);
+              console.log("Parsed webhook data:", parsedData);
+              
               if (parsedData) {
                 if (parsedData.message) {
                   setWebhookMessage(parsedData.message);
@@ -110,7 +113,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
         console.error("Error processing webhook response in CardReading:", error);
       }
     }
-  }, [webhookResponse]);
+  }, [webhookResponse, webhookMessage, webhookQuestion]);
   
   // Card back image based on selected deck
   const cardBackImage = getCardBackPath(selectedDeck);

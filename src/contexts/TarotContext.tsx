@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useWallet } from './WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -54,11 +55,29 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setWebhookResponse(readingData);
       setWebhookError(null);
       
+      // When we receive the final webhook, prepare the cards for reading phase
       if (phase === 'selection') {
         setPhase('reading');
+        
+        // Generate the cards based on webhook response
+        if (readingData.selected_cards && readingData.selected_cards.length > 0) {
+          const webhookCards = readingData.selected_cards.map((cardIndex: number) => {
+            // Find the card from tarotCards using the index
+            const card = tarotCards[cardIndex] || tarotCards[0]; // Fallback to first card if not found
+            
+            return {
+              ...card,
+              revealed: false, // Cards start face down
+              deck: selectedDeck // Ensure cards use the selected deck
+            };
+          });
+          
+          console.log("Setting selected cards from webhook:", webhookCards);
+          setSelectedCards(webhookCards);
+        }
       }
     }
-  }, [phase]);
+  }, [phase, selectedDeck]);
 
   const handleReadingError = useCallback((event: CustomEvent) => {
     const errorData = event.detail;
@@ -92,12 +111,30 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
         setWebhookResponse(finalResponse);
         setWebhookError(null);
         
+        // When we detect the final webhook, update cards for reading phase
         if (phase === 'selection') {
           setPhase('reading');
+          
+          // Generate the cards based on webhook response
+          if (finalResponse.selected_cards && finalResponse.selected_cards.length > 0) {
+            const webhookCards = finalResponse.selected_cards.map((cardIndex: number) => {
+              // Find the card from tarotCards using the index
+              const card = tarotCards[cardIndex] || tarotCards[0]; // Fallback to first card if not found
+              
+              return {
+                ...card,
+                revealed: false, // Cards start face down
+                deck: selectedDeck // Ensure cards use the selected deck
+              };
+            });
+            
+            console.log("Setting selected cards from final webhook response:", webhookCards);
+            setSelectedCards(webhookCards);
+          }
         }
       }
     }
-  }, [phase, webhookResponse]);
+  }, [phase, webhookResponse, selectedDeck]);
 
   const startReading = async () => {
     if (!connected) {
