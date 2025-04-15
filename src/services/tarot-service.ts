@@ -10,11 +10,17 @@ export const getRandomCards = (selectedDeck: Deck, count: number = 6): Card[] =>
 };
 
 export const getCardsByIndices = (selectedDeck: Deck, indices: number[]): Card[] => {
+  console.log(`Getting cards by indices for deck ${selectedDeck}:`, indices);
+  
   const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
+  console.log(`Found ${deckCards.length} cards for deck ${selectedDeck}`);
+  
   return indices.map(index => {
     // Ensure the index is valid
     const validIndex = Math.min(Math.max(0, index), deckCards.length - 1);
-    return deckCards[validIndex];
+    const card = deckCards[validIndex];
+    console.log(`Index ${index} -> Card ${card?.id || 'unknown'} (${card?.name || 'Unknown Name'})`);
+    return card;
   });
 };
 

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { Badge } from '@/components/ui/badge';
@@ -15,12 +16,21 @@ const DebugTab = () => {
   const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
   
   const clearWebhookCache = () => {
-    // Reset the lastCallTimestamp in reading.ts
-    // @ts-ignore - Accessing global variable
+    // Reset the lastCallTimestamp in core.ts
     if (typeof window !== 'undefined') {
+      // Clear any cached webhook data
+      const lastWebhookCalls = {};
       // @ts-ignore - Accessing global variable
-      window.lastCallTimestamp = 0;
+      window.lastWebhookCalls = lastWebhookCalls;
     }
+    
+    // Clear local webhook logs
+    try {
+      localStorage.removeItem('webhook_logs');
+    } catch (e) {
+      console.error('Failed to clear webhook logs:', e);
+    }
+    
     toast.success('Webhook cache cleared');
   };
   
@@ -28,77 +38,49 @@ const DebugTab = () => {
     if (webhookResponse) {
       console.log("Debug tab processing webhook response:", webhookResponse);
       
+      let tempWebhookCards: number[] = [];
+      let tempMessage: string | null = null;
+      let tempParsedWebhook: any = null;
+      
       // Try to parse the webhook response
       try {
-        // Handle case where webhookResponse is an array
-        if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
-          const firstResponse = webhookResponse[0];
-          
-          // Try to get message directly
-          if (firstResponse.message) {
-            setWebhookMessage(firstResponse.message);
-          }
-          
-          // Try to get selected_cards directly
-          if (Array.isArray(firstResponse.selected_cards)) {
-            console.log("Found selected_cards directly in webhook array:", firstResponse.selected_cards);
-            setWebhookCards(firstResponse.selected_cards);
-          }
-          
-          // Try to parse returnwebhoock
-          if (typeof firstResponse.returnwebhoock === 'string') {
-            try {
-              const parsed = JSON.parse(firstResponse.returnwebhoock);
-              setParsedWebhook(parsed);
-              
-              if (!webhookMessage && parsed.message) {
-                setWebhookMessage(parsed.message);
-              }
-              
-              if (Array.isArray(parsed.selected_cards)) {
-                console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
-                setWebhookCards(parsed.selected_cards);
-              }
-            } catch (error) {
-              console.error("Error parsing webhook in debug tab:", error);
+        // First try to get selected_cards directly from the response
+        if (Array.isArray(webhookResponse.selected_cards)) {
+          tempWebhookCards = webhookResponse.selected_cards;
+          console.log("Found selected_cards directly in webhook object:", tempWebhookCards);
+        }
+        
+        // Try to get message directly
+        if (webhookResponse.message) {
+          tempMessage = webhookResponse.message;
+        }
+        
+        // Try to parse returnwebhoock if it exists
+        if (typeof webhookResponse.returnwebhoock === 'string') {
+          try {
+            const parsed = JSON.parse(webhookResponse.returnwebhoock);
+            tempParsedWebhook = parsed;
+            
+            if (!tempMessage && parsed.message) {
+              tempMessage = parsed.message;
             }
-          }
-        } 
-        // Handle case where webhookResponse is an object 
-        else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
-          // Try to get message directly
-          if (webhookResponse.message) {
-            setWebhookMessage(webhookResponse.message);
-          }
-          
-          // Try to get selected_cards directly
-          if (Array.isArray(webhookResponse.selected_cards)) {
-            console.log("Found selected_cards directly in webhook object:", webhookResponse.selected_cards);
-            setWebhookCards(webhookResponse.selected_cards);
-          }
-          
-          // Try to parse returnwebhoock
-          if (typeof webhookResponse.returnwebhoock === 'string') {
-            try {
-              const parsed = JSON.parse(webhookResponse.returnwebhoock);
-              setParsedWebhook(parsed);
-              
-              if (!webhookMessage && parsed.message) {
-                setWebhookMessage(parsed.message);
-              }
-              
-              if (Array.isArray(parsed.selected_cards)) {
-                console.log("Found selected_cards in parsed webhook:", parsed.selected_cards);
-                setWebhookCards(parsed.selected_cards);
-              }
-            } catch (error) {
-              console.error("Error parsing webhook in debug tab:", error);
+            
+            if (Array.isArray(parsed.selected_cards)) {
+              tempWebhookCards = parsed.selected_cards;
+              console.log("Found selected_cards in parsed webhook:", tempWebhookCards);
             }
+          } catch (error) {
+            console.error("Error parsing webhook in debug tab:", error);
           }
         }
       } catch (error) {
         console.error("General error processing webhook in debug tab:", error);
       }
+      
+      // Set state after processing all data
+      setWebhookCards(tempWebhookCards);
+      setWebhookMessage(tempMessage);
+      setParsedWebhook(tempParsedWebhook);
     }
   }, [webhookResponse]);
   
@@ -154,7 +136,7 @@ const DebugTab = () => {
         {selectedCards.length > 0 ? (
           <ScrollArea className="h-28 rounded border p-2">
             {selectedCards.map((card, index) => (
-              <div key={index} className="mb-2 last:mb-0 flex items-center gap-2">
+              <div key={`selected-${index}`} className="mb-2 last:mb-0 flex items-center gap-2">
                 <Badge 
                   variant={card.revealed ? "default" : "outline"}
                   className={card.revealed ? "bg-green-100 text-green-800 hover:bg-green-200" : ""}
@@ -162,7 +144,7 @@ const DebugTab = () => {
                   Card {index + 1}
                 </Badge>
                 <span className="text-xs">
-                  {card.id} - {card.name} - {selectedDeck}
+                  {card.id} - {card.name} - {card.deck || selectedDeck}
                 </span>
               </div>
             ))}
@@ -184,7 +166,7 @@ const DebugTab = () => {
               const isMatch = webhookCard && selectedCardAtIndex && webhookCard.id === selectedCardAtIndex.id;
               
               return (
-                <div key={index} className="mb-2 last:mb-0">
+                <div key={`webhook-${index}`} className="mb-2 last:mb-0">
                   <div className="flex items-center gap-2">
                     <Badge 
                       variant="outline"
@@ -203,7 +185,7 @@ const DebugTab = () => {
                   {selectedCardAtIndex && selectedCardAtIndex.revealed && (
                     <div className="ml-6 mt-1 text-xs">
                       <span className={isMatch ? "text-green-600" : "text-amber-600"}>
-                        {isMatch ? "✓ Matches revealed card" : "⚠ Doesn't match revealed card: " + selectedCardAtIndex.name + " (" + selectedDeck + ")"}
+                        {isMatch ? "✓ Matches revealed card" : "⚠ Doesn't match revealed card: " + selectedCardAtIndex.name + " (" + (selectedCardAtIndex.deck || selectedDeck) + ")"}
                       </span>
                     </div>
                   )}

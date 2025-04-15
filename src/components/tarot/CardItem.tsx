@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Skeleton } from '@/components/ui/skeleton';
 import ImageLoader from '@/components/ui/image-loader';
 import { useTarot } from '@/contexts/TarotContext';
+import { getCardPath, getCardBackPath } from '@/utils/deck-utils';
 
 interface CardItemProps {
   card: ReadingCard;
@@ -34,21 +35,19 @@ const CardItem: React.FC<CardItemProps> = ({
   // Console log to debug card data
   useEffect(() => {
     console.log(`Card ${index} data:`, card);
-  }, [card, index]);
+    console.log(`Selected deck: ${selectedDeck}`);
+  }, [card, index, selectedDeck]);
 
   // Set up image sources with proper fallbacks
   useEffect(() => {
     // For card front (when revealed)
     if (card?.image) {
-      let imagePath = '';
+      // Try to use the image from the card object
+      let imagePath = card.image;
       
       // Make sure to handle different image path formats
-      if (card.image.startsWith('/img/')) {
-        imagePath = card.image;
-      } else if (card.image.includes('/')) {
-        imagePath = `/img/${card.image}`;
-      } else {
-        imagePath = `/img/cards/${selectedDeck}/${card.image}`;
+      if (!imagePath.startsWith('/')) {
+        imagePath = `/img/cards/${card.deck || selectedDeck}/${imagePath}`;
       }
       
       // Convert png to jpg if needed
@@ -58,21 +57,24 @@ const CardItem: React.FC<CardItemProps> = ({
       
       console.log(`Card ${index} image path:`, imagePath);
       setFrontImageSrc(imagePath);
-      setHasError(false);
+    } else if (card?.id) {
+      // Use the card ID to construct a path
+      const deckToUse = card.deck || selectedDeck;
+      const imagePath = getCardPath(deckToUse, card.id);
+      console.log(`Card ${index} generated image path:`, imagePath);
+      setFrontImageSrc(imagePath);
     } else {
-      console.warn(`Card ${index} has no image:`, card);
-      setFrontImageSrc(`/img/cards/${selectedDeck.replace('deck', 'deck_')}/0_TheDegen.jpg`);
+      console.warn(`Card ${index} has no image or ID:`, card);
+      setFrontImageSrc(`/img/cards/deck_1/0_TheDegen.jpg`);
     }
     
-    // For card back
+    // For card back, use the provided cardBackImage directly
     if (cardBackImage) {
       setBackImageSrc(cardBackImage);
     } else {
-      // Ensure we're using the correct format (deck_X instead of deckX)
-      const formattedDeck = selectedDeck.includes('_') ? 
-        selectedDeck : 
-        `deck_${selectedDeck.replace('deck', '')}`;
-      setBackImageSrc(`/img/cards/${formattedDeck}/99_BACK.jpg`);
+      // Fallback to using the selectedDeck
+      const backPath = getCardBackPath(selectedDeck);
+      setBackImageSrc(backPath);
     }
 
     // Reset loading state when card changes
@@ -121,7 +123,10 @@ const CardItem: React.FC<CardItemProps> = ({
                     alt={card?.name || 'Tarot Card'}
                     onError={(e) => {
                       console.error(`Failed to load front image: ${frontImageSrc}`);
-                      e.currentTarget.src = "/img/cards/deck_1/0_TheDegen.jpg";
+                      const fallbackImage = card?.deck === 'deck_2' ? 
+                        "/img/cards/deck_2/0_the fool.jpg" : 
+                        "/img/cards/deck_1/0_TheDegen.jpg";
+                      e.currentTarget.src = fallbackImage;
                     }}
                   />
                 </div>

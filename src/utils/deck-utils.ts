@@ -26,7 +26,13 @@ export interface DeckInfo {
  * Get the path to the card back image for a given deck
  */
 export const getCardBackPath = (deck: Deck): string => {
-  // Handle deck format: either 'deck1' or 'deck_1'
+  // Ensure we have a deck name
+  if (!deck) {
+    console.warn("getCardBackPath called with empty deck, using default");
+    return `/img/cards/deck_1/99_BACK.jpg`;
+  }
+  
+  // Standardize deck format to 'deck_X'
   let deckNumber;
   if (deck.includes('_')) {
     // For format: 'deck_1'
@@ -45,7 +51,13 @@ export const getCardBackPath = (deck: Deck): string => {
  * Get the path to a specific card image in a deck
  */
 export const getCardPath = (deck: Deck, cardId: string): string => {
-  // Handle deck format: either 'deck1' or 'deck_1'
+  // Ensure we have a deck name
+  if (!deck) {
+    console.warn("getCardPath called with empty deck, using default");
+    return `/img/cards/deck_1/${cardId}.jpg`;
+  }
+  
+  // Standardize deck format to 'deck_X'
   let deckNumber;
   if (deck.includes('_')) {
     // For format: 'deck_1'
@@ -56,6 +68,7 @@ export const getCardPath = (deck: Deck, cardId: string): string => {
   }
   
   const path = `/img/cards/deck_${deckNumber}/${cardId}.jpg`;
+  console.log(`getCardPath: ${deck} ${cardId} -> ${path}`);
   return path;
 };
 

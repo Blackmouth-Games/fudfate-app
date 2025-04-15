@@ -103,36 +103,54 @@ export const useTarotOperations = () => {
         }
       }
       
-      // If this is the first card reveal and we have webhook cards, replace the selected cards
-      const isFirstReveal = selectedCards.every(c => !c.revealed);
-      
-      if (webhookCards.length > 0 && isFirstReveal) {
-        console.log("Using webhook cards for reveal. First reveal:", isFirstReveal);
+      // If we have webhook cards, use them regardless of whether this is first reveal
+      if (webhookCards.length > 0) {
+        console.log("Using webhook cards for reveal. Selected deck:", selectedDeck);
         
         // Get cards from webhook indices
         const webhookDeckCards = getCardsByIndices(selectedDeck, webhookCards);
         console.log("Cards from webhook indices:", webhookDeckCards);
         
         if (webhookDeckCards.length > 0) {
-          // Get interpretation for the revealed card
-          let interpretation;
-          try {
-            if (webhookDeckCards[index] && webhookDeckCards[index].id) {
-              interpretation = await generateCardInterpretation(webhookDeckCards[index].id, intention);
+          // If this is the first reveal, replace all cards
+          const isFirstReveal = selectedCards.every(c => !c.revealed);
+          
+          if (isFirstReveal) {
+            // Get interpretation for the revealed card
+            let interpretation;
+            try {
+              if (webhookDeckCards[index] && webhookDeckCards[index].id) {
+                interpretation = await generateCardInterpretation(webhookDeckCards[index].id, intention);
+              }
+            } catch (error) {
+              console.error("Error generating interpretation:", error);
             }
-          } catch (error) {
-            console.error("Error generating interpretation:", error);
+            
+            // Replace all cards but keep the current request to reveal
+            const newSelectedCards = webhookDeckCards.map((card, i) => ({
+              ...card,
+              revealed: i === index,
+              interpretation: i === index ? interpretation : undefined
+            }));
+            
+            console.log("Setting new selected cards from webhook:", newSelectedCards);
+            setSelectedCards(newSelectedCards);
+          } else {
+            // Just reveal the current card using the webhook data
+            const webhookCard = webhookDeckCards[index];
+            if (webhookCard) {
+              const interpretation = await generateCardInterpretation(webhookCard.id, intention);
+              
+              const updatedCards = [...selectedCards];
+              updatedCards[index] = {
+                ...webhookCard,
+                interpretation,
+                revealed: true
+              };
+              
+              setSelectedCards(updatedCards);
+            }
           }
-          
-          // Replace all cards but keep the current request to reveal
-          const newSelectedCards = webhookDeckCards.map((card, i) => ({
-            ...card,
-            revealed: i === index,
-            interpretation: i === index ? interpretation : undefined
-          }));
-          
-          console.log("Setting new selected cards from webhook:", newSelectedCards);
-          setSelectedCards(newSelectedCards);
           
           setLoading(false);
           return true;

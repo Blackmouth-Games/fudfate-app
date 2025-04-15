@@ -41,6 +41,12 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
     }
   }, [selectedCards]);
   
+  // Debug log when selected cards change
+  useEffect(() => {
+    console.log("CardRevealContainer - Selected Cards:", selectedCards);
+    console.log("CardRevealContainer - Card Back Image:", cardBackImage);
+  }, [selectedCards, cardBackImage]);
+  
   // Handle card click directly without queueing
   const handleCardReveal = (index: number) => {
     if (loading) {
