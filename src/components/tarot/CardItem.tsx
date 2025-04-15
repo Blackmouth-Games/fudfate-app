@@ -35,7 +35,7 @@ const CardItem: React.FC<CardItemProps> = ({
   // Console log to debug card data
   useEffect(() => {
     console.log(`Card ${index} data:`, card);
-    console.log(`Selected deck: ${selectedDeck}`);
+    console.log(`Selected deck: ${selectedDeck}, Card deck: ${card.deck || 'not specified'}`);
   }, [card, index, selectedDeck]);
 
   // Set up image sources with proper fallbacks
@@ -75,7 +75,7 @@ const CardItem: React.FC<CardItemProps> = ({
       setBackImageSrc(cardBackImage);
     } else {
       // Fallback to using the selectedDeck
-      const backPath = getCardBackPath(selectedDeck);
+      const backPath = getCardBackPath(card.deck || selectedDeck);
       setBackImageSrc(backPath);
     }
 

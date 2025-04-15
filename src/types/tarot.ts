@@ -1,4 +1,3 @@
-
 export type Deck = 'deck_1' | 'deck_2' | 'deck_3' | string;
 export type ReadingPhase = 'intention' | 'preparing' | 'selection' | 'reading' | 'complete';
 
@@ -26,9 +25,10 @@ export interface Interpretation {
 export interface WebhookResponse {
   selected_cards: number[];
   message: string;
-  reading?: string | null;
-  cards?: any[] | null;
-  returnwebhoock?: string | null;
+  question?: string | null;
+  reading: any;
+  cards: any;
+  returnwebhoock: any;
   isTemporary?: boolean;
 }
 

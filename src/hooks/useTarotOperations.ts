@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, ReadingCard, WebhookResponse, Deck, Interpretation } from '@/types/tarot';
 import { toast } from 'sonner';
@@ -68,6 +69,7 @@ export const useTarotOperations = () => {
       // Parse webhook response to extract card indices and message
       let webhookCards: number[] = [];
       let webhookMessage: string | undefined;
+      let webhookQuestion: string | undefined;
       
       // Process webhook data to extract card indices and message
       if (webhookResponse) {
@@ -84,6 +86,11 @@ export const useTarotOperations = () => {
           webhookMessage = webhookResponse.message;
         }
         
+        // Try to get question directly from the response
+        if (webhookResponse.question) {
+          webhookQuestion = webhookResponse.question;
+        }
+        
         // Try to parse returnwebhoock if it exists
         if (typeof webhookResponse.returnwebhoock === 'string') {
           try {
@@ -96,6 +103,10 @@ export const useTarotOperations = () => {
             
             if (parsedData.message) {
               webhookMessage = parsedData.message;
+            }
+            
+            if (parsedData.question) {
+              webhookQuestion = parsedData.question;
             }
           } catch (error) {
             console.error("Error parsing webhook response:", error);
@@ -129,6 +140,7 @@ export const useTarotOperations = () => {
             // Replace all cards but keep the current request to reveal
             const newSelectedCards = webhookDeckCards.map((card, i) => ({
               ...card,
+              deck: selectedDeck, // Ensure the deck is explicitly set
               revealed: i === index,
               interpretation: i === index ? interpretation : undefined
             }));
@@ -144,6 +156,7 @@ export const useTarotOperations = () => {
               const updatedCards = [...selectedCards];
               updatedCards[index] = {
                 ...webhookCard,
+                deck: selectedDeck, // Ensure the deck is explicitly set
                 interpretation,
                 revealed: true
               };
@@ -174,7 +187,10 @@ export const useTarotOperations = () => {
       const allRevealed = updatedCards.every(c => c.revealed);
       if (allRevealed && webhookMessage) {
         console.log("All cards revealed, showing webhook message:", webhookMessage);
-        setFinalMessage(webhookMessage);
+        const finalMessageWithQuestion = webhookQuestion 
+          ? `${webhookQuestion}\n\n${webhookMessage}` 
+          : webhookMessage;
+        setFinalMessage(finalMessageWithQuestion);
       }
       
       return true;
@@ -198,6 +214,7 @@ export const useTarotOperations = () => {
     try {
       // Parse webhook message if it's a complex object with returnwebhoock
       let message = '';
+      let question = '';
       
       if (webhookMessage) {
         if (typeof webhookMessage === 'string') {
@@ -207,11 +224,16 @@ export const useTarotOperations = () => {
           if (webhookMessage.message) {
             message = webhookMessage.message;
           }
+          // Try to get question directly
+          if (webhookMessage.question) {
+            question = webhookMessage.question;
+          }
           // Try to parse returnwebhoock if available
           else if (webhookMessage.returnwebhoock && typeof webhookMessage.returnwebhoock === 'string') {
             try {
               const parsedData = JSON.parse(webhookMessage.returnwebhoock);
               message = parsedData.message || '';
+              question = parsedData.question || '';
             } catch (error) {
               console.error("Error parsing webhook message:", error);
             }
@@ -222,9 +244,14 @@ export const useTarotOperations = () => {
       // Only generate a final message if we don't have one from the webhook
       const finalMessage = message || await generateFinalMessage(selectedCards, intention, message);
       
+      // Format final message with question if available
+      const formattedMessage = question 
+        ? `${question}\n\n${finalMessage}` 
+        : finalMessage;
+      
       // Create interpretation object
       const interpretation: Interpretation = {
-        summary: finalMessage, // Use the final message to avoid duplication
+        summary: formattedMessage, // Use the formatted message with question
         cards: selectedCards.reduce((acc, card) => {
           if (card.interpretation) {
             acc[card.id] = card.interpretation;

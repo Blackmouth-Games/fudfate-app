@@ -16,8 +16,9 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
   const { selectedCards, revealCard, loading, finalMessage, resetReading, webhookResponse, selectedDeck } = useTarot();
   const { t } = useTranslation();
   
-  // State for webhook message
+  // State for webhook message and question
   const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
+  const [webhookQuestion, setWebhookQuestion] = useState<string | null>(null);
   
   console.log("CardReading rendering with:", {
     cardBackImage: getCardBackPath(selectedDeck),
@@ -27,7 +28,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
     webhookResponse: webhookResponse,
   });
   
-  // Parse webhook message if available
+  // Parse webhook message and question if available
   useEffect(() => {
     if (webhookResponse) {
       try {
@@ -38,16 +39,26 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           // Try to get message directly
           if (firstResponse.message) {
             setWebhookMessage(firstResponse.message);
-            return;
+          }
+          
+          // Try to get question directly
+          if (firstResponse.question) {
+            setWebhookQuestion(firstResponse.question);
           }
           
           // Try to parse returnwebhoock
           if (typeof firstResponse.returnwebhoock === 'string') {
             try {
               const parsedData = JSON.parse(firstResponse.returnwebhoock);
-              if (parsedData && parsedData.message) {
-                setWebhookMessage(parsedData.message);
-                console.log("Found message in parsed webhook array:", parsedData.message);
+              if (parsedData) {
+                if (parsedData.message) {
+                  setWebhookMessage(parsedData.message);
+                  console.log("Found message in parsed webhook array:", parsedData.message);
+                }
+                if (parsedData.question) {
+                  setWebhookQuestion(parsedData.question);
+                  console.log("Found question in parsed webhook array:", parsedData.question);
+                }
               }
             } catch (error) {
               console.error("Error parsing webhook message in CardReading:", error);
@@ -59,16 +70,26 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           // Try to get message directly from the response
           if (webhookResponse.message) {
             setWebhookMessage(webhookResponse.message);
-            return;
+          }
+          
+          // Try to get question directly from the response
+          if (webhookResponse.question) {
+            setWebhookQuestion(webhookResponse.question);
           }
           
           // Try to parse returnwebhoock if it exists
           if (typeof webhookResponse.returnwebhoock === 'string') {
             try {
               const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-              if (parsedData && parsedData.message) {
-                setWebhookMessage(parsedData.message);
-                console.log("Found message in parsed webhook object:", parsedData.message);
+              if (parsedData) {
+                if (parsedData.message) {
+                  setWebhookMessage(parsedData.message);
+                  console.log("Found message in parsed webhook object:", parsedData.message);
+                }
+                if (parsedData.question) {
+                  setWebhookQuestion(parsedData.question);
+                  console.log("Found question in parsed webhook object:", parsedData.question);
+                }
               }
             } catch (error) {
               console.error("Error parsing webhook message in CardReading:", error);
@@ -101,9 +122,6 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
             neonEffect="purple"
           />
         </h3>
-        <p className="text-sm text-gray-600">
-          {!finalMessage ? t('tarot.tapToReveal') : t('tarot.readingCompleteDescription')}
-        </p>
       </div>
       
       {!finalMessage ? (
@@ -112,6 +130,7 @@ const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
           handleCardClick={revealCard}
           loading={loading}
           webhookMessage={webhookMessage}
+          webhookQuestion={webhookQuestion}
           cardBackImage={cardBackImage}
         />
       ) : (

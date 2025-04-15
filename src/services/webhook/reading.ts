@@ -1,3 +1,4 @@
+
 import { WebhookResponse } from '@/types/tarot';
 import { callWebhook } from './core';
 import { logReadingWebhook } from './logger';
@@ -20,9 +21,11 @@ export const callReadingWebhook = async (
     throw new Error("No user ID available");
   }
 
+  // Create temporary response while waiting for actual webhook response
   const tempResponse: WebhookResponse = {
     selected_cards: Array.from({ length: 3 }, () => Math.floor(Math.random() * 21)),
     message: "Selecciona tus cartas del tarot...",
+    question: intention || null,
     reading: null,
     cards: null,
     returnwebhoock: null,
@@ -35,6 +38,7 @@ export const callReadingWebhook = async (
 
   pendingReading = (async () => {
     try {
+      // Make the actual webhook call
       const result = await callWebhook<WebhookResponse>(
         { 
           url: webhookUrl, 
@@ -48,11 +52,19 @@ export const callReadingWebhook = async (
         throw new Error(result.error || 'No data received');
       }
 
-      if (result.data.selected_cards && result.data.message) {
+      // Validate webhook response format
+      if (result.data.selected_cards) {
+        // Ensure card indices are within valid range
         result.data.selected_cards = result.data.selected_cards.map(index => 
           Math.min(Math.max(0, index), 21)
         );
 
+        // Add the question to the response for display
+        if (!result.data.question && intention) {
+          result.data.question = intention;
+        }
+
+        // Log the webhook response for debugging
         logReadingWebhook({
           url: webhookUrl,
           requestData: { userid: userId, intention },
@@ -61,6 +73,7 @@ export const callReadingWebhook = async (
           environment
         });
 
+        // Dispatch event to notify other components the reading is ready
         window.dispatchEvent(new CustomEvent('readingReady', { 
           detail: result.data 
         }));

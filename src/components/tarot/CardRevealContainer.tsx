@@ -13,6 +13,7 @@ interface CardRevealContainerProps {
   handleCardClick: (index: number) => void;
   loading: boolean;
   webhookMessage: string | null;
+  webhookQuestion?: string | null;
   cardBackImage: string;
 }
 
@@ -21,6 +22,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   handleCardClick,
   loading,
   webhookMessage,
+  webhookQuestion,
   cardBackImage
 }) => {
   const { t } = useTranslation();
@@ -66,10 +68,6 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
   
   return (
     <div className="space-y-8">
-      <p className="text-gray-600 text-sm text-center">
-        {t('tarot.tapToReveal')}
-      </p>
-      
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
         {selectedCards.map((card, index) => (
           <CardItem
@@ -87,6 +85,11 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
       
       {allRevealed && webhookMessage && (
         <div className="mt-10 space-y-6">
+          {webhookQuestion && (
+            <div className="p-5 bg-purple-50 border border-purple-200 rounded-lg text-center">
+              <p className="text-lg font-medium text-purple-800">{webhookQuestion}</p>
+            </div>
+          )}
           <div className="p-5 bg-amber-50 border border-amber-200 rounded-lg text-center">
             <p className="text-lg font-medium text-amber-800">{webhookMessage}</p>
           </div>
