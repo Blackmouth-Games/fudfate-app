@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useWallet } from './WalletContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +38,23 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [webhookResponse, setWebhookResponse] = useState<WebhookResponse | null>(null);
   const [isCallingWebhook, setIsCallingWebhook] = useState(false);
 
+  // Listen for readingReady events to update the webhook response
+  useEffect(() => {
+    const handleReadingReady = (event: CustomEvent) => {
+      const readingData = event.detail;
+      if (readingData && !readingData.isTemporary) {
+        console.log("Reading ready event received:", readingData);
+        setWebhookResponse(readingData);
+      }
+    };
+
+    window.addEventListener('readingReady', handleReadingReady as EventListener);
+    
+    return () => {
+      window.removeEventListener('readingReady', handleReadingReady as EventListener);
+    };
+  }, []);
+
   const startReading = async () => {
     if (!connected) {
       toast.error(t('errors.walletNotConnected'));
@@ -72,35 +90,32 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setPhase('preparing');
       
       // Call the reading webhook
-      const webhookData = await callReadingWebhook(
+      const tempWebhookData = await callReadingWebhook(
         webhooks.reading, 
         userData?.userId, 
         intention,
         environment
       );
       
-      // If webhook call was debounced or failed
-      if (!webhookData) {
-        if (environment !== 'development') {
-          console.log('Reading webhook call was debounced or failed');
-          toast.error(t('errors.serverError'));
-          setPhase('intention');
-          return;
-        }
+      // Set the temporary webhook response first
+      if (tempWebhookData) {
+        console.log("Setting temporary webhook response:", tempWebhookData);
+        setWebhookResponse(tempWebhookData);
       }
       
-      setWebhookResponse(webhookData);
-      console.log("Webhook response received:", {
-        hasData: !!webhookData,
-        timestamp: new Date().toISOString(),
-        responseType: webhookData ? typeof webhookData : 'null'
-      });
+      // If webhook call failed completely
+      if (!tempWebhookData && environment !== 'development') {
+        console.log('Reading webhook call failed');
+        toast.error(t('errors.serverError'));
+        setPhase('intention');
+        return;
+      }
       
       // Parse the webhook response if needed to extract deck information
       let selectedDeckFromWebhook: Deck | undefined;
-      if (webhookData?.returnwebhoock) {
+      if (tempWebhookData?.returnwebhoock) {
         try {
-          const parsedData = JSON.parse(webhookData.returnwebhoock);
+          const parsedData = JSON.parse(tempWebhookData.returnwebhoock);
           selectedDeckFromWebhook = parsedData.selected_deck;
           console.log('Parsed deck from webhook:', selectedDeckFromWebhook);
         } catch (error) {
@@ -117,7 +132,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       const success = await prepareCardSelection(
         intention,
         selectedDeck,
-        webhookData,
+        tempWebhookData,
         (msg) => setIntroMessage(msg),
         (cards) => setAvailableCards(cards)
       );

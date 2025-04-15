@@ -66,6 +66,16 @@ export const useTarotOperations = () => {
     try {
       setLoading(true);
       
+      // Skip temporary webhook responses
+      if (!webhookResponse || webhookResponse.isTemporary === true) {
+        console.log("Waiting for non-temporary webhook response...");
+        toast.error("Reading data not ready yet. Please wait a moment and try again.");
+        setLoading(false);
+        return false;
+      }
+      
+      console.log("Using non-temporary webhook response for card reveal:", webhookResponse);
+      
       // Parse webhook response to extract card indices and message
       let webhookCards: number[] = [];
       let webhookMessage: string | undefined;
@@ -73,8 +83,6 @@ export const useTarotOperations = () => {
       
       // Process webhook data to extract card indices and message
       if (webhookResponse) {
-        console.log("Processing webhook response for card reveal:", webhookResponse);
-        
         // Try to get selected_cards directly from the response
         if (Array.isArray(webhookResponse.selected_cards)) {
           webhookCards = webhookResponse.selected_cards;

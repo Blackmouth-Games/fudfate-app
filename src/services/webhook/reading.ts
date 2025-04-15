@@ -63,6 +63,9 @@ export const callReadingWebhook = async (
         if (!result.data.question && intention) {
           result.data.question = intention;
         }
+        
+        // Mark this response as non-temporary
+        result.data.isTemporary = false;
 
         // Log the webhook response for debugging
         logReadingWebhook({
