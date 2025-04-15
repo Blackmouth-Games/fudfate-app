@@ -19,6 +19,7 @@ export const connectMetamask = async (): Promise<{ address: string | null; netwo
 
   try {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
+    // Use Web3Provider from ethers.js
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const address = await signer.getAddress();
