@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   PanelLeft, Code, X, GripHorizontal
@@ -17,6 +18,7 @@ import RoutesTab from './TabsContent/RoutesTab';
 import WebhookLogTab from './TabsContent/WebhookLogTab';
 import ConnectionLogsTab from './TabsContent/ConnectionLogsTab';
 import DecksTab from './TabsContent/DecksTab';
+import ReadingLogsTab from './TabsContent/ReadingLogsTab'; // Added this import
 import { useTarot } from '@/contexts/TarotContext';
 
 interface DevToolPanelProps {
