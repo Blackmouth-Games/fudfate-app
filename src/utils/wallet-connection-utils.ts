@@ -1,4 +1,3 @@
-
 import { ethers } from 'ethers';
 import { PublicKey } from '@solana/web3.js';
 import { UserData, WalletType } from '@/types/walletTypes';
@@ -19,9 +18,9 @@ export const connectMetamask = async (): Promise<{ address: string | null; netwo
 
   try {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
-    // Use Web3Provider from ethers.js
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
+    // Use BrowserProvider from ethers.js v6
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
     const address = await signer.getAddress();
     const network = await provider.getNetwork();
     const networkId = network.chainId.toString();
