@@ -6,6 +6,7 @@ import CardItem from './CardItem';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import CardDetailsDialog from './CardDetailsDialog';
+import ShareReading from './ShareReading';
 
 interface CardRevealContainerProps {
   selectedCards: ReadingCard[];
@@ -57,20 +58,6 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
     setIsDetailsOpen(true);
   };
   
-  // Share to Twitter/X
-  const shareToX = () => {
-    // Only share final message without duplicating it
-    const text = `I just got a crypto tarot reading! ${webhookMessage || 'Check out my fortune!'}`;
-    const url = window.location.href;
-    const hashtags = 'CryptoTarot,FUDFate';
-    const token = '$FDft @fudfate';
-    
-    window.open(
-      `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${hashtags}&via=${encodeURIComponent(token)}`,
-      '_blank'
-    );
-  };
-  
   return (
     <div className="space-y-8">
       <p className="text-gray-600 text-sm text-center">
@@ -99,13 +86,7 @@ const CardRevealContainer: React.FC<CardRevealContainerProps> = ({
           </div>
           
           <div className="mt-6 flex flex-col items-center space-y-4">
-            <Button 
-              onClick={shareToX}
-              className="flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white"
-            >
-              <X className="h-4 w-4" />
-              {t('tarot.shareOnX')}
-            </Button>
+            <ShareReading className="w-full" />
           </div>
         </div>
       )}

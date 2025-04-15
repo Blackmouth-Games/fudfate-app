@@ -54,8 +54,6 @@ const CardItem: React.FC<CardItemProps> = ({
       // Convert png to jpg if needed
       if (!imagePath.endsWith('.jpg') && !imagePath.endsWith('.png')) {
         imagePath = `${imagePath}.jpg`;
-      } else if (imagePath.endsWith('.png')) {
-        imagePath = imagePath.replace('.png', '.jpg');
       }
       
       console.log(`Card ${index} image path:`, imagePath);
@@ -63,19 +61,18 @@ const CardItem: React.FC<CardItemProps> = ({
       setHasError(false);
     } else {
       console.warn(`Card ${index} has no image:`, card);
-      setFrontImageSrc(`/img/cards/deck_default/0_TheDegen.jpg`);
+      setFrontImageSrc(`/img/cards/${selectedDeck.replace('deck', 'deck_')}/0_TheDegen.jpg`);
     }
     
     // For card back
     if (cardBackImage) {
-      // Ensure the back image path starts with /img/
-      const backPath = cardBackImage.startsWith('/') 
-        ? cardBackImage 
-        : `/img/cards/${selectedDeck}/99_BACK.jpg`;
-      
-      setBackImageSrc(backPath);
+      setBackImageSrc(cardBackImage);
     } else {
-      setBackImageSrc(`/img/cards/${selectedDeck}/99_BACK.jpg`);
+      // Ensure we're using the correct format (deck_X instead of deckX)
+      const formattedDeck = selectedDeck.includes('_') ? 
+        selectedDeck : 
+        `deck_${selectedDeck.replace('deck', '')}`;
+      setBackImageSrc(`/img/cards/${formattedDeck}/99_BACK.jpg`);
     }
 
     // Reset loading state when card changes
@@ -101,44 +98,36 @@ const CardItem: React.FC<CardItemProps> = ({
       transition={{ delay: index * 0.1, duration: 0.3 }}
     >
       <div className={`tarot-card ${loading ? 'opacity-70 pointer-events-none' : ''} ${isRevealed ? 'is-flipped' : ''}`}>
-        <div className="card-face card-back">
-          <ImageLoader
-            src={backImageSrc} 
-            alt="Card Back" 
-            className="w-full h-full object-cover rounded-lg"
-            fallbackSrc="/img/cards/deck_default/99_BACK.jpg"
-            aspectRatio={5/8}
-            skeletonClassName="bg-amber-100"
-            onLoad={() => setIsImageLoading(false)}
-            onError={() => {
-              console.error(`Failed to load back image: ${backImageSrc}`);
-              setHasError(true);
-            }}
-          />
-        </div>
-        
-        <div className="card-face card-front">
-          <ImageLoader
-            src={frontImageSrc} 
-            alt={card?.name || 'Tarot Card'}
-            className="w-full h-full object-cover rounded-lg"
-            fallbackSrc="/img/cards/deck_default/0_TheDegen.jpg"
-            aspectRatio={5/8}
-            skeletonClassName="bg-amber-100"
-            onLoad={() => setIsImageLoading(false)}
-            onError={() => {
-              console.error(`Failed to load front image: ${frontImageSrc}`);
-              setHasError(true);
-            }}
-          />
-          {isRevealed && (
-            <motion.div 
-              className="absolute inset-0 bg-amber-400/20 rounded-lg"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
+        <div className="tarot-card-inner">
+          <div className="tarot-card-back">
+            <img 
+              src={backImageSrc} 
+              alt="Card Back" 
+              className="w-full h-full object-cover rounded-lg"
+              onError={(e) => {
+                console.error(`Failed to load back image: ${backImageSrc}`);
+                e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
+              }}
             />
-          )}
+          </div>
+          
+          <div className="tarot-card-front">
+            {isRevealed && (
+              <>
+                <div className="tarot-card-name">{card?.name || 'Unknown Card'}</div>
+                <div className="tarot-card-image">
+                  <img 
+                    src={frontImageSrc} 
+                    alt={card?.name || 'Tarot Card'}
+                    onError={(e) => {
+                      console.error(`Failed to load front image: ${frontImageSrc}`);
+                      e.currentTarget.src = "/img/cards/deck_1/0_TheDegen.jpg";
+                    }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </motion.div>

@@ -1,20 +1,15 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Trash2, ChevronDown, ChevronRight, Maximize2, Minimize2, GripHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { Resizable } from 're-resizable';
+import { WebhookLog } from '@/types/webhook';
 
-interface WebhookLog {
-  type: string;
-  url: string;
-  timestamp: string;
-  status?: number;
-  error?: string;
-  request?: any;
-  response?: any;
-}
+// Key for localStorage
+const WEBHOOK_LOGS_KEY = 'webhook_logs';
 
 const WebhookLogTab = () => {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
@@ -22,6 +17,24 @@ const WebhookLogTab = () => {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [sectionHeights, setSectionHeights] = useState<Record<string, number>>({});
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Load logs from localStorage on mount
+  useEffect(() => {
+    loadLogsFromStorage();
+  }, []);
+
+  const loadLogsFromStorage = () => {
+    try {
+      const storedLogs = localStorage.getItem(WEBHOOK_LOGS_KEY);
+      if (storedLogs) {
+        const parsedLogs = JSON.parse(storedLogs);
+        setLogs(parsedLogs);
+        console.log(`Loaded ${parsedLogs.length} webhook logs from storage`);
+      }
+    } catch (error) {
+      console.error('Error loading webhook logs from storage:', error);
+    }
+  };
 
   const toggleLogExpansion = (index: number) => {
     const newExpanded = new Set(expandedLogs);
@@ -43,6 +56,7 @@ const WebhookLogTab = () => {
 
   const clearLogs = () => {
     setLogs([]);
+    localStorage.removeItem(WEBHOOK_LOGS_KEY);
     toast.success('Webhook logs cleared');
   };
 
@@ -60,7 +74,15 @@ const WebhookLogTab = () => {
   };
 
   const addLog = (log: WebhookLog) => {
-    setLogs(prev => [log, ...prev]);
+    setLogs(prev => {
+      const newLogs = [log, ...prev];
+      try {
+        localStorage.setItem(WEBHOOK_LOGS_KEY, JSON.stringify(newLogs.slice(0, 100)));
+      } catch (error) {
+        console.error('Error saving logs to localStorage:', error);
+      }
+      return newLogs;
+    });
   };
 
   // Expose addLog function globally
@@ -156,7 +178,7 @@ const WebhookLogTab = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.reload()}
+            onClick={loadLogsFromStorage}
             className="h-7 text-xs flex items-center gap-1"
           >
             <RefreshCw className="h-3 w-3" />
@@ -172,7 +194,7 @@ const WebhookLogTab = () => {
         <div className="space-y-2 p-4">
           {logs.map((log, index) => (
             <div
-              key={index}
+              key={log.id || index}
               className="border rounded-lg overflow-hidden bg-white shadow-sm"
             >
               <div
@@ -186,7 +208,7 @@ const WebhookLogTab = () => {
                   {log.type}
                 </Badge>
                 <div className="flex-grow text-xs truncate font-mono">
-                  {new URL(log.url).pathname}
+                  {log.url ? new URL(log.url).pathname : 'unknown-path'}
                 </div>
                 <Badge
                   variant={log.error ? 'destructive' : (log.status === 200 ? 'default' : 'secondary')}

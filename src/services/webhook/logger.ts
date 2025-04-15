@@ -1,10 +1,38 @@
-
 import { Environment } from '@/config/webhooks';
 
 // Extend the Window interface to include the addWebhookLog function
 declare global {
   interface Window {
     addWebhookLog?: (log: any) => void;
+  }
+}
+
+// Key for localStorage
+const WEBHOOK_LOGS_KEY = 'webhook_logs';
+
+/**
+ * Get stored webhook logs from localStorage
+ */
+const getStoredLogs = (): any[] => {
+  try {
+    const logs = localStorage.getItem(WEBHOOK_LOGS_KEY);
+    return logs ? JSON.parse(logs) : [];
+  } catch (error) {
+    console.error('Error loading webhook logs:', error);
+    return [];
+  }
+}
+
+/**
+ * Store webhook logs in localStorage
+ */
+const storeWebhookLogs = (logs: any[]) => {
+  try {
+    // Keep only the latest 100 logs to prevent localStorage overflow
+    const trimmedLogs = logs.slice(0, 100);
+    localStorage.setItem(WEBHOOK_LOGS_KEY, JSON.stringify(trimmedLogs));
+  } catch (error) {
+    console.error('Error saving webhook logs:', error);
   }
 }
 
@@ -21,8 +49,9 @@ export const logWebhookCall = (
   environment: Environment = 'production',
   method: string = 'POST'
 ) => {
-  // Create log entry
+  // Create log entry with UUID
   const log = {
+    id: crypto.randomUUID(),
     type,
     url,
     timestamp: new Date().toISOString(),
@@ -33,6 +62,10 @@ export const logWebhookCall = (
     environment,
     method
   };
+
+  // Save to localStorage
+  const logs = getStoredLogs();
+  storeWebhookLogs([log, ...logs]);
 
   // Add to DevTools logs if available
   if (typeof window !== 'undefined' && window.addWebhookLog) {
