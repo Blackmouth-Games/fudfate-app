@@ -1,9 +1,33 @@
-
 import { useState } from 'react';
 import { ReadingCard, WebhookResponse, Deck } from '@/types/tarot';
 import { generateCardInterpretation } from '@/services/tarot-service';
 import { toast } from 'sonner';
 import tarotCards from '@/data/tarotCards';
+
+// Helper function to get card by numeric index for a specific deck
+const getCardByIndex = (index: number, selectedDeck: Deck): ReadingCard | undefined => {
+  // Filter cards by deck first
+  const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
+  
+  // Get the card by its numeric ID from the image filename
+  const card = deckCards.find(card => {
+    // Extract numeric ID from the image path
+    // Format: /img/cards/deck_X/6_TheFork.jpg
+    const filename = card.image.split('/').pop() || '';
+    const numericId = parseInt(filename.split('_')[0]);
+    return numericId === index;
+  });
+
+  if (!card) return undefined;
+
+  // Convert TarotCard to ReadingCard
+  return {
+    ...card,
+    revealed: false,
+    interpretation: '',
+    deck: selectedDeck
+  };
+};
 
 export const useCardReveal = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -47,22 +71,40 @@ export const useCardReveal = () => {
       setRetryCount(0);
       setIsWaitingForWebhook(false);
       
-      // Get card ID from the webhook response selected_cards array based on position
-      // Log for debugging what card we're actually revealing
+      // Get card index from webhook response
+      const webhookCardIndex = webhookResponse.selected_cards?.[index];
+      
+      if (webhookCardIndex === undefined) {
+        console.error('No card index found in webhook response for position:', index);
+        return false;
+      }
+      
+      // Get the card by its numeric index from the selected deck
+      const webhookCard = getCardByIndex(webhookCardIndex, selectedDeck);
+      
+      if (!webhookCard) {
+        console.error('Card not found for webhook index:', webhookCardIndex, 'in deck:', selectedDeck);
+        return false;
+      }
+      
       console.log(`Revealing card at index ${index}:`, {
-        cardInPosition: card,
-        webhookCardIndex: webhookResponse.selected_cards?.[index],
+        position: index,
+        webhookCardIndex,
+        webhookCard,
+        deck: selectedDeck,
+        imagePath: webhookCard.image,
         allWebhookCards: webhookResponse.selected_cards
       });
       
-      // Get interpretation for the revealed card - use the card's actual ID
-      const interpretation = await generateCardInterpretation(card.id, intention);
+      // Get interpretation for the revealed card
+      const interpretation = await generateCardInterpretation(webhookCard.id, intention);
       
       const updatedCards = [...selectedCards];
       updatedCards[index] = {
-        ...card,
+        ...webhookCard,
         interpretation,
-        revealed: true
+        revealed: true,
+        deck: selectedDeck
       };
       
       setSelectedCards(updatedCards);

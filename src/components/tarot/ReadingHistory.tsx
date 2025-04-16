@@ -78,6 +78,9 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           user_id: reading.user_id || reading.userid || userData?.userId || '',
           selected_cards: reading.selected_cards || []
         };
+      }).sort((a, b) => {
+        // Sort by date in descending order (most recent first)
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
       })
     : [];
 

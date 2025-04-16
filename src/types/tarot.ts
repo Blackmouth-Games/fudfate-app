@@ -1,6 +1,14 @@
-
 export type Deck = 'deck_1' | 'deck_2' | 'deck_3' | string;
 export type ReadingPhase = 'intention' | 'preparing' | 'selection' | 'reading' | 'complete';
+
+export interface TarotCard {
+  numericId: number;     // 0-21, único por mazo
+  id: string;           // Ejemplo: "deck_1_0" (combinación de deck y numericId)
+  name: string;         // Nombre display de la carta
+  image: string;        // Ruta de la imagen: `/img/cards/${deck}/${numericId}_${name}.jpg`
+  description: string;
+  deck: string;
+}
 
 export interface Card {
   id: string;

@@ -51,27 +51,61 @@ export const connectPhantom = async (): Promise<{ address: string | null; networ
 };
 
 export const parseUserData = (data: any): UserData | null => {
-  if (!data) return null;
+  console.log('Raw webhook response:', data);
+  
+  if (!data) {
+    console.error("Webhook response is null or undefined");
+    return null;
+  }
+
+  // If data is a string, try to parse it as JSON
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch (error) {
+      console.error("Failed to parse webhook response as JSON:", error);
+      return null;
+    }
+  }
+
+  // If data is an array, take the first item
+  if (Array.isArray(data)) {
+    console.log('Webhook response is an array, using first item');
+    data = data[0];
+  }
 
   // Try to get user ID from the response
-  const userId = data.userid || data.userId || null;
+  const userId = data.userid || data.userId || data.user_id || null;
   if (!userId) {
-    console.error("No user ID found in webhook response");
+    console.error("No user ID found in webhook response. Available fields:", Object.keys(data));
     return null;
   }
 
   // Parse whitelist status, defaulting to false if not present
-  const isWhitelisted = data.whitelist === true;
+  const isWhitelisted = data.whitelist === true || 
+                       data.whitelist === 'true' || 
+                       data.whitelisted === true || 
+                       data.whitelisted === 'true';
   
   // Parse runs availability, defaulting to false if not present
-  const runsToday = data.runsToday === true;
+  const runsToday = data.runsToday === true || 
+                    data.runs_today === true || 
+                    data.runsAvailable === true;
 
-  return {
+  const selectedDeck = data.selected_deck || 
+                      data.selectedDeck || 
+                      data.deck;
+
+  const userData = {
     userId,
     runsToday,
     whitelisted: isWhitelisted,
-    selectedDeck: data.selectedDeck
+    selectedDeck
   };
+
+  console.log('Parsed user data:', userData);
+  console.log('Original data fields:', Object.keys(data));
+  return userData;
 };
 
 export const fetchAvailableDecks = async (
@@ -110,6 +144,8 @@ export const processDecksFromApi = (decksData: any[]): any[] => {
     id: deck.id,
     name: deck.name,
     description: deck.description,
-    image: deck.image
+    image: deck.image,
+    is_active: deck.is_active || false,
+    created_at: deck.created_at || new Date().toISOString()
   }));
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +22,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [animatingToSlot, setAnimatingToSlot] = useState<number | null>(null);
   const [highlightedSlot, setHighlightedSlot] = useState<number | null>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
   
   // Use the correct path format for card back images
   const cardBackImage = getCardBackPath(selectedDeck);
@@ -34,6 +34,16 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
     const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
     setAllDeckCards(deckCards);
   }, [selectedDeck]);
+
+  // Reset selection state when phase changes
+  useEffect(() => {
+    if (phase !== 'selection') {
+      setSelectedCardId(null);
+      setAnimatingToSlot(null);
+      setHighlightedSlot(null);
+      setIsSelecting(false);
+    }
+  }, [phase]);
   
   // Check if user can make readings (userData.runsToday should be true for "can read")
   // Empty state - no cards available or user can't read
@@ -58,10 +68,13 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
   }
 
   const handleCardSelect = (cardId: string) => {
+    if (isSelecting || phase !== 'selection') return;
     console.log("Selecting card:", cardId);
     
     // Only allow selection if we haven't selected 3 cards yet
     if (selectedCards.length >= 3) return;
+    
+    setIsSelecting(true);
     
     // Set the card as selected for animation
     setSelectedCardId(cardId);
@@ -76,6 +89,7 @@ const CardSelection: React.FC<CardSelectionProps> = ({ className = '' }) => {
       setSelectedCardId(null);
       setAnimatingToSlot(null);
       setHighlightedSlot(null);
+      setIsSelecting(false);
     }, 500); // Match this to the animation duration
   };
 

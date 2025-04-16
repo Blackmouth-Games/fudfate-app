@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ReadingCard } from '@/types/tarot';
 import { motion } from 'framer-motion';
@@ -39,7 +38,7 @@ const CardItem: React.FC<CardItemProps> = ({
       selectedDeck,
       id: card.id,
       name: card.name,
-      deck: card.deck || selectedDeck,
+      deck: card.deck,
       revealed: card.revealed
     });
   }, [card, index, selectedDeck]);
@@ -47,41 +46,24 @@ const CardItem: React.FC<CardItemProps> = ({
   // Set up image sources with proper fallbacks
   useEffect(() => {
     // For card front (when revealed)
-    if (card?.image) {
-      // Try to use the image from the card object
-      let imagePath = card.image;
-      
-      // Make sure to handle different image path formats
-      if (!imagePath.startsWith('/')) {
-        // Use card's deck if available, otherwise use the selected deck
-        const cardDeck = card.deck || selectedDeck;
-        imagePath = `/img/cards/${cardDeck}/${imagePath}`;
-      }
-      
-      // Convert png to jpg if needed
-      if (!imagePath.endsWith('.jpg') && !imagePath.endsWith('.png')) {
-        imagePath = `${imagePath}.jpg`;
-      }
-      
+    if (card?.id) {
+      // Use the card's deck if available, otherwise use the selected deck
+      const cardDeck = card.deck || selectedDeck;
+      const imagePath = getCardPath(cardDeck, card.id);
       console.log(`Card ${index} front image path:`, imagePath);
       setFrontImageSrc(imagePath);
-    } else if (card?.id) {
-      // Use the card ID to construct a path
-      const deckToUse = card.deck || selectedDeck;
-      const imagePath = getCardPath(deckToUse, card.id);
-      console.log(`Card ${index} generated front image path:`, imagePath);
-      setFrontImageSrc(imagePath);
     } else {
-      console.warn(`Card ${index} has no image or ID:`, card);
+      console.warn(`Card ${index} has no ID:`, card);
       setFrontImageSrc(`/img/cards/deck_1/0_TheDegen.jpg`);
     }
     
-    // For card back, use the provided cardBackImage directly
+    // For card back, use the provided cardBackImage or generate from deck
     if (cardBackImage) {
-      console.log(`Card ${index} back image path:`, cardBackImage);
-      setBackImageSrc(cardBackImage);
+      const backPath = cardBackImage.replace('.png', '.jpg');
+      console.log(`Card ${index} back image path:`, backPath);
+      setBackImageSrc(backPath);
     } else {
-      // Fallback to using the selectedDeck
+      // Fallback to using the card's deck or selected deck
       const backPath = getCardBackPath(card.deck || selectedDeck);
       console.log(`Card ${index} fallback back image path:`, backPath);
       setBackImageSrc(backPath);
@@ -143,6 +125,7 @@ const CardItem: React.FC<CardItemProps> = ({
                         "/img/cards/deck_1/0_TheDegen.jpg";
                       e.currentTarget.src = fallbackImage;
                     }}
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </>

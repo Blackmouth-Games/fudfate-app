@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTarot } from '@/contexts/TarotContext';
@@ -29,11 +28,6 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!userData?.whitelisted) {
-      toast.error(t('errors.notWhitelisted') || 'You are not whitelisted to use this feature');
-      return;
-    }
     
     if (intention.trim().length < 3) {
       toast.error(t('tarot.intentionTooShort'));
@@ -71,18 +65,9 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
           </>
         );
       default:
-        return (
+        return (Number(userData?.runsToday) > 0) ? (
           <Card className="border-amber-400/50 shadow-md">
             <CardContent className="pt-6">
-              {!userData?.whitelisted && (
-                <Alert variant="destructive" className="mb-6">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    {t('errors.notWhitelisted') || 'You are not whitelisted to use this feature'}
-                  </AlertDescription>
-                </Alert>
-              )}
-              
               <div className="text-center mb-6">
                 <div className="mb-2 overflow-visible">
                   <GlitchText 
@@ -96,45 +81,38 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
                 </p>
               </div>
               
-              {userData && userData.runsToday ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="relative">
-                    <Input
-                      value={intention}
-                      onChange={(e) => setIntention(e.target.value)}
-                      placeholder={t('tarot.enterYourQuestion')}
-                      className="pr-8 text-center"
-                      disabled={!userData.whitelisted}
-                    />
-                    {intention && (
-                      <button 
-                        type="button" 
-                        onClick={clearIntention}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <X size={16} />
-                      </button>
-                    )}
-                  </div>
-                  
-                  <div className="pt-2 flex justify-center">
-                    <Button 
-                      type="submit" 
-                      disabled={intention.trim().length < 3 || loading || !userData.whitelisted}
-                      className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="relative">
+                  <Input
+                    value={intention}
+                    onChange={(e) => setIntention(e.target.value)}
+                    placeholder={t('tarot.enterYourQuestion')}
+                    className="pr-8 text-center"
+                  />
+                  {intention && (
+                    <button 
+                      type="button" 
+                      onClick={clearIntention}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     >
-                      <Sparkles size={14} /> {t('tarot.seekGuidance')}
-                    </Button>
-                  </div>
-                </form>
-              ) : (
-                <div className="text-center text-sm text-amber-600 mt-2">
-                  {t('tarot.noReadingsAvailable')}
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
-              )}
+                
+                <div className="pt-2 flex justify-center">
+                  <Button 
+                    type="submit" 
+                    disabled={intention.trim().length < 3 || loading}
+                    className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
+                  >
+                    <Sparkles size={14} /> {t('tarot.seekGuidance')}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
-        );
+        ) : null;
     }
   };
 
