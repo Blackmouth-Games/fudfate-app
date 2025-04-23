@@ -15,7 +15,9 @@ const Congrats: React.FC = () => {
 
   // Redirect to index if wallet is connected and we have user data
   React.useEffect(() => {
-    if (connected && userData) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const bypassRedirect = searchParams.get('bypass') === 'true';
+    if (connected && userData && !bypassRedirect) {
       navigate('/');
     }
   }, [connected, userData, navigate]);
