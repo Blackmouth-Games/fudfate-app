@@ -46,7 +46,10 @@
     "address": "Address",
     "network": "Network",
     "balance": "Balance",
-    "switchNetwork": "Switch Network"
+    "switchNetwork": "Switch Network",
+    "metamaskNotInstalled": "Metamask is not installed",
+    "phantomNotInstalled": "Phantom is not installed",
+    "disconnectWallet": "Disconnect Wallet"
   },
   "tarot": {
     "askTheTarot": "Ask the Tarot",
@@ -85,7 +88,6 @@
     "cryptoFortuneAwaits": "Your Crypto Fortune Awaits",
     "noMoreReadings": "No More Readings Available",
     "comeBackTomorrow": "You've used all your readings for today. Come back tomorrow for more insights!",
-    "noReadingsAvailable": "You don't have any readings available today",
     "readingsExhaustedDescription": "You've reached your daily limit of tarot readings. The cards need time to recharge their mystical energies. Return tomorrow for fresh insights into your crypto journey.",
     "interpretationLoading": "Interpreting the cards...",
     "shareYourJourney": "Share your journey through the crypto realm",
@@ -99,7 +101,6 @@
     "comingSoon": "Coming Soon",
     "locked": "Locked",
     "noReadingsTitle": "No Readings Found",
-    "noReadingsAvailable": "You haven't done any tarot readings yet. Start a new reading to see your fortune!",
     "backToHistory": "Back to History",
     "view": "View Details",
     "noQuestion": "No question provided",
@@ -109,7 +110,19 @@
     "cosmicMessageReceived": "Cosmic Message Received",
     "readingHistory": "Your Reading History",
     "cards": "Cards",
-    "response": "Interpretation"
+    "response": "Interpretation",
+    "intentionPlaceholder": "Enter your question or intention...",
+    "clear": "Clear",
+    "start": "Start",
+    "question": "Question",
+    "date": "Date",
+    "invokingEnergies": "Invoking Energies",
+    "starting": "Starting...",
+    "preparingYourReading": "Preparing your reading...",
+    "readingsExhausted": "Readings Exhausted",
+    "todayReadingDone": "Today's Reading Completed",
+    "todayReadingDoneDescription": "You've already done today's reading. Check your history below.",
+    "noCards": "No cards"
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",

@@ -112,7 +112,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onClick={disconnectWallet} className="text-red-500 cursor-pointer">
             <LogOut className="mr-2 h-4 w-4" />
-            {t('wallet.disconnect')}
+            {t('wallet.disconnectWallet')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -140,7 +140,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               alt="Metamask" 
               className="w-5 h-5 mr-2"
             />
-            {isMetamaskAvailable ? t('wallet.connectMetamask') : (
+            {isMetamaskAvailable ? t('wallet.connectToMetamask') : (
               <div className="flex items-center">
                 {t('wallet.metamaskNotInstalled')}
                 <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
@@ -171,7 +171,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               alt="Phantom" 
               className="w-5 h-5 mr-2"
             />
-            {isPhantomAvailable ? t('wallet.connectPhantom') : (
+            {isPhantomAvailable ? t('wallet.connectToPhantom') : (
               <div className="flex items-center">
                 {t('wallet.phantomNotInstalled')}
                 <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
