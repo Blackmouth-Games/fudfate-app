@@ -1,18 +1,17 @@
-
 import { Environment } from '@/config/webhooks';
 
 // Interface for the webhook log
 export interface WebhookLog {
   id: string;
-  timestamp: string;
   type: string;
   url: string;
-  method?: string;
-  request: any;
-  response?: any;
-  error?: string;
+  timestamp: string;
   status?: number;
-  environment: string;
+  error?: string;
+  request: any;
+  response: any;
+  environment: Environment;
+  method: string;
 }
 
 export interface WebhookRequestOptions {
@@ -22,7 +21,7 @@ export interface WebhookRequestOptions {
   method?: string;
 }
 
-export interface WebhookCallResult<T> {
+export interface WebhookCallResult<T = any> {
   success: boolean;
   data?: T;
   error?: string;

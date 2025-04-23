@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ReadingCard } from '@/types/tarot';
 import GlitchText from '@/components/GlitchText';
-import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { motion } from 'framer-motion';
 import ShareReading from './ShareReading';
@@ -12,14 +10,14 @@ interface CompletedReadingProps {
   finalMessage: string;
   selectedCards: ReadingCard[];
   resetReading: () => void;
-  hideResetButton?: boolean; // Added this optional prop
+  hideResetButton?: boolean;
 }
 
 const CompletedReading: React.FC<CompletedReadingProps> = ({
   finalMessage,
   selectedCards,
   resetReading,
-  hideResetButton = false // Default to false
+  hideResetButton = false
 }) => {
   const { t } = useTranslation();
   
@@ -77,7 +75,7 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
       </motion.div>
       
       <motion.div 
-        className="bg-white p-6 rounded-lg border-2 border-amber-300 shadow-md"
+        className="bg-white p-6 rounded-lg border-2 border-[#3ADDD9] shadow-md"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
@@ -90,21 +88,14 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
         </p>
       </motion.div>
       
-      {!hideResetButton && (
-        <motion.div 
-          className="flex justify-center pt-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.5 }}
-        >
-          <Button
-            onClick={resetReading}
-            className="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-black font-medium px-6 py-2 text-lg"
-          >
-            {t('tarot.startNewReading')}
-          </Button>
-        </motion.div>
-      )}
+      <motion.div 
+        className="flex justify-center pt-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 0.5 }}
+      >
+        <ShareReading className="w-full sm:w-auto" />
+      </motion.div>
     </div>
   );
 };

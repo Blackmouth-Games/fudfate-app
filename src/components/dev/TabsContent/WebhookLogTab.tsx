@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { WebhookLog } from '@/types/webhook';
 
 // Key for localStorage
 const WEBHOOK_LOGS_KEY = 'webhook_logs';
+const WEBHOOK_LOG_EVENT = 'webhook-log';
 
 const WebhookLogTab = () => {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
@@ -18,41 +18,63 @@ const WebhookLogTab = () => {
   const [sectionHeights, setSectionHeights] = useState<Record<string, number>>({});
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Load logs from localStorage on mount
-  useEffect(() => {
-    loadLogsFromStorage();
-  }, []);
-
-  const loadLogsFromStorage = () => {
+  // Load logs from localStorage
+  const loadLogsFromStorage = useCallback(() => {
     try {
+      console.log('WebhookLogTab: Loading logs from storage');
       const storedLogs = localStorage.getItem(WEBHOOK_LOGS_KEY);
       if (storedLogs) {
         const parsedLogs = JSON.parse(storedLogs);
+        console.log(`WebhookLogTab: Found ${parsedLogs.length} logs in storage`);
         setLogs(parsedLogs);
-        console.log(`Loaded ${parsedLogs.length} webhook logs from storage`);
+      } else {
+        console.log('WebhookLogTab: No logs found in storage');
       }
     } catch (error) {
-      console.error('Error loading webhook logs from storage:', error);
+      console.error('WebhookLogTab: Error loading logs from storage:', error);
     }
-  };
+  }, []);
 
-  const toggleLogExpansion = (index: number) => {
-    const newExpanded = new Set(expandedLogs);
-    if (newExpanded.has(index)) {
-      newExpanded.delete(index);
-    } else {
-      newExpanded.add(index);
-    }
-    setExpandedLogs(newExpanded);
-  };
+  // Handle new webhook log events
+  const handleNewLog = useCallback((event: CustomEvent<WebhookLog>) => {
+    console.log('WebhookLogTab: Received new log event:', event.detail);
+    setLogs(prevLogs => {
+      const newLog = event.detail;
+      // Ensure we don't add duplicate logs
+      const exists = prevLogs.some(log => log.id === newLog.id);
+      if (exists) {
+        console.log('WebhookLogTab: Duplicate log detected, skipping');
+        return prevLogs;
+      }
+      console.log('WebhookLogTab: Adding new log to state');
+      return [newLog, ...prevLogs].slice(0, 100);
+    });
+  }, []);
 
-  const toggleSection = (logIndex: number, section: string) => {
-    const key = `${logIndex}-${section}`;
-    setExpandedSections(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
+  // Initial load and event listener setup
+  useEffect(() => {
+    console.log('WebhookLogTab: Component mounted');
+    loadLogsFromStorage();
+
+    // Add event listener for new logs
+    window.addEventListener(WEBHOOK_LOG_EVENT, handleNewLog as EventListener);
+    console.log('WebhookLogTab: Added event listener for webhook logs');
+
+    // Set up storage event listener for cross-tab sync
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === WEBHOOK_LOGS_KEY) {
+        console.log('WebhookLogTab: Storage change detected, reloading logs');
+        loadLogsFromStorage();
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      console.log('WebhookLogTab: Component unmounting, removing event listeners');
+      window.removeEventListener(WEBHOOK_LOG_EVENT, handleNewLog as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [loadLogsFromStorage, handleNewLog]);
 
   const clearLogs = () => {
     setLogs([]);
@@ -73,23 +95,25 @@ const WebhookLogTab = () => {
     }
   };
 
-  const addLog = (log: WebhookLog) => {
-    setLogs(prev => {
-      const newLogs = [log, ...prev];
-      try {
-        localStorage.setItem(WEBHOOK_LOGS_KEY, JSON.stringify(newLogs.slice(0, 100)));
-      } catch (error) {
-        console.error('Error saving logs to localStorage:', error);
+  const toggleLogExpansion = (index: number) => {
+    setExpandedLogs(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(index)) {
+        newExpanded.delete(index);
+      } else {
+        newExpanded.add(index);
       }
-      return newLogs;
+      return newExpanded;
     });
   };
 
-  // Expose addLog function globally
-  if (typeof window !== 'undefined') {
-    // @ts-ignore
-    window.addWebhookLog = addLog;
-  }
+  const toggleSection = (logIndex: number, section: string) => {
+    const key = `${logIndex}-${section}`;
+    setExpandedSections(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   const handleResizeStop = (key: string, height: number) => {
     setSectionHeights(prev => ({
@@ -139,7 +163,7 @@ const WebhookLogTab = () => {
               <pre className="text-xs bg-gray-50 p-2 rounded overflow-auto h-full border border-gray-200">
                 {formatJson(data)}
               </pre>
-              <div className="absolute top-1 right-1">
+              <div className="absolute top-2 right-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -192,57 +216,65 @@ const WebhookLogTab = () => {
 
       <ScrollArea className="flex-grow">
         <div className="space-y-2 p-4">
-          {logs.map((log, index) => (
-            <div
-              key={log.id || index}
-              className="border rounded-lg overflow-hidden bg-white shadow-sm"
-            >
-              <div
-                className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50"
-                onClick={() => toggleLogExpansion(index)}
-              >
-                <Badge
-                  variant={log.error ? 'destructive' : 'default'}
-                  className="h-5 min-w-[60px] flex items-center justify-center"
-                >
-                  {log.type}
-                </Badge>
-                <div className="flex-grow text-xs truncate font-mono">
-                  {log.url ? new URL(log.url).pathname : 'unknown-path'}
-                </div>
-                <Badge
-                  variant={log.error ? 'destructive' : (log.status === 200 ? 'default' : 'secondary')}
-                  className="h-5 min-w-[40px] flex items-center justify-center"
-                >
-                  {log.status || 'ERR'}
-                </Badge>
-                <div className="text-xs text-gray-500">
-                  {formatTimestamp(log.timestamp)}
-                </div>
-              </div>
-
-              {expandedLogs.has(index) && (
-                <div className="border-t p-2 space-y-2">
-                  {log.error && (
-                    <div className="space-y-1">
-                      <div className="text-xs font-medium text-red-600">Error</div>
-                      <pre className="text-xs bg-red-50 p-2 rounded overflow-auto">
-                        {log.error}
-                      </pre>
-                    </div>
-                  )}
-
-                  {renderJsonSection('Request', log.request, index)}
-                  {renderJsonSection('Response', log.response, index)}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {logs.length === 0 && (
+          {logs.length === 0 ? (
             <div className="text-center text-gray-500 text-sm py-8">
               No webhook logs yet
             </div>
+          ) : (
+            logs.map((log, index) => (
+              <div
+                key={log.id || index}
+                className="border rounded-lg overflow-hidden bg-white shadow-sm"
+              >
+                <div
+                  className="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50"
+                  onClick={() => toggleLogExpansion(index)}
+                >
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px] h-5">
+                      {log.type}
+                    </Badge>
+                    <span className="text-xs text-gray-500">
+                      {formatTimestamp(log.timestamp)}
+                    </span>
+                    {log.status && (
+                      <Badge 
+                        variant={log.status >= 200 && log.status < 300 ? "default" : "destructive"}
+                        className="text-[10px] h-5"
+                      >
+                        {log.status}
+                      </Badge>
+                    )}
+                    {log.error && (
+                      <Badge variant="destructive" className="text-[10px] h-5">
+                        Error
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px] h-5">
+                      {log.environment}
+                    </Badge>
+                    {expandedLogs.has(index) ? (
+                      <ChevronDown className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+
+                {expandedLogs.has(index) && (
+                  <div className="p-2 border-t space-y-2 bg-gray-50">
+                    <div className="text-xs font-mono break-all bg-white p-2 rounded border border-gray-200">
+                      {log.method} {log.url}
+                    </div>
+                    {renderJsonSection('Request', log.request, index)}
+                    {renderJsonSection('Response', log.response, index)}
+                    {log.error && renderJsonSection('Error', { message: log.error }, index)}
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       </ScrollArea>

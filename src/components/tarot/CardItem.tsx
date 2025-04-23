@@ -49,7 +49,10 @@ const CardItem: React.FC<CardItemProps> = ({
     if (card?.id) {
       // Use the card's deck if available, otherwise use the selected deck
       const cardDeck = card.deck || selectedDeck;
-      const imagePath = getCardPath(cardDeck, card.id);
+      // If card.image is provided, use it (replace .png with .jpg if needed), otherwise fallback to generated path
+      const imagePath = card?.image 
+        ? card.image.replace('.png', '.jpg')
+        : getCardPath(cardDeck, card.id);
       console.log(`Card ${index} front image path:`, imagePath);
       setFrontImageSrc(imagePath);
     } else {

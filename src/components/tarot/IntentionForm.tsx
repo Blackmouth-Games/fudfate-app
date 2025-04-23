@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from 'sonner';
 import { useTarot } from '@/contexts/TarotContext';
 import { useWallet } from '@/contexts/WalletContext';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import GlitchText from '@/components/GlitchText';
-import { Sparkles, X } from 'lucide-react';
-import { toast } from 'sonner';
 import PreparingReading from './PreparingReading';
 import CardSelection from './CardSelection';
 import CardReading from './CardReading';
 import ShareReading from './ShareReading';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import NoReadingsAlert from './NoReadingsAlert';
 
 const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { t } = useTranslation();
@@ -65,7 +63,10 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
           </>
         );
       default:
-        return (Number(userData?.runsToday) > 0) ? (
+        if (!userData?.runsToday) {
+          return null;
+        }
+        return (
           <Card className="border-amber-400/50 shadow-md">
             <CardContent className="pt-6">
               <div className="text-center mb-6">
@@ -82,37 +83,35 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
               </div>
               
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                  <Input
-                    value={intention}
-                    onChange={(e) => setIntention(e.target.value)}
-                    placeholder={t('tarot.enterYourQuestion')}
-                    className="pr-8 text-center"
-                  />
-                  {intention && (
-                    <button 
-                      type="button" 
-                      onClick={clearIntention}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                </div>
+                <Textarea
+                  value={intention}
+                  onChange={(e) => setIntention(e.target.value)}
+                  placeholder={t('tarot.intentionPlaceholder')}
+                  className="min-h-[100px] resize-none border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                />
                 
-                <div className="pt-2 flex justify-center">
-                  <Button 
-                    type="submit" 
-                    disabled={intention.trim().length < 3 || loading}
-                    className="px-4 py-1.5 h-auto text-sm flex items-center gap-1.5"
+                <div className="flex justify-center gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={clearIntention}
+                    className="border-amber-300 hover:bg-amber-50"
                   >
-                    <Sparkles size={14} /> {t('tarot.seekGuidance')}
+                    {t('tarot.clear')}
+                  </Button>
+                  
+                  <Button
+                    type="submit"
+                    disabled={loading || intention.trim().length < 3}
+                    className="bg-[#3ADDD9] hover:bg-[#2BCBC7] text-white"
+                  >
+                    {loading ? t('tarot.starting') : t('tarot.start')}
                   </Button>
                 </div>
               </form>
             </CardContent>
           </Card>
-        ) : null;
+        );
     }
   };
 

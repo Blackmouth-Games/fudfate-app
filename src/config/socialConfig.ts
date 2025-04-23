@@ -2,6 +2,6 @@
 export const socialLinks = {
   x: 'https://x.com/FudFate',
   telegram: 'https://t.me/',
-  github: 'https://github.com/blackmouthgames',
+  github: 'https://github.com/',
   web: 'https://fudfate.xyz/'
 };

@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Share2, Twitter } from 'lucide-react';
+import { Share2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTarot } from '@/contexts/TarotContext';
 import { motion } from 'framer-motion';
+import { useWallet } from '@/contexts/WalletContext';
 
 interface ShareReadingProps {
   className?: string;
@@ -14,6 +14,7 @@ interface ShareReadingProps {
 const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
   const { t } = useTranslation();
   const { intention, selectedCards, interpretation, finalMessage, webhookResponse } = useTarot();
+  const { walletAddress } = useWallet();
 
   const getWebhookMessage = (): string => {
     if (finalMessage) return finalMessage;
@@ -72,7 +73,7 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
     const token = '$FDft @fudfate';
     const hashtags = 'FUDfate,Tarot,Crypto';
     
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
     
     window.open(twitterUrl, '_blank');
   };
@@ -125,9 +126,9 @@ const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
       
       <Button
         onClick={shareOnTwitter}
-        className="w-full sm:w-auto flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#0c85d0]"
+        className="w-full sm:w-auto flex items-center gap-2 bg-black hover:bg-gray-800 text-white"
       >
-        <Twitter className="h-4 w-4" />
+        <X className="h-4 w-4" />
         {t('tarot.shareOnX')}
       </Button>
     </motion.div>

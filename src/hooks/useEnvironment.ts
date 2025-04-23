@@ -1,13 +1,22 @@
-
 import { useState, useEffect } from 'react';
 import { getWebhookUrls, Environment } from '@/config/webhooks';
 
 export const useEnvironment = () => {
   const [environment, setEnvironmentState] = useState<Environment>(() => {
+    // First check localStorage
     const savedEnvironment = localStorage.getItem('appEnvironment') as Environment | null;
-    return (savedEnvironment && (savedEnvironment === 'development' || savedEnvironment === 'production')) 
-      ? savedEnvironment 
-      : 'production';
+    if (savedEnvironment && (savedEnvironment === 'development' || savedEnvironment === 'production')) {
+      return savedEnvironment;
+    }
+    
+    // If no saved environment, check if we're in development
+    const isDevelopment = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.port === '8080';
+    
+    const defaultEnv = isDevelopment ? 'development' : 'production';
+    localStorage.setItem('appEnvironment', defaultEnv);
+    return defaultEnv;
   });
 
   const [webhooks, setWebhooks] = useState(getWebhookUrls(environment));

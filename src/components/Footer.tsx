@@ -14,7 +14,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-center text-xs text-gray-400">
           <div className="mb-2 sm:mb-0 flex items-center">
-            &copy; {currentYear} FudFate · <span className="ml-1">Created by Blackmouthgames</span>
+            &copy; {currentYear} FudFate · <span className="ml-1"></span>
           </div>
           
           <div className="flex justify-center space-x-5 mb-2 sm:mb-0">

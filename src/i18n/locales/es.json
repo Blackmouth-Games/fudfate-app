@@ -1,4 +1,3 @@
-
 {
   "common": {
     "appName": "Oráculo FUD Fate",
@@ -151,5 +150,32 @@
     "termsOfService": "Términos de Servicio",
     "privacyPolicy": "Política de Privacidad",
     "cookiesPolicy": "Política de Cookies"
+  },
+  "congrats": {
+    "title": "La Experiencia Tarot Web3",
+    "joinWhitelist": "¡ÚNETE A LA WHITELIST AHORA!",
+    "congratsMessage": "✨ ¡Felicidades! ¡Estás en la Whitelist!",
+    "stayTuned": "¡Mantente atento a nuestras redes sociales para más información sobre los siguientes pasos!"
+  },
+  "cookies": {
+    "title": "Configuración de Cookies",
+    "description": "Utilizamos cookies para mejorar tu experiencia. Al continuar visitando este sitio, aceptas nuestro uso de cookies.",
+    "settings": "Configuración de Cookies",
+    "accept": "Aceptar Todo",
+    "decline": "Rechazar Todo"
+  },
+  "cookiePage": {
+    "title": "Política de Cookies",
+    "lastUpdated": "Última Actualización",
+    "introduction": "Esta Política de Cookies explica cómo FUDfate utiliza cookies y tecnologías similares para reconocerte cuando visitas nuestro sitio web.",
+    "whatAreCookies": "¿Qué son las cookies?",
+    "cookiesDefinition": "Las cookies son pequeños archivos de datos que se colocan en tu computadora o dispositivo móvil cuando visitas un sitio web.",
+    "whyWeUse": "¿Por qué usamos cookies?",
+    "cookiesUsage": "Usamos cookies para mejorar tu experiencia y entender cómo utilizas nuestro sitio web.",
+    "typesOfCookies": "Tipos de Cookies que Utilizamos",
+    "essentialCookies": "Cookies esenciales: Necesarias para el funcionamiento del sitio web",
+    "analyticsCookies": "Cookies analíticas: Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio",
+    "advertisingCookies": "Cookies publicitarias: Utilizadas para mostrar anuncios relevantes",
+    "back": "Volver al Inicio"
   }
 }

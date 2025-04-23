@@ -1,4 +1,3 @@
-
 import { WebhookRequestOptions, WebhookCallResult } from '@/types/webhook';
 import { logWebhookCall } from './logger';
 import { toast } from 'sonner';
@@ -34,6 +33,12 @@ export async function callWebhook<T>(
   lastWebhookCalls[callKey] = now;
 
   // Log the attempt before making the call
+  console.log('WebhookCore: Logging webhook attempt:', {
+    type: logType,
+    url,
+    data,
+    environment
+  });
   logWebhookCall(logType, url, data, null, undefined, undefined, environment as Environment, method);
   
   try {
