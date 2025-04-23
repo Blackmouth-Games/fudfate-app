@@ -52,21 +52,16 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
           >
             {card && (
               <AspectRatio ratio={5/8}>
-                <div className="p-3 h-full flex flex-col">
-                  <div className="text-center font-bold text-amber-800 py-1.5 px-2 bg-amber-50 rounded-md mb-2 truncate">
-                    {card.name}
-                  </div>
-                  <div className="flex-1 flex items-center justify-center p-2">
-                    <img 
-                      src={card.image.replace('.png', '.jpg')} 
-                      alt={card.name} 
-                      className="max-h-full max-w-full object-contain rounded-md"
-                      onError={(e) => {
-                        console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                        e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
-                      }}
-                    />
-                  </div>
+                <div className="relative h-full w-full">
+                  <img 
+                    src={card.image.replace('.png', '.jpg')} 
+                    alt={card.name} 
+                    className="absolute inset-0 w-full h-full object-cover rounded-md"
+                    onError={(e) => {
+                      console.warn(`Failed to load card image: ${card.image}, using fallback`);
+                      e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
+                    }}
+                  />
                 </div>
               </AspectRatio>
             )}

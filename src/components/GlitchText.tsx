@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import '../styles/glitch.css';
 
@@ -10,6 +9,7 @@ interface GlitchTextProps {
   glitchColor1?: string;
   glitchColor2?: string;
   noAnimate?: boolean;
+  flicker?: boolean;
   children?: React.ReactNode;
   goldEffect?: boolean;
   intensity?: 'normal' | 'intense' | 'digital';
@@ -25,6 +25,7 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   glitchColor1 = '#00FF7B',
   glitchColor2 = '#FF00E9',
   noAnimate = false,
+  flicker = true,
   children,
   goldEffect = false,
   intensity = 'normal',
@@ -39,21 +40,35 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   }, [text]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    if (shouldAnimate) {
-      interval = setInterval(() => {
-        setShouldAnimate(false);
-        setTimeout(() => {
-          setShouldAnimate(true);
-        }, 3000 + Math.random() * 3000);
-      }, 8000);
+    if (noAnimate) {
+      setShouldAnimate(false);
+      return;
     }
 
-    return () => {
-      if (interval) clearInterval(interval);
+    let animationTimeout: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout;
+
+    const startAnimation = () => {
+      setShouldAnimate(true);
+      animationTimeout = setTimeout(() => {
+        setShouldAnimate(true);
+      }, 2000);
     };
-  }, [shouldAnimate]);
+
+    intervalId = setInterval(() => {
+      startAnimation();
+    }, 5000 + Math.random() * 3000);
+
+    const initialDelay = setTimeout(() => {
+      startAnimation();
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(animationTimeout);
+      clearTimeout(initialDelay);
+    };
+  }, [noAnimate]);
 
   // Apply neon effect if requested
   let neonClass = '';
@@ -79,7 +94,7 @@ const GlitchText: React.FC<GlitchTextProps> = ({
   const content = (
     <div className="glitch-wrapper">
       <div
-        className={`glitch ${shouldAnimate ? 'glitching' : ''} ${goldClass} ${neonClass} ${intensityClass} ${className}`}
+        className={`glitch ${shouldAnimate ? 'glitching' : ''} ${!flicker ? 'no-flicker' : ''} ${goldClass} ${neonClass} ${intensityClass} ${className}`}
         style={style}
         data-text={displayText}
       >

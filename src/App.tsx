@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
@@ -14,6 +13,7 @@ import { TarotProvider } from './contexts/TarotContext';
 import DevTool from './components/DevTool';
 import CookieConsent from './components/CookieConsent';
 import AppRoutes from './routes/AppRoutes';
+import CursorParticles from './components/CursorParticles';
 
 // Create React Query client with appropriate settings
 const queryClient = new QueryClient({
@@ -32,6 +32,7 @@ function App() {
         <I18nextProvider i18n={i18n}>
           <WalletProvider>
             <TarotProvider>
+              <CursorParticles />
               <Router>
                 <AppRoutes />
                 <CookieConsent />

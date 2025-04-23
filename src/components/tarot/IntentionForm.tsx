@@ -11,7 +11,7 @@ import PreparingReading from './PreparingReading';
 import CardSelection from './CardSelection';
 import CardReading from './CardReading';
 import ShareReading from './ShareReading';
-import NoReadingsAlert from './NoReadingsAlert';
+import NoReadingsAlert from '@/components/tarot/NoReadingsAlert';
 
 const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   const { t } = useTranslation();
@@ -64,7 +64,7 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
         );
       default:
         if (!userData?.runsToday) {
-          return null;
+          return <NoReadingsAlert className="mb-6" />;
         }
         return (
           <Card className="border-amber-400/50 shadow-md">
