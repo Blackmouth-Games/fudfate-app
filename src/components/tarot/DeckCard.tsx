@@ -1,10 +1,10 @@
-
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CheckCircle2, LockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DeckInfo } from '@/utils/deck-utils';
 import { motion } from 'framer-motion';
 import tarotCards from '@/data/tarotCards';
+import RocketCelebration from '@/components/animations/RocketCelebration';
 
 interface DeckCardProps {
   deck: DeckInfo;
@@ -28,6 +28,46 @@ const DeckCard: React.FC<DeckCardProps> = ({
   const isUnlocked = deck.isActive;
   const isSelectingThis = isSelecting === deck.name;
   const [isHovered, setIsHovered] = React.useState(false);
+  const [showCelebration, setShowCelebration] = React.useState(false);
+  const animationTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Debug log
+  console.log('DeckCard render:', { 
+    deckName: deck.name, 
+    isSelected, 
+    showCelebration 
+  });
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSelect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+
+    // Start celebration
+    setShowCelebration(true);
+
+    // Call onSelect after animation duration
+    animationTimeoutRef.current = setTimeout(() => {
+      onSelect(deck.name);
+    }, 1000); // Reduced from 2500 to 1000 to match faster animation
+  };
+
+  const handleCelebrationComplete = () => {
+    console.log('Celebration complete for deck:', deck.name);
+    setShowCelebration(false);
+  };
 
   const deckCards = React.useMemo(() => {
     return tarotCards.filter(card => card.deck === deck.name);
@@ -58,12 +98,19 @@ const DeckCard: React.FC<DeckCardProps> = ({
   };
 
   return (
-    <div 
-      className="flex flex-col items-center"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <div className="relative">
+    <div className="flex flex-col items-center relative">
+      <div className="absolute inset-0 overflow-visible pointer-events-none">
+        <RocketCelebration 
+          show={showCelebration} 
+          onComplete={handleCelebrationComplete}
+        />
+      </div>
+      
+      <div 
+        className="relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         {isHovered && isUnlocked && (
           <>
             <motion.div 
@@ -76,7 +123,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
               }}
               transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
             >
-              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-400 shadow-md">
                 <img 
                   src={sampleCards.card1} 
                   alt="Card Preview" 
@@ -98,7 +145,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
               }}
               transition={{ duration: 2.5, repeat: Infinity, repeatType: "reverse", delay: 0.1 }}
             >
-              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-300 shadow-md">
+              <div className="aspect-[5/8] w-full overflow-hidden rounded-lg border-2 border-amber-400 shadow-md">
                 <img 
                   src={sampleCards.card2} 
                   alt="Card Preview" 
@@ -113,9 +160,9 @@ const DeckCard: React.FC<DeckCardProps> = ({
         )}
 
         <div 
-          className={`relative cursor-pointer border-2 rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[150px] h-[240px] mx-auto z-10
-            ${isSelected ? 'border-amber-500 shadow-amber-200' : 'border-gray-200'}
-            ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-300'}`}
+          className={`relative cursor-pointer rounded-lg overflow-hidden shadow-md transition-all w-full max-w-[150px] h-[240px] mx-auto z-10
+            ${isSelected ? 'border-[#3ADDD9] border-[3px] shadow-[#3ADDD9]/20' : 'border-amber-400 border-2'}
+            ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-500'}`}
           onClick={() => {
             if (isUnlocked) {
               onDetailsOpen(deck.id);
@@ -142,7 +189,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
             </div>
           )}
           {isSelected && (
-            <div className="absolute top-1 right-1 bg-amber-500 w-3 h-3 rounded-full border border-white"></div>
+            <div className="absolute top-1 right-1 bg-[#3ADDD9] w-3 h-3 rounded-full border border-white"></div>
           )}
         </div>
       </div>
@@ -160,11 +207,8 @@ const DeckCard: React.FC<DeckCardProps> = ({
             size="sm" 
             variant="outline" 
             className="text-xs h-6 px-2 mt-1 relative z-20"
-            disabled={isSelectingThis}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect(deck.name);
-            }}
+            disabled={isSelectingThis || showCelebration}
+            onClick={handleSelect}
           >
             {isSelectingThis ? t('tarot.selecting') : t('tarot.select')}
           </Button>

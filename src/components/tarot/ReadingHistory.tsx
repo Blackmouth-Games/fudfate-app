@@ -12,33 +12,37 @@ import { useWallet } from '@/contexts/WalletContext';
 import { toast } from 'sonner';
 import ReadingListItem from './ReadingListItem';
 import ReadingDetails from './ReadingDetails';
+import GlitchText from '@/components/GlitchText';
+import '@/styles/reading-history.css';
 
 interface Reading {
   id: string;
   date: string;
   question: string;
-  cards: number[] | string | any[];
+  cards: (number | string)[];
   result?: string;
   response?: string;
-  selected_cards?: any[];
+  selected_cards?: ReadingCard[];
   user_id?: string;
   reading_date?: string;
 }
 
 interface ReadingHistoryProps {
   className?: string;
-  readings?: any[];
+  readings?: Reading[];
   isLoading?: boolean;
+  resetReading?: () => void;
 }
 
 const ReadingHistory: React.FC<ReadingHistoryProps> = ({ 
   className = '', 
   readings = [], 
-  isLoading = false 
+  isLoading = false,
+  resetReading
 }) => {
   const { t } = useTranslation();
   const { userData } = useWallet();
-  const { resetReading } = useTarot();
+  const { resetReading: tarotResetReading } = useTarot();
   const [selectedReading, setSelectedReading] = useState<Reading | null>(null);
   const [viewingCards, setViewingCards] = useState<ReadingCard[]>([]);
 
@@ -48,9 +52,15 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   }, [readings]);
   
   // Format the readings data to match our expected format
-  const formattedReadings: Reading[] = readings && readings.length > 0 
-    ? readings.map((reading: any) => {
-        let parsedCards: number[] = [];
+  const formattedReadings: Reading[] = Array.isArray(readings) && readings.length > 0 && Object.keys(readings[0]).length > 0
+    ? readings
+      .map((reading: any) => {
+        // Skip empty objects
+        if (!reading || Object.keys(reading).length === 0) {
+          return null;
+        }
+
+        let parsedCards: (number | string)[] = [];
         
         // Parse the cards array which might be a string like "[11, 0, 5]"
         if (typeof reading.cards === 'string') {
@@ -77,8 +87,14 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           response: reading.response || '',
           user_id: reading.user_id || reading.userid || userData?.userId || '',
           selected_cards: reading.selected_cards || []
-        };
-      }).sort((a, b) => {
+        } as Reading;
+      })
+      .filter((reading): reading is NonNullable<typeof reading> => reading !== null)
+      // Remove duplicates based on ID
+      .filter((reading, index, self) => 
+        index === self.findIndex((r) => r.id === reading.id)
+      )
+      .sort((a, b) => {
         // Sort by date in descending order (most recent first)
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       })
@@ -92,7 +108,10 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
   });
 
   // Helper function to get card name from card ID
-  const getCardName = (cardId: number, fallbackIndex: number): string => {
+  const getCardName = (cardId: string | number, fallbackIndex?: number): string => {
+    const numericId = typeof cardId === 'string' ? parseInt(cardId, 10) : cardId;
+    const index = fallbackIndex ?? 0;
+    
     const cardNames: Record<number, string> = {
       0: "The Degen",
       1: "The Miner",
@@ -118,13 +137,14 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       21: "The DAO"
     };
     
-    return cardNames[cardId] || `Card ${fallbackIndex + 1}`;
+    return cardNames[numericId] || `Card ${index + 1}`;
   };
 
   // Get card image path from card ID
-  const getCardImagePath = (cardId: number): string => {
-    if (cardId >= 0 && cardId <= 21) {
-      return `/img/cards/deck_1/${cardId}_${getCardName(cardId, 0).replace(/\s+/g, '')}.jpg`;
+  const getCardImagePath = (cardId: string | number): string => {
+    const numericId = typeof cardId === 'string' ? parseInt(cardId, 10) : cardId;
+    if (numericId >= 0 && numericId <= 21) {
+      return `/img/cards/deck_1/${numericId}_${getCardName(numericId).replace(/\s+/g, '')}.jpg`;
     }
     return '/img/cards/deck_1/0_TheDegen.jpg';
   };
@@ -252,15 +272,21 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           onBack={hideReading}
           onCopyToClipboard={copyToClipboard}
           onShareOnTwitter={shareOnTwitter}
-          resetReading={resetReading}
+          resetReading={resetReading || tarotResetReading}
           className={className}
         />
       ) : (
-        <Card className={`border-amber-400/50 shadow-md ${className}`}>
-          <CardContent className="p-6">
-            <h3 className="text-xl font-semibold text-amber-800 mb-4">
-              {t('tarot.readingHistory')}
-            </h3>
+        <Card className="relative z-10 border-[#3ADDD9] border-2 shadow-md animate-border-glow">
+          <CardContent className="pt-6">
+            <div className="text-center mb-6">
+              <GlitchText 
+                text={t('tarot.readingHistory')} 
+                tag="h3"
+                className="text-xl font-bold text-gray-800"
+                intensity="normal"
+                neonEffect="purple"
+              />
+            </div>
 
             {isLoading ? (
               <div className="space-y-2">
@@ -284,11 +310,13 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                 </div>
               </ScrollArea>
             ) : (
-              <div className="text-center py-6">
-                <Alert>
-                  <InfoIcon className="h-4 w-4" />
-                  <AlertTitle>{t('tarot.noReadingsTitle')}</AlertTitle>
-                  <AlertDescription>{t('tarot.noReadingsAvailable')}</AlertDescription>
+              <div className="flex flex-col items-center justify-center py-12 px-4">
+                <Alert variant="default" className="bg-gradient-to-r from-purple-50 via-amber-50 to-pink-50 border-amber-200 animate-gradient-x">
+                  <InfoIcon className="h-5 w-5 text-amber-500 animate-pulse" />
+                  <AlertTitle className="text-amber-800 mb-2 font-semibold">{t('tarot.noReadingsTitle')}</AlertTitle>
+                  <AlertDescription className="text-amber-700">
+                    {t('tarot.noReadingsDescription')}
+                  </AlertDescription>
                 </Alert>
               </div>
             )}

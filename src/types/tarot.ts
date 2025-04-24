@@ -64,6 +64,8 @@ export interface TarotContextType {
   availableCards: Card[];
   selectedCards: ReadingCard[];
   setSelectedCards: (cards: ReadingCard[]) => void;
+  revealedCardIds: string[];
+  setRevealedCardIds: (ids: string[]) => void;
   introMessage: string | null;
   finalMessage: string | null;
   setFinalMessage: (message: string | null) => void;

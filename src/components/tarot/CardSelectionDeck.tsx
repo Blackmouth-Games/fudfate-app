@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -97,7 +96,7 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
   }
 
   return (
-    <div className="relative h-[70vh] sm:h-[50vh] overflow-visible">
+    <div className="relative h-[80vh] sm:h-[60vh] overflow-visible">
       <div className="absolute inset-0 px-4">
         <div className="flex flex-wrap justify-center">
           <AnimatePresence>
@@ -156,22 +155,21 @@ const CardSelectionDeck: React.FC<CardSelectionDeckProps> = ({
                   onClick={() => !isAnimating && handleCardSelect(card.id)}
                   style={{
                     transform: `translateX(-50%)`,
-                    width: '120px'
+                    width: '120px',
+                    height: '192px'
                   }}
                 >
-                  <AspectRatio ratio={5/8}>
-                    <div className="w-full h-full rounded-lg shadow-md overflow-hidden flex items-center justify-center border-2 hover:border-amber-400 transition-colors">
-                      <motion.img 
-                        src={backImage} 
-                        alt="Tarot Card Back"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          console.warn(`Failed to load image: ${backImage}, using fallback`);
-                          e.currentTarget.src = `/img/cards/deck_1/99_BACK.jpg`;
-                        }}
-                      />
-                    </div>
-                  </AspectRatio>
+                  <div className="w-full h-full relative">
+                    <img
+                      src={backImage}
+                      alt={`Card ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        console.warn(`Failed to load image: ${backImage}, using fallback`);
+                        e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
+                      }}
+                    />
+                  </div>
                 </motion.div>
               );
             })}

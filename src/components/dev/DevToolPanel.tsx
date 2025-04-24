@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   PanelLeft, Code, X, GripHorizontal
@@ -16,9 +15,8 @@ import ConfigTab from './TabsContent/ConfigTab';
 import DebugTab from './TabsContent/DebugTab';
 import RoutesTab from './TabsContent/RoutesTab';
 import WebhookLogTab from './TabsContent/WebhookLogTab';
-import ConnectionLogsTab from './TabsContent/ConnectionLogsTab';
 import DecksTab from './TabsContent/DecksTab';
-import ReadingLogsTab from './TabsContent/ReadingLogsTab'; // Added this import
+import ReadingLogsTab from './TabsContent/ReadingLogsTab';
 import { useTarot } from '@/contexts/TarotContext';
 
 interface DevToolPanelProps {
@@ -54,14 +52,18 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
             <Button 
               variant="outline" 
               size="icon" 
-              className="h-10 w-10 rounded-full bg-amber-500 text-white hover:bg-amber-600 shadow-lg border-2 border-white"
+              className={`h-10 w-10 rounded-full ${
+                environment === 'production' 
+                  ? 'bg-red-500 hover:bg-red-600' 
+                  : 'bg-amber-500 hover:bg-amber-600'
+              } text-white shadow-lg border-2 border-white`}
               onClick={() => setIsOpen(!isOpen)}
             >
               <Code className="h-5 w-5" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p className="text-xs">Developer Tools</p>
+            <p className="text-xs">Developer Tools ({environment})</p>
           </TooltipContent>
         </Tooltip>
 
@@ -121,7 +123,7 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                               }`}
                               onClick={toggleEnvironment}
                             >
-                              {environment === 'production' ? 'PROD' : 'DEV'}
+                              {environment === 'production' ? 'PROD WEBHOOKS' : 'DEV WEBHOOKS'}
                               <Switch 
                                 checked={environment === 'development'}
                                 onCheckedChange={toggleEnvironment}
@@ -130,7 +132,7 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="bottom">
-                            <p className="text-xs">Click to toggle environment</p>
+                            <p className="text-xs">Switch between development and production webhooks</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -158,9 +160,6 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                       <TabsTrigger value="webhooks" className="text-xs py-1 px-2 h-7">
                         API Logs
                       </TabsTrigger>
-                      <TabsTrigger value="logs" className="text-xs py-1 px-2 h-7">
-                        Conn Logs
-                      </TabsTrigger>
                       <TabsTrigger value="debug" className="text-xs py-1 px-2 h-7">
                         Debug
                       </TabsTrigger>
@@ -187,10 +186,6 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                       
                       <TabsContent value="webhooks" className="h-full m-0">
                         <WebhookLogTab />
-                      </TabsContent>
-
-                      <TabsContent value="logs" className="h-full m-0">
-                        <ConnectionLogsTab />
                       </TabsContent>
 
                       <TabsContent value="debug" className="m-0">

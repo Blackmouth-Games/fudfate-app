@@ -95,13 +95,13 @@ const CardItem: React.FC<CardItemProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.3 }}
     >
-      <div className={`tarot-card ${loading ? 'opacity-70 pointer-events-none' : ''} ${isRevealed ? 'is-flipped' : ''}`}>
-        <div className="tarot-card-inner">
-          <div className="tarot-card-back">
+      <div className={`tarot-card w-[120px] h-[192px] ${loading ? 'opacity-70 pointer-events-none' : ''} ${isRevealed ? 'is-flipped' : ''}`}>
+        <div className="tarot-card-inner w-full h-full relative">
+          <div className="tarot-card-back w-full h-full">
             <img 
               src={backImageSrc} 
               alt="Card Back" 
-              className="w-full h-full object-cover rounded-lg"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 console.error(`Failed to load back image: ${backImageSrc}`);
                 e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
@@ -109,29 +109,25 @@ const CardItem: React.FC<CardItemProps> = ({
             />
           </div>
           
-          <div className="tarot-card-front">
+          <div className="tarot-card-front w-full h-full absolute top-0 left-0">
             {isRevealed && (
-              <>
-                <div className="tarot-card-name">{card?.name || 'Unknown Card'}</div>
-                <div className="tarot-card-image">
-                  <img 
-                    src={frontImageSrc} 
-                    alt={card?.name || 'Tarot Card'}
-                    onLoad={() => setIsImageLoading(false)}
-                    onError={(e) => {
-                      console.error(`Failed to load front image: ${frontImageSrc}`);
-                      setHasError(true);
-                      // Use card's deck if available, otherwise use the selected deck
-                      const cardDeck = card.deck || selectedDeck;
-                      const fallbackImage = cardDeck === 'deck_2' ? 
-                        "/img/cards/deck_2/0_the fool.jpg" : 
-                        "/img/cards/deck_1/0_TheDegen.jpg";
-                      e.currentTarget.src = fallbackImage;
-                    }}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-              </>
+              <div className="w-full h-full">
+                <img 
+                  src={frontImageSrc} 
+                  alt={card?.name || 'Tarot Card'}
+                  onLoad={() => setIsImageLoading(false)}
+                  onError={(e) => {
+                    console.error(`Failed to load front image: ${frontImageSrc}`);
+                    setHasError(true);
+                    const cardDeck = card.deck || selectedDeck;
+                    const fallbackImage = cardDeck === 'deck_2' ? 
+                      "/img/cards/deck_2/0_the fool.jpg" : 
+                      "/img/cards/deck_1/0_TheDegen.jpg";
+                    e.currentTarget.src = fallbackImage;
+                  }}
+                  className="w-full h-full object-cover"
+                />
+              </div>
             )}
           </div>
         </div>

@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './animations.css';
+
+@layer utilities {
+  .animate-border-glow {
+    animation: border-glow 8s ease-in-out infinite;
+  }
+}
+
+@keyframes border-glow {
+  0% {
+    border-color: #3ADDD9;  /* Cyan */
+  }
+  25% {
+    border-color: #FF71CE;  /* Pink */
+  }
+  50% {
+    border-color: #B967FF;  /* Purple */
+  }
+  75% {
+    border-color: #01CDFE;  /* Light blue */
+  }
+  100% {
+    border-color: #3ADDD9;  /* Back to cyan */
+  }
+} 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
@@ -61,7 +60,7 @@ const DeckSelector: React.FC<DeckSelectorProps> = ({
   }
 
   return (
-    <Card className={`border-amber-400/50 shadow-md ${className}`}>
+    <Card className="relative z-10 border-[#3ADDD9] border-2 shadow-md animate-border-glow">
       <CardContent className="pt-6">
         <div className="text-center mb-6">
           <h3 className="text-lg font-medium text-center text-gray-800 mb-1">

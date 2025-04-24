@@ -176,3 +176,26 @@
   50% { transform: translate(0); }
   100% { transform: translate(0); }
 }
+
+@keyframes border-glow {
+  0%, 100% {
+    border-color: #3ADDD9;
+    box-shadow: 0 0 10px rgba(58, 221, 217, 0.5);
+  }
+  25% {
+    border-color: #FF71CE;
+    box-shadow: 0 0 10px rgba(255, 113, 206, 0.5);
+  }
+  50% {
+    border-color: #B967FF;
+    box-shadow: 0 0 10px rgba(185, 103, 255, 0.5);
+  }
+  75% {
+    border-color: #01CDFE;
+    box-shadow: 0 0 10px rgba(1, 205, 254, 0.5);
+  }
+}
+
+.animate-border-glow {
+  animation: border-glow 8s ease-in-out infinite;
+}

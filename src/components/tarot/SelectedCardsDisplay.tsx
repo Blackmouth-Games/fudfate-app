@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import SelectionSlot from './SelectionSlot';
@@ -21,7 +20,7 @@ const SelectedCardsDisplay: React.FC<SelectedCardsDisplayProps> = ({
   
   return (
     <div className="py-4 border-b border-amber-200">
-      <div className="flex justify-center space-x-8">
+      <div className="flex justify-center gap-8">
         {Array.from({ length: 3 }).map((_, i) => {
           const selected = selectedCards[i];
           const isHighlighted = highlightedSlot === i;

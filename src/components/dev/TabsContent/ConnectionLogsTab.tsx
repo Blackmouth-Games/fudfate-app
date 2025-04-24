@@ -1,60 +1,14 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { RefreshCw, Trash2, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface ConnectionLog {
-  type: string;
-  message: string;
-  timestamp: string;
-  details?: any;
-}
-
-// Key for localStorage
-const CONNECTION_LOGS_KEY = 'connectionLogs';
-const CONNECTION_LOG_EVENT = 'connection-log';
+import { useConnectionLogs } from '@/hooks/useConnectionLogs';
 
 const ConnectionLogsTab = () => {
-  const [logs, setLogs] = useState<ConnectionLog[]>([]);
+  const { logs, clearLogs } = useConnectionLogs();
   const [expandedLogs, setExpandedLogs] = useState<Set<number>>(new Set());
-
-  // Load logs from localStorage
-  const loadLogsFromStorage = useCallback(() => {
-    try {
-      const stored = localStorage.getItem(CONNECTION_LOGS_KEY);
-      if (stored) {
-        setLogs(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.error('Error loading connection logs from localStorage:', e);
-    }
-  }, []);
-
-  // Handle new log events
-  const handleNewLog = useCallback((event: CustomEvent<ConnectionLog>) => {
-    const newLog = event.detail;
-    setLogs(prev => [newLog, ...prev].slice(0, 50));
-  }, []);
-
-  // Initial load and event listeners
-  useEffect(() => {
-    loadLogsFromStorage();
-
-    window.addEventListener(CONNECTION_LOG_EVENT, handleNewLog as EventListener);
-    const storageListener = (e: StorageEvent) => {
-      if (e.key === CONNECTION_LOGS_KEY) {
-        loadLogsFromStorage();
-      }
-    };
-    window.addEventListener('storage', storageListener);
-
-    return () => {
-      window.removeEventListener(CONNECTION_LOG_EVENT, handleNewLog as EventListener);
-      window.removeEventListener('storage', storageListener);
-    };
-  }, [loadLogsFromStorage, handleNewLog]);
 
   const toggleLogExpansion = (index: number) => {
     const newExpanded = new Set(expandedLogs);
@@ -64,16 +18,6 @@ const ConnectionLogsTab = () => {
       newExpanded.add(index);
     }
     setExpandedLogs(newExpanded);
-  };
-
-  const clearLogs = () => {
-    setLogs([]);
-    try {
-      localStorage.removeItem(CONNECTION_LOGS_KEY);
-    } catch (e) {
-      console.error('Error clearing connection logs from localStorage:', e);
-    }
-    toast.success('Connection logs cleared');
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -89,33 +33,10 @@ const ConnectionLogsTab = () => {
     }
   };
 
-  // Expose addLog globally and dispatch event
-  const addLog = useCallback((log: ConnectionLog) => {
-    setLogs(prev => {
-      const updated = [log, ...prev].slice(0, 50);
-      try {
-        localStorage.setItem(CONNECTION_LOGS_KEY, JSON.stringify(updated));
-      } catch (e) {
-        console.error('Error saving connection logs to localStorage:', e);
-      }
-      return updated;
-    });
-
-    try {
-      const evt = new CustomEvent(CONNECTION_LOG_EVENT, { detail: log });
-      window.dispatchEvent(evt);
-    } catch (e) {
-      /* noop */
-    }
-  }, []);
-
-  // Register global only once
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // @ts-ignore
-      window.addConnectionLog = addLog;
-    }
-  }, [addLog]);
+  const handleClearLogs = () => {
+    clearLogs();
+    toast.success('Connection logs cleared');
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -124,7 +45,7 @@ const ConnectionLogsTab = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={clearLogs}
+            onClick={handleClearLogs}
             className="h-7 text-xs flex items-center gap-1 bg-white"
           >
             <Trash2 className="h-3 w-3" />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export type WalletType = 'metamask' | 'phantom' | null;
@@ -11,9 +10,10 @@ export interface UserData {
 }
 
 export interface ConnectionLog {
+  type: string;
+  message: string;
   timestamp: string;
-  action: string;
-  details: string;
+  details?: any;
 }
 
 export interface WalletContextType {

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -24,7 +23,7 @@ const SelectionSlot: React.FC<SelectionSlotProps> = ({
   return (
     <motion.div
       key={`slot-${index}`}
-      className={`w-24 h-36 sm:w-32 sm:h-48 rounded-md ${
+      className={`w-[120px] h-[192px] rounded-lg ${
         selected 
           ? 'bg-gradient-to-br from-amber-100 to-amber-200 border border-amber-400/50 shadow-md' 
           : 'border border-dashed border-amber-300 bg-white selection-slot'
@@ -34,7 +33,7 @@ const SelectionSlot: React.FC<SelectionSlotProps> = ({
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       {loading && !selected ? (
-        <Skeleton className="w-full h-full rounded-md" />
+        <Skeleton className="w-full h-full rounded-lg" />
       ) : selected ? (
         <motion.div 
           className="h-full w-full flex items-center justify-center"
@@ -42,23 +41,17 @@ const SelectionSlot: React.FC<SelectionSlotProps> = ({
           animate={{ rotateY: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <AspectRatio ratio={2/3} className="w-full h-full">
+          <div className="w-full h-full">
             <img
               src={cardBackImage}
               alt="Selected Card"
-              className="h-full w-full object-cover rounded-md"
+              className="h-full w-full object-cover rounded-lg"
               onError={(e) => {
-                // Fallback to default image if the dynamic path fails
                 console.warn(`Failed to load image: ${cardBackImage}, using fallback`);
-                e.currentTarget.src = `/img/cards/deck_1/99_BACK.png`;
+                e.currentTarget.src = "/img/cards/deck_1/99_BACK.jpg";
               }}
             />
-          </AspectRatio>
-          <motion.div 
-            className="absolute inset-0 bg-amber-400/20 rounded-md"
-            animate={{ opacity: [0, 0.5, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          />
+          </div>
         </motion.div>
       ) : (
         <span className="text-xs text-amber-400">{index + 1}</span>

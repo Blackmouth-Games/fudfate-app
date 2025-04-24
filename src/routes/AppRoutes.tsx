@@ -5,7 +5,7 @@ import NotFound from '@/pages/NotFound';
 import CookiesPolicy from '@/pages/CookiesPolicy';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Congrats from '@/pages/Congrats';
-import DevTool from '@/components/DevTool';
+import DevToolPanel from '@/components/dev/DevToolPanel';
 import { useEnvironment } from '@/hooks/useEnvironment';
 
 // Routes configuration for DevTool
@@ -18,7 +18,9 @@ const routes = [
 
 const AppRoutes: React.FC = () => {
   const { environment } = useEnvironment();
-  const isDevelopment = environment === 'development';
+  const isDevelopment = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.port === '8080';
 
   return (
     <>
@@ -30,7 +32,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      {isDevelopment && <DevTool routes={routes} />}
+      {isDevelopment && <DevToolPanel routes={routes} />}
     </>
   );
 };

@@ -10,7 +10,7 @@ import CookiesPolicy from './pages/CookiesPolicy';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import { WalletProvider } from './contexts/WalletContext';
 import { TarotProvider } from './contexts/TarotContext';
-import DevTool from './components/DevTool';
+import DevToolPanel from '@/components/dev/DevToolPanel';
 import CookieConsent from './components/CookieConsent';
 import AppRoutes from './routes/AppRoutes';
 import CursorParticles from './components/CursorParticles';

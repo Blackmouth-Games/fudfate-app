@@ -1,159 +1,119 @@
-
 import React, { useState, useEffect } from 'react';
-import { useTarot } from '@/contexts/TarotContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { useTranslation } from 'react-i18next';
-import GlitchText from '@/components/GlitchText';
-import { getCardBackPath } from '@/utils/deck-utils';
+import { Loader2 } from 'lucide-react';
+import { ReadingCard } from '@/types/tarot';
+import { Interpretation } from '@/types/Interpretation';
+import CardItem from './CardItem';
 import CompletedReading from './CompletedReading';
-import CardRevealContainer from './CardRevealContainer';
+import RocketCelebration from '@/components/animations/RocketCelebration';
+import { useTarot } from '@/contexts/TarotContext';
+import tarotCards from '@/data/tarotCards';
 
 interface CardReadingProps {
-  className?: string;
+  selectedCards: ReadingCard[];
+  onComplete: () => void;
+  onReset: () => void;
 }
 
-const CardReading: React.FC<CardReadingProps> = ({ className = '' }) => {
-  const { selectedCards, revealCard, loading, finalMessage, resetReading, webhookResponse, webhookError, selectedDeck } = useTarot();
+const CardReading: React.FC<CardReadingProps> = ({ selectedCards, onComplete, onReset }) => {
   const { t } = useTranslation();
-  
-  // State for webhook message and question
-  const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
-  const [webhookQuestion, setWebhookQuestion] = useState<string | null>(null);
-  
-  // Log important state for debugging
-  console.log("CardReading rendering with:", {
-    cardBackImage: getCardBackPath(selectedDeck),
-    selectedCards: selectedCards?.length || 0,
-    selectedDeck,
-    finalMessage: !!finalMessage,
-    webhookResponse: webhookResponse,
-    webhookError
-  });
-  
-  // Parse webhook message and question if available
-  useEffect(() => {
-    if (webhookResponse) {
-      try {
-        // First clear the previous values when new response arrives
-        setWebhookMessage(null);
-        setWebhookQuestion(null);
-        
-        // Skip if this is a temporary response
-        if (webhookResponse.isTemporary) {
-          console.log("Skipping temporary webhook response in CardReading");
-          return;
-        }
-        
-        // Handle case where webhookResponse is an array
-        if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
-          const firstResponse = webhookResponse[0];
-          
-          // Try to parse returnwebhoock
-          if (typeof firstResponse.returnwebhoock === 'string') {
-            try {
-              const parsedData = JSON.parse(firstResponse.returnwebhoock);
-              console.log("Parsed webhook data:", parsedData);
-              
-              if (parsedData) {
-                if (parsedData.message) {
-                  setWebhookMessage(parsedData.message);
-                  console.log("Found message in parsed webhook array:", parsedData.message);
-                }
-                if (parsedData.question) {
-                  setWebhookQuestion(parsedData.question);
-                  console.log("Found question in parsed webhook array:", parsedData.question);
-                }
-              }
-            } catch (error) {
-              console.error("Error parsing webhook message in CardReading:", error);
-            }
-          }
-          
-          // Try to get message directly
-          if (!webhookMessage && firstResponse.message) {
-            setWebhookMessage(firstResponse.message);
-          }
-          
-          // Try to get question directly
-          if (!webhookQuestion && firstResponse.question) {
-            setWebhookQuestion(firstResponse.question);
-          }
-        } 
-        // Handle case where webhookResponse is an object
-        else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
-          // Try to get message directly from the response
-          if (webhookResponse.message) {
-            setWebhookMessage(webhookResponse.message);
-          }
-          
-          // Try to get question directly from the response
-          if (webhookResponse.question) {
-            setWebhookQuestion(webhookResponse.question);
-          }
-          
-          // Try to parse returnwebhoock if it exists
-          if (typeof webhookResponse.returnwebhoock === 'string') {
-            try {
-              const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-              if (parsedData) {
-                if (!webhookMessage && parsedData.message) {
-                  setWebhookMessage(parsedData.message);
-                  console.log("Found message in parsed webhook object:", parsedData.message);
-                }
-                if (!webhookQuestion && parsedData.question) {
-                  setWebhookQuestion(parsedData.question);
-                  console.log("Found question in parsed webhook object:", parsedData.question);
-                }
-              }
-            } catch (error) {
-              console.error("Error parsing webhook message in CardReading:", error);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error processing webhook response in CardReading:", error);
-      }
-    }
-  }, [webhookResponse, webhookMessage, webhookQuestion]);
-  
-  // Card back image based on selected deck
-  const cardBackImage = getCardBackPath(selectedDeck);
+  const { selectedDeck, webhookResponse, phase, revealedCardIds, setRevealedCardIds } = useTarot();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
 
-  // Debug the selected cards
+  // Get the actual cards from webhook response
+  const webhookCards = webhookResponse?.selected_cards?.map(cardIndex => {
+    // Find the card in tarotCards data using the numeric index
+    const card = tarotCards.find(c => {
+      const filename = c.image.split('/').pop() || '';
+      const numericId = parseInt(filename.split('_')[0]);
+      return numericId === cardIndex;
+    });
+
+    if (!card) {
+      console.error(`Card not found for index ${cardIndex}`);
+      return null;
+    }
+
+    return {
+      ...card,
+      deck: selectedDeck,
+      revealed: revealedCardIds.includes(card.id)
+    } as ReadingCard;
+  }).filter((card): card is NonNullable<typeof card> => card !== null) || [];
+
+  const handleRevealComplete = () => {
+    setShowCelebration(true);
+    onComplete();
+  };
+
   useEffect(() => {
-    console.log("CardReading - Selected Cards:", selectedCards);
-  }, [selectedCards]);
+    if (revealedCardIds.length === webhookCards.length && webhookCards.length > 0) {
+      handleRevealComplete();
+    }
+  }, [revealedCardIds.length, webhookCards.length]);
+
+  if (webhookResponse?.message && revealedCardIds.length === webhookCards.length) {
+    return (
+      <div className="space-y-6">
+        {webhookResponse.question && (
+          <Card className="p-6 bg-purple-50/80 backdrop-blur-sm border-purple-200">
+            <p className="text-xl font-medium text-center text-purple-900">
+              {webhookResponse.question}
+            </p>
+          </Card>
+        )}
+        <CompletedReading
+          finalMessage={webhookResponse.message}
+          selectedCards={webhookCards}
+          resetReading={onReset}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      <div className="text-center space-y-2">
-        <h3 className="text-xl font-bold text-gray-800">
-          <GlitchText 
-            text={finalMessage 
-              ? t('tarot.readingComplete') 
-              : t('tarot.revealCards')} 
-            intensity="normal"
-            neonEffect="purple"
-          />
-        </h3>
-      </div>
+    <div className="relative w-full">
+      <RocketCelebration 
+        show={showCelebration} 
+        onComplete={() => setShowCelebration(false)} 
+      />
       
-      {!finalMessage ? (
-        <CardRevealContainer 
-          selectedCards={selectedCards}
-          handleCardClick={revealCard}
-          loading={loading}
-          webhookMessage={webhookMessage}
-          webhookQuestion={webhookQuestion}
-          cardBackImage={cardBackImage}
-          error={webhookError}
-        />
-      ) : (
-        <CompletedReading 
-          finalMessage={finalMessage}
-          selectedCards={selectedCards}
-          resetReading={resetReading}
-        />
-      )}
+      <Card className="p-8 bg-white/80 backdrop-blur-sm border-[#3ADDD9]/30">
+        <div className="flex flex-col items-center space-y-8">
+          <h2 className="text-2xl font-semibold text-center">
+            {revealedCardIds.length === 0 ? t('reading.revealYourCards') : t('reading.selectACard')}
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl mx-auto">
+            {webhookCards.map((card, index) => (
+              <div key={card.id} className="flex flex-col items-center">
+                <CardItem
+                  card={card}
+                  index={index}
+                  handleCardClick={() => {
+                    if (!revealedCardIds.includes(card.id)) {
+                      setRevealedCardIds(prev => [...prev, card.id]);
+                    }
+                  }}
+                  isRevealed={revealedCardIds.includes(card.id)}
+                  loading={isLoading}
+                  cardBackImage={`/img/cards/${selectedDeck}/99_BACK.jpg`}
+                />
+              </div>
+            ))}
+          </div>
+
+          {isLoading && (
+            <div className="flex items-center justify-center space-x-2 mt-6">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>{t('reading.interpretingCards')}</span>
+            </div>
+          )}
+        </div>
+      </Card>
     </div>
   );
 };

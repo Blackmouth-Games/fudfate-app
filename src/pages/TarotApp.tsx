@@ -8,7 +8,6 @@ import Footer from '@/components/Footer';
 import CommitSHA from '@/components/CommitSHA';
 import DevToolPanel from '@/components/dev/DevToolPanel';
 import WalletSecurityBanner from '@/components/wallet/WalletSecurityBanner';
-import NoReadingsAlert from '@/components/tarot/NoReadingsAlert';
 import { useTranslation } from 'react-i18next';
 import { useEnvironment } from '@/hooks/useEnvironment';
 
@@ -89,19 +88,13 @@ const TarotApp: React.FC = () => {
         {!connected ? (
           <WelcomeScreen />
         ) : (
-          <>
-            {userData && !userData.runsToday && !showTodayReading && (
-              <NoReadingsAlert className="mb-6" />
-            )}
-
-            <TarotMainContent 
-              activeTab={activeTab}
-              historyData={historyData}
-              isLoadingHistory={isLoadingHistory}
-              availableDecks={availableDecks}
-              isLoadingDecks={isLoadingDecks}
-            />
-          </>
+          <TarotMainContent 
+            activeTab={activeTab}
+            historyData={historyData}
+            isLoadingHistory={isLoadingHistory}
+            availableDecks={availableDecks}
+            isLoadingDecks={isLoadingDecks}
+          />
         )}
       </main>
 

@@ -19,7 +19,7 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
   const { 
     intention, setIntention, 
     phase, startReading, resetReading,
-    interpretation
+    interpretation, selectedCards, setPhase
   } = useTarot();
   
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,17 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
       case 'complete':
         return (
           <>
-            <CardReading />
+            <CardReading 
+              selectedCards={selectedCards}
+              onComplete={() => {
+                setPhase('complete');
+                // Trigger interpretation generation here if needed
+              }}
+              onReset={() => {
+                resetReading();
+                setPhase('initial');
+              }}
+            />
             {interpretation && <ShareReading />}
           </>
         );
@@ -67,7 +77,7 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
           return <NoReadingsAlert className="mb-6" />;
         }
         return (
-          <Card className="border-amber-400/50 shadow-md">
+          <Card className="relative z-10 border-[#3ADDD9] border-2 shadow-md animate-border-glow">
             <CardContent className="pt-6">
               <div className="text-center mb-6">
                 <div className="mb-2 overflow-visible">
@@ -82,31 +92,42 @@ const IntentionForm: React.FC<{ className?: string }> = ({ className = '' }) => 
                 </p>
               </div>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <Textarea
-                  value={intention}
-                  onChange={(e) => setIntention(e.target.value)}
-                  placeholder={t('tarot.intentionPlaceholder')}
-                  className="min-h-[100px] resize-none border-amber-200 focus:border-amber-400 focus:ring-amber-400"
-                />
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="relative max-w-2xl mx-auto">
+                  <Textarea
+                    value={intention}
+                    onChange={(e) => setIntention(e.target.value)}
+                    placeholder={t('tarot.intentionPlaceholder')}
+                    className="h-[48px] resize-none overflow-hidden border border-[#3ADDD9]/30 focus:border-[#3ADDD9] focus:ring-1 focus:ring-[#3ADDD9]/30 rounded-xl pr-10 text-lg placeholder:text-gray-400 shadow-sm"
+                    rows={1}
+                  />
+                  {intention && (
+                    <button
+                      type="button"
+                      onClick={clearIntention}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors text-xl"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
                 
-                <div className="flex justify-center gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={clearIntention}
-                    className="border-amber-300 hover:bg-amber-50"
-                  >
-                    {t('tarot.clear')}
-                  </Button>
-                  
-                  <Button
-                    type="submit"
-                    disabled={loading || intention.trim().length < 3}
-                    className="bg-[#3ADDD9] hover:bg-[#2BCBC7] text-white"
-                  >
-                    {loading ? t('tarot.starting') : t('tarot.start')}
-                  </Button>
+                <div className="flex justify-center">
+                  <div className="relative inline-block">
+                    <button
+                      type="submit"
+                      disabled={loading || intention.trim().length < 3}
+                      className={`bg-[#3ADDD9] hover:bg-[#2BCBC7] text-white h-11 px-10 text-lg font-medium rounded-full transition-all transform hover:scale-105 shadow-lg hover:shadow-xl ${
+                        loading || intention.trim().length < 3 ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      <GlitchText 
+                        text={loading ? t('tarot.starting') : t('tarot.start')}
+                        className="text-white font-semibold tracking-wide"
+                        goldEffect={true}
+                      />
+                    </button>
+                  </div>
                 </div>
               </form>
             </CardContent>

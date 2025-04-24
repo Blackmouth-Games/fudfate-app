@@ -34,6 +34,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
   const [phase, setPhase] = useState<ReadingPhase>('intention');
   const [availableCards, setAvailableCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<ReadingCard[]>([]);
+  const [revealedCardIds, setRevealedCardIds] = useState<string[]>([]);
   const [introMessage, setIntroMessage] = useState<string | null>(null);
   const [finalMessage, setFinalMessage] = useState<string | null>(null);
   const [interpretation, setInterpretation] = useState<Interpretation | null>(null);
@@ -258,6 +259,11 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     );
     
     if (success) {
+      const card = selectedCards[index];
+      if (card) {
+        setRevealedCardIds(prev => [...prev, card.id]);
+      }
+
       const updatedCards = [...selectedCards];
       const allRevealed = updatedCards.every(c => c.revealed);
       
@@ -293,11 +299,16 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     setPhase('intention');
     setAvailableCards([]);
     setSelectedCards([]);
+    setRevealedCardIds([]);
     setIntroMessage(null);
     setFinalMessage(null);
     setInterpretation(null);
     setWebhookResponse(null);
     setWebhookError(null);
+    
+    // Clear any stored reading data from localStorage
+    localStorage.removeItem('currentReading');
+    localStorage.removeItem('revealedCards');
     
     toast.success(t('tarot.newReadingStarted'));
   };
@@ -312,6 +323,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     availableCards,
     selectedCards,
     setSelectedCards,
+    revealedCardIds,
+    setRevealedCardIds,
     introMessage,
     finalMessage,
     setFinalMessage,
