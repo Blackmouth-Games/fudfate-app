@@ -6,6 +6,7 @@ import CookiesPolicy from '@/pages/CookiesPolicy';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import Congrats from '@/pages/Congrats';
 import DevTool from '@/components/DevTool';
+import { useEnvironment } from '@/hooks/useEnvironment';
 
 // Routes configuration for DevTool
 const routes = [
@@ -16,6 +17,9 @@ const routes = [
 ];
 
 const AppRoutes: React.FC = () => {
+  const { environment } = useEnvironment();
+  const isDevelopment = environment === 'development';
+
   return (
     <>
       <Routes>
@@ -26,7 +30,7 @@ const AppRoutes: React.FC = () => {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <DevTool routes={routes} />
+      {isDevelopment && <DevTool routes={routes} />}
     </>
   );
 };

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import useTarotData from '@/hooks/useTarotData';
@@ -11,10 +10,13 @@ import DevToolPanel from '@/components/dev/DevToolPanel';
 import WalletSecurityBanner from '@/components/wallet/WalletSecurityBanner';
 import NoReadingsAlert from '@/components/tarot/NoReadingsAlert';
 import { useTranslation } from 'react-i18next';
+import { useEnvironment } from '@/hooks/useEnvironment';
 
 const TarotApp: React.FC = () => {
   const { connected, userData } = useWallet();
   const { t } = useTranslation();
+  const { environment } = useEnvironment();
+  const isDevelopment = environment === 'development';
   
   const {
     activeTab,
@@ -105,13 +107,11 @@ const TarotApp: React.FC = () => {
 
       <Footer />
       <CommitSHA sha={commitSha} />
-      <DevToolPanel 
-        routes={[
-          { path: '/', name: 'Home' },
-          { path: '/privacy-policy', name: 'Privacy Policy' },
-          { path: '/cookies-policy', name: 'Cookies Policy' }
-        ]}
-      />
+      {isDevelopment && <DevToolPanel routes={[
+        { path: '/', name: 'Home' },
+        { path: '/privacy-policy', name: 'Privacy Policy' },
+        { path: '/cookies-policy', name: 'Cookies Policy' }
+      ]} />}
       <WalletSecurityBanner />
     </div>
   );
