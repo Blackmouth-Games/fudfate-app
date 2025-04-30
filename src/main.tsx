@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -8,6 +7,10 @@ import './styles/animations.css';
 import './styles/buttons.css';
 import './styles/cards.css';
 import './styles/themes/crypto.css';
+import { initGA } from './config/analytics';
+
+// Initialize Google Analytics
+initGA('G-6X8PP6JSVM');
 
 // Log the current commit SHA (if available) for debugging
 if (import.meta.env.VITE_COMMIT_SHA) {
