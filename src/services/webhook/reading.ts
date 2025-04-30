@@ -1,4 +1,3 @@
-
 import { WebhookResponse, WebhookArrayResponse, ParsedWebhookData } from '@/types/tarot';
 import { callWebhook } from './core';
 import { logReadingWebhook } from './logger';
@@ -14,6 +13,7 @@ let parsedFinalResponse: WebhookResponse | null = null;
  */
 const parseWebhookData = (data: any): ParsedWebhookData => {
   let result: ParsedWebhookData = {};
+  console.log("Parsing webhook data:", data);
   
   // Handle array response format
   if (Array.isArray(data) && data.length > 0) {
@@ -57,6 +57,19 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
     if (!result.selected_cards && Array.isArray(firstItem.selected_cards)) {
       result.selected_cards = firstItem.selected_cards;
     }
+
+    // If we still don't have a message, try to get it from the response data
+    if (!result.message) {
+      if (typeof firstItem === 'string') {
+        result.message = firstItem;
+      } else if (firstItem.text) {
+        result.message = firstItem.text;
+      } else if (firstItem.content) {
+        result.message = firstItem.content;
+      } else if (firstItem.reading) {
+        result.message = firstItem.reading;
+      }
+    }
     
     return result;
   }
@@ -71,6 +84,12 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
     
     if (data.message) {
       result.message = data.message;
+    } else if (data.text) {
+      result.message = data.text;
+    } else if (data.content) {
+      result.message = data.content;
+    } else if (data.reading) {
+      result.message = data.reading;
     }
     
     if (data.question) {
@@ -99,6 +118,11 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
         console.error("Error parsing returnwebhoock in object response:", error);
       }
     }
+  }
+
+  // If we still don't have a message, create a default one
+  if (!result.message) {
+    result.message = "Your tarot reading is ready. Let's explore what the cards reveal...";
   }
   
   return result;

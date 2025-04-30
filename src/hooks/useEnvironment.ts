@@ -12,7 +12,9 @@ export const useEnvironment = () => {
     // If no saved environment, check if we're in development
     const isDevelopment = window.location.hostname === 'localhost' || 
                          window.location.hostname === '127.0.0.1' ||
-                         window.location.port === '8080';
+                         window.location.hostname.includes('railway.app') ||  // Add railway.app check
+                         window.location.port === '8080' ||
+                         window.location.port === '3000';  // Add port 3000
     
     const defaultEnv = isDevelopment ? 'development' : 'production';
     localStorage.setItem('appEnvironment', defaultEnv);

@@ -82,8 +82,8 @@
     "copyFailed": "Failed to copy reading",
     "shareToSocial": "Share to Social Media",
     "shareOnX": "Share",
-    "shareText": "My crypto tarot reading drew these cards: {{cards}}. My question: \"{{intention}}\". The oracle says: {{message}} #FUDfate #CryptoTarot",
-    "shareClipboardText": "My Crypto Tarot Reading:\nCards: {{cards}}\nQuestion: {{intention}}\nInterpretation: {{interpretation}}",
+    "shareText": "#FUDfate #CryptoTarot",
+    "shareClipboardText": "Hey i h",
     "newReadingStarted": "New reading initiated",
     "cryptoFortuneAwaits": "Your Crypto Fortune Awaits",
     "noMoreReadings": "No More Readings Available",
@@ -123,7 +123,12 @@
     "readingsExhausted": "Readings Exhausted",
     "todayReadingDone": "Today's Reading Completed",
     "todayReadingDoneDescription": "You've already done today's reading. Check your history below.",
-    "noCards": "No cards"
+    "noCards": "No cards",
+    "generatingImage": "Generating image of your reading...",
+    "imageShared": "Image ready for sharing!",
+    "imageUploadFailed": "Failed to upload image. Sharing without image.",
+    "imageGenerationFailed": "Failed to generate image. Sharing without image.",
+    "sharingFailed": "Error sharing reading. Please try again."
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",
