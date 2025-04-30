@@ -69,6 +69,7 @@ const CardReading: React.FC<CardReadingProps> = ({ selectedCards, onComplete, on
           finalMessage={webhookResponse.message}
           selectedCards={webhookCards}
           resetReading={onReset}
+          source="reading"
         />
       </div>
     );

@@ -12,6 +12,12 @@ interface Reading {
   cards: number[] | string | any[];
   result?: string;
   response?: string;
+  interpretation?: string;
+  webhookResponse?: {
+    message: string;
+    selected_cards: number[];
+    question?: string;
+  };
 }
 
 interface ReadingListItemProps {
@@ -43,6 +49,13 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
     (typeof reading.cards === 'string' && reading.cards.startsWith('[') && reading.cards.endsWith(']')) ?
       JSON.parse(reading.cards) :
       [];
+
+  const getDisplayMessage = () => {
+    const message = reading.webhookResponse?.message || reading.result || reading.response || reading.interpretation;
+    if (!message) return <span className="text-gray-400 italic">{t('tarot.noResponse')}</span>;
+    
+    return message.length > 50 ? `${message.substring(0, 50)}...` : message;
+  };
   
   return (
     <div className="bg-white rounded-lg border border-amber-200 p-4 shadow-sm hover:shadow-md transition-shadow">
@@ -101,8 +114,7 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
         <div>
           <p className="text-sm text-gray-500 mb-1">{t('tarot.response')}:</p>
           <p className="text-sm text-gray-700 line-clamp-3">
-            {reading.result || reading.response || 
-             <span className="text-gray-400 italic">{t('tarot.noResponse')}</span>}
+            {getDisplayMessage()}
           </p>
         </div>
       </div>

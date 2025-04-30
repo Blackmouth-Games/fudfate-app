@@ -22,9 +22,15 @@ interface Reading {
   cards: (number | string)[];
   result?: string;
   response?: string;
+  interpretation?: string;
   selected_cards?: ReadingCard[];
   user_id?: string;
   reading_date?: string;
+  webhookResponse?: {
+    message: string;
+    selected_cards: number[];
+    question?: string;
+  };
 }
 
 interface ReadingHistoryProps {
@@ -66,28 +72,63 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
         if (typeof reading.cards === 'string') {
           try {
             parsedCards = JSON.parse(reading.cards);
+            console.log("Parsed cards from string:", parsedCards);
           } catch (e) {
             console.error("Error parsing cards JSON:", e);
             // If parse fails, try to extract numbers from the string using regex
             const cardMatches = reading.cards.match(/\d+/g);
             if (cardMatches) {
               parsedCards = cardMatches.map(Number);
+              console.log("Extracted card numbers using regex:", parsedCards);
             }
           }
         } else if (Array.isArray(reading.cards)) {
           parsedCards = reading.cards;
+          console.log("Using array cards directly:", parsedCards);
+        }
+
+        // Handle webhook response data
+        let webhookData = undefined;
+        if (reading.webhookResponse) {
+          console.log("Processing webhook response:", reading.webhookResponse);
+          webhookData = {
+            message: reading.webhookResponse.message || '',
+            selected_cards: Array.isArray(reading.webhookResponse.selected_cards) 
+              ? reading.webhookResponse.selected_cards.map(Number)
+              : parsedCards,
+            question: reading.webhookResponse.question || reading.question || reading.intention || ''
+          };
+          console.log("Processed webhook data:", webhookData);
+        } else if (reading.selected_cards || reading.interpretation) {
+          // If we have selected_cards or interpretation but no webhookResponse, create one
+          console.log("Creating webhook data from selected_cards or interpretation");
+          webhookData = {
+            message: reading.interpretation || reading.result || reading.response || '',
+            selected_cards: Array.isArray(reading.selected_cards) 
+              ? reading.selected_cards.map(card => 
+                  typeof card === 'number' ? card : parseInt(String(card), 10)
+                ).filter(num => !isNaN(num))
+              : parsedCards,
+            question: reading.question || reading.intention || ''
+          };
+          console.log("Created webhook data:", webhookData);
         }
         
-        return {
+        const formattedReading = {
           id: reading.id || String(Math.random()),
           date: reading.reading_date || reading.date || new Date().toISOString(),
           question: reading.question || reading.intention || '',
           cards: parsedCards,
           result: reading.result || reading.message || '',
           response: reading.response || '',
+          interpretation: reading.interpretation || '',
           user_id: reading.user_id || reading.userid || userData?.userId || '',
-          selected_cards: reading.selected_cards || []
+          selected_cards: reading.selected_cards || [],
+          webhookResponse: webhookData
         } as Reading;
+
+        console.log("Formatted reading:", formattedReading);
+        return formattedReading;
       })
       .filter((reading): reading is NonNullable<typeof reading> => reading !== null)
       // Remove duplicates based on ID
@@ -109,8 +150,9 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
 
   // Helper function to get card name from card ID
   const getCardName = (cardId: string | number, fallbackIndex?: number): string => {
+    console.log("getCardName called with:", { cardId, fallbackIndex });
     const numericId = typeof cardId === 'string' ? parseInt(cardId, 10) : cardId;
-    const index = fallbackIndex ?? 0;
+    console.log("Converted to numericId:", numericId);
     
     const cardNames: Record<number, string> = {
       0: "The Degen",
@@ -137,49 +179,74 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       21: "The DAO"
     };
     
-    return cardNames[numericId] || `Card ${index + 1}`;
+    const name = cardNames[numericId];
+    console.log("Found name:", name);
+    return name || (fallbackIndex !== undefined ? `Card ${fallbackIndex + 1}` : `Card ${numericId}`);
   };
 
   // Get card image path from card ID
   const getCardImagePath = (cardId: string | number): string => {
+    console.log("getCardImagePath called with:", cardId);
     const numericId = typeof cardId === 'string' ? parseInt(cardId, 10) : cardId;
+    console.log("Converted to numericId:", numericId);
+    
     if (numericId >= 0 && numericId <= 21) {
-      return `/img/cards/deck_1/${numericId}_${getCardName(numericId).replace(/\s+/g, '')}.jpg`;
+      const path = `/img/cards/deck_1/${numericId}_${getCardName(numericId).replace(/\s+/g, '')}.jpg`;
+      console.log("Generated path:", path);
+      return path;
     }
+    console.log("Falling back to default card");
     return '/img/cards/deck_1/0_TheDegen.jpg';
   };
 
   // View a reading's details
   const viewReading = (reading: Reading) => {
+    console.log("=== Debug Reading Data ===");
+    console.log("Full reading object:", reading);
+    console.log("Webhook response:", reading.webhookResponse);
+    console.log("Original cards:", reading.cards);
+    console.log("Question:", reading.webhookResponse?.question || reading.question);
+    
     setSelectedReading(reading);
     
-    // Convert cards array to ReadingCard format
-    const readingCards: ReadingCard[] = Array.isArray(reading.cards) 
-      ? reading.cards.map((cardId, index) => {
-          let cardNumber: number;
-          
-          // Handle different card ID types
-          if (typeof cardId === 'number') {
-            cardNumber = cardId;
-          } else if (typeof cardId === 'string') {
-            cardNumber = parseInt(cardId, 10);
-            if (isNaN(cardNumber)) cardNumber = index;
-          } else {
-            cardNumber = index;
-          }
-              
-          return {
-            id: String(cardNumber),
-            name: getCardName(cardNumber, index),
-            image: `/img/cards/deck_1/${cardNumber}_${getCardName(cardNumber, index).replace(/\s+/g, '')}.jpg`,
-            description: "",
-            revealed: true
-          };
-        })
-      : [];
+    // Always try to use webhook cards first
+    let cardsToUse: number[] = [];
     
+    // First priority: webhook response selected_cards
+    if (reading.webhookResponse?.selected_cards) {
+      cardsToUse = reading.webhookResponse.selected_cards;
+      console.log("Using webhook selected cards:", cardsToUse);
+    }
+    // Second priority: reading.cards if they are numbers
+    else if (Array.isArray(reading.cards)) {
+      cardsToUse = reading.cards.map(cardId => {
+        if (typeof cardId === 'number') return cardId;
+        if (typeof cardId === 'string') {
+          const parsed = parseInt(cardId, 10);
+          return isNaN(parsed) ? 0 : parsed;
+        }
+        return 0;
+      });
+      console.log("Using reading.cards:", cardsToUse);
+    }
+    
+    // Convert to ReadingCard format
+    const readingCards: ReadingCard[] = cardsToUse.map((cardId: number) => {
+      const cardName = getCardName(cardId);
+      const imagePath = `/img/cards/deck_1/${cardId}_${cardName.replace(/\s+/g, '')}.jpg`;
+      console.log("Creating card:", { cardId, cardName, imagePath });
+      
+      return {
+        id: String(cardId),
+        name: cardName,
+        image: imagePath,
+        description: "",
+        revealed: true
+      };
+    });
+    
+    console.log("Final reading cards:", readingCards);
     setViewingCards(readingCards);
-    console.log("Set viewing cards to:", readingCards);
   };
 
   // Hide the selected reading view and allow going back to history
@@ -267,7 +334,10 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     <TooltipProvider>
       {selectedReading ? (
         <ReadingDetails
-          reading={selectedReading}
+          reading={{
+            ...selectedReading,
+            question: selectedReading.webhookResponse?.question || selectedReading.question
+          }}
           viewingCards={viewingCards}
           onBack={hideReading}
           onCopyToClipboard={copyToClipboard}

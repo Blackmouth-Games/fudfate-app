@@ -1,15 +1,50 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Share2, X, Download } from 'lucide-react';
+import { Share2, Download, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTarot } from '@/contexts/TarotContext';
-import { motion } from 'framer-motion';
-import { useWallet } from '@/contexts/WalletContext';
 import html2canvas from 'html2canvas';
+import { ReadingCard } from '@/types/tarot';
+import { DownloadHistoryEntry } from '@/types/debug';
+import tarotCards from '@/data/tarotCards';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface ShareReadingProps {
   className?: string;
+  readingData?: {
+    intention: string;
+    selectedCards: ReadingCard[];
+    interpretation: string;
+    finalMessage: string;
+  };
+  onCopyToClipboard?: () => void;
+  onShareOnTwitter?: () => void;
+  source?: 'reading' | 'history';
+}
+
+// Extend Window interface to include our custom property
+declare global {
+  interface Window {
+    imageDownloadHistory: Array<{
+      url: string;
+      timestamp: number;
+      success: boolean;
+      error?: string;
+      cards?: Array<{
+        name: string;
+        id: string | number;
+        image: string;
+      }>;
+      intention?: string;
+      source: string;
+    }>;
+  }
 }
 
 const debug = (type: 'info' | 'error' | 'warn' | 'debug', ...args: any[]) => {
@@ -23,474 +58,811 @@ const debug = (type: 'info' | 'error' | 'warn' | 'debug', ...args: any[]) => {
   console.log(`%c[ShareReading] ${type.toUpperCase()}:`, styles[type], ...args);
 };
 
-const ShareReading: React.FC<ShareReadingProps> = ({ className = '' }) => {
+const ShareReading: React.FC<ShareReadingProps> = ({ 
+  className = '', 
+  readingData,
+  source = 'reading',
+  onCopyToClipboard,
+  onShareOnTwitter
+}) => {
   const { t } = useTranslation();
-  const { intention, selectedCards, interpretation, finalMessage, webhookResponse, selectedDeck } = useTarot();
-  const { walletAddress } = useWallet();
+  const { 
+    intention: currentIntention, 
+    selectedCards: contextSelectedCards, 
+    interpretation: contextInterpretation, 
+    finalMessage: contextFinalMessage, 
+    webhookResponse, 
+    selectedDeck 
+  } = useTarot();
   const readingRef = useRef<HTMLDivElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
-  // Log all relevant data when component renders
-  React.useEffect(() => {
-    console.log('=== ShareReading Debug Info ===');
-    console.log('Selected Cards:', selectedCards);
-    console.log('Webhook Response:', webhookResponse);
-    console.log('Selected Deck:', selectedDeck);
-  }, [selectedCards, webhookResponse, selectedDeck]);
-
-  const getSelectedCards = () => {
-    console.log('=== Getting Selected Cards ===');
+  // Función para obtener una carta del deck actual por su ID numérico
+  const getCardFromDeck = (cardId: number): ReadingCard | undefined => {
+    debug('debug', `Getting card from deck: ID=${cardId}, Deck=${selectedDeck}`);
     
-    // 1. First try to get cards from webhook response
-    if (webhookResponse) {
-      console.log('Webhook response:', webhookResponse);
+    try {
+      // Filtrar cartas por el deck actual
+      const deckCards = tarotCards.filter(card => card.deck === selectedDeck);
+      debug('debug', `Found ${deckCards.length} cards in deck ${selectedDeck}`);
       
-      // Try to get cards from returnwebhoock first
-      if (webhookResponse.returnwebhoock) {
-        try {
-          const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-          console.log('Parsed webhook data:', parsedData);
-          
-          if (parsedData.selected_cards && Array.isArray(parsedData.selected_cards)) {
-            const cards = parsedData.selected_cards.map((cardId: number) => {
-              const cardName = getCardName(cardId);
-              return {
-                id: cardId.toString(),
-                name: cardName,
-                cardId: cardId.toString()
-              };
-            });
-            console.log('Using cards from parsed webhook:', cards);
-            return cards;
-          }
-        } catch (e) {
-          console.error('Error parsing webhook data:', e);
+      // Buscar la carta por su ID numérico
+      const cardInfo = deckCards.find(card => {
+        // Intentar extraer el ID del nombre del archivo de imagen
+        const filename = card.image.split('/').pop() || '';
+        const match = filename.match(/^(\d+)_/);
+        const numericId = match ? parseInt(match[1]) : null;
+        
+        debug('debug', `Comparing card: filename=${filename}, extractedId=${numericId}, targetId=${cardId}`);
+        return numericId === cardId;
+      });
+
+      if (!cardInfo) {
+        debug('warn', `Card not found in deck ${selectedDeck} with ID ${cardId}`);
+        return undefined;
+      }
+
+      // Extraer el nombre del archivo de la imagen original
+      const originalFilename = cardInfo.image.split('/').pop() || '';
+      // Asegurarse de que la extensión sea .jpg
+      const filenameWithoutExt = originalFilename.replace(/\.[^/.]+$/, "");
+      // Construir la ruta de la imagen usando el mismo formato que el original pero con .jpg
+      const imagePath = `/img/cards/${selectedDeck}/${filenameWithoutExt}.jpg`;
+      
+      debug('info', 'Found card:', {
+        id: cardId,
+        name: cardInfo.name,
+        imagePath: imagePath,
+        originalImage: cardInfo.image,
+        deck: selectedDeck
+      });
+
+      return {
+        id: String(cardId),
+        name: cardInfo.name,
+        image: imagePath,
+        description: cardInfo.description,
+        revealed: true,
+        deck: selectedDeck
+      };
+    } catch (error) {
+      debug('error', 'Error getting card from deck:', error);
+      return undefined;
+    }
+  };
+
+  // Determinar las cartas a mostrar
+  const displayCards = useMemo(() => {
+    debug('info', 'Determining cards to display', {
+      hasReadingData: !!readingData,
+      hasWebhookResponse: !!webhookResponse,
+      webhookCards: webhookResponse?.selected_cards,
+      source
+    });
+    
+    try {
+      // Caso 1: Lectura del historial (mayor prioridad)
+      if (source === 'history' && readingData?.selectedCards?.length) {
+        debug('info', 'Using history cards:', readingData.selectedCards);
+        return readingData.selectedCards;
+      }
+      
+      // Caso 2: Lectura actual con respuesta del webhook
+      if (webhookResponse?.selected_cards) {
+        const webhookCards = webhookResponse.selected_cards;
+        debug('info', 'Using webhook cards:', webhookCards);
+
+        // Convertir directamente los IDs del webhook a cartas usando el deck seleccionado
+        const cards = webhookCards
+          .map(webhookId => {
+            const card = getCardFromDeck(webhookId);
+            if (!card) {
+              debug('warn', `Could not create card for webhook ID ${webhookId}`);
+              return null;
+            }
+            debug('info', `Created card for webhook ID ${webhookId}:`, card);
+            return card;
+          })
+          .filter((card): card is ReadingCard => card !== null);
+
+        if (cards.length > 0) {
+          debug('info', 'Final webhook cards:', cards);
+          return cards;
         }
       }
       
-      // Then try selected_cards directly from webhook
-      if (webhookResponse.selected_cards && Array.isArray(webhookResponse.selected_cards)) {
-        const cards = webhookResponse.selected_cards.map((cardId: number) => {
-          const cardName = getCardName(cardId);
-          return {
-            id: cardId.toString(),
-            name: cardName,
-            cardId: cardId.toString()
-          };
-        });
-        console.log('Using cards directly from webhook:', cards);
-        return cards;
+      // Caso 3: Fallback a las cartas del contexto
+      if (contextSelectedCards?.length) {
+        debug('info', 'Using context cards:', contextSelectedCards);
+        return contextSelectedCards;
       }
-    }
-    
-    // 2. If no webhook cards found, use manually selected cards
-    if (selectedCards && selectedCards.length > 0) {
-      console.log('Using manually selected cards:', selectedCards);
-      return selectedCards;
-    }
-    
-    console.warn('No cards found in any source');
-    return [];
-  };
 
-  const getCardName = (cardId: number): string => {
-    const cardNames: { [key: number]: string } = {
-      0: 'TheDegen',
-      1: 'TheMiner',
-      13: 'TheRugpull',
-      20: 'TheHalving',
-      19: 'TheMemecoin',
-      10: 'TheAirdrop'
-      // Add more mappings as needed
-    };
-    return cardNames[cardId] || `Card${cardId}`;
-  };
+      debug('warn', 'No valid cards found, returning empty array');
+      return [];
+    } catch (error) {
+      debug('error', 'Error in displayCards:', error);
+      return [];
+    }
+  }, [readingData, webhookResponse, contextSelectedCards, selectedDeck, source]);
 
-  const getWebhookMessage = (): string => {
-    if (finalMessage) return finalMessage;
+  // Determinar el mensaje/interpretación a mostrar
+  const displayMessage = useMemo(() => {
+    debug('info', 'Determining message to display');
     
-    if (webhookResponse) {
-      if (Array.isArray(webhookResponse) && webhookResponse.length > 0) {
-        if (webhookResponse[0].message) return webhookResponse[0].message;
-        
-        if (webhookResponse[0].returnwebhoock) {
-          try {
-            const parsedData = JSON.parse(webhookResponse[0].returnwebhoock);
-            if (parsedData && parsedData.message) return parsedData.message;
-          } catch (e) {
-            console.error("Error parsing webhook message for sharing:", e);
-          }
-        }
-      } else if (typeof webhookResponse === 'object' && webhookResponse !== null) {
-        if (webhookResponse.message) return webhookResponse.message;
-        
-        if (webhookResponse.returnwebhoock) {
-          try {
-            const parsedData = JSON.parse(webhookResponse.returnwebhoock);
-            if (parsedData && parsedData.message) return parsedData.message;
-          } catch (e) {
-            console.error("Error parsing webhook message for sharing:", e);
-          }
-        }
-      }
+    // Caso 1: Mensaje del historial
+    if (source === 'history' && readingData?.interpretation) {
+      debug('info', 'Using history interpretation');
+      return String(readingData.interpretation);
     }
     
-    return interpretation?.summary || "";
-  };
+    // Caso 2: Mensaje del webhook
+    if (webhookResponse?.message) {
+      debug('info', 'Using webhook message:', webhookResponse.message);
+      return String(webhookResponse.message);
+    }
+    
+    // Caso 3: Mensaje del contexto
+    debug('info', 'Using context message:', contextFinalMessage);
+    return String(contextFinalMessage || contextInterpretation || t('tarot.noMessageAvailable'));
+  }, [readingData, webhookResponse, contextFinalMessage, contextInterpretation, source, t]);
+
+  // Determinar la intención/pregunta a mostrar
+  const displayIntention = useMemo(() => {
+    debug('info', 'Determining intention to display', {
+      readingDataIntention: readingData?.intention,
+      webhookQuestion: webhookResponse?.question,
+      currentIntention,
+      source
+    });
+    
+    // Si estamos en el historial, usar la intención del readingData
+    if (source === 'history') {
+      const historyIntention = readingData?.intention;
+      debug('info', 'Using history intention:', historyIntention);
+      return historyIntention || t('tarot.noQuestion');
+    }
+    
+    // Para lecturas normales, seguir el orden de prioridad
+    const intention = webhookResponse?.question || currentIntention;
+    debug('info', 'Using normal reading intention:', intention);
+    return intention || t('tarot.noQuestion');
+  }, [readingData, webhookResponse, currentIntention, source]);
 
   const downloadImage = async () => {
     if (!readingRef.current) return;
 
+    debug('info', 'Starting image download with data:', {
+      displayIntention,
+      displayMessage,
+      displayCards,
+      source,
+      readingData,
+      readingDataIntention: readingData?.intention
+    });
+
     const loadingToast = toast.loading('Generating image...');
 
     try {
-      debug('info', 'Starting image generation process');
-      debug('debug', 'Selected cards:', selectedCards);
+      const targetWidth = 1080;
+      const targetHeight = 1350;
+
+      // Crear un contenedor temporal que sea una copia exacta del original
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.top = '0';
+      tempContainer.style.left = '0';
+      tempContainer.style.width = `${targetWidth}px`;
+      tempContainer.style.height = `${targetHeight}px`;
+      tempContainer.style.zIndex = '-9999';
+      tempContainer.style.backgroundColor = '#0a0014';
+      tempContainer.style.overflow = 'hidden';
+      document.body.appendChild(tempContainer);
+
+      // Clonar el contenido manteniendo todos los estilos
+      const clone = readingRef.current.cloneNode(true) as HTMLElement;
+      
+      // Asegurarse de que el clon tenga las dimensiones correctas
+      clone.style.position = 'absolute';
+      clone.style.left = '0';
+      clone.style.top = '0';
+      clone.style.width = `${targetWidth}px`;
+      clone.style.height = `${targetHeight}px`;
+      clone.style.visibility = 'visible';
+      clone.style.opacity = '1';
+      clone.style.transform = 'none';
+      
+      // Asegurarse de que las imágenes mantengan su calidad
+      const images = clone.getElementsByTagName('img');
+      Array.from(images).forEach(img => {
+        img.style.imageRendering = 'pixelated';
+        img.style.transform = 'none';
+      });
+      
+      tempContainer.appendChild(clone);
 
       // Esperar a que las imágenes se carguen
-      const images = readingRef.current.getElementsByTagName('img');
-      debug('info', `Found ${images.length} images to load`);
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
 
-      const imagePromises = Array.from(images).map((img, index) => {
-        return new Promise((resolve, reject) => {
-          if (img.complete) {
-            debug('debug', `Image ${index} already loaded:`, img.src);
-            resolve(null);
+      // Dar tiempo al navegador para renderizar
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Configuración de html2canvas con opciones optimizadas
+      const canvas = await html2canvas(tempContainer, {
+        width: targetWidth,
+        height: targetHeight,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0a0014',
+        logging: false,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.querySelector('[data-reading-container]');
+          if (clonedElement) {
+            (clonedElement as HTMLElement).style.transform = 'none';
+          }
+        },
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+      // Convertir a blob
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            toast.error('Failed to generate image');
+            if (typeof window !== 'undefined') {
+              window.imageDownloadHistory = window.imageDownloadHistory || [];
+              window.imageDownloadHistory.unshift({
+                url: 'Failed to generate image',
+                timestamp: Date.now(),
+                success: false,
+                error: 'Failed to generate image blob',
+                source: source
+              });
+              window.dispatchEvent(new Event('imageDownloadHistoryUpdate'));
+            }
             return;
           }
 
-          img.onload = () => {
-            debug('debug', `Image ${index} loaded successfully:`, img.src);
-            resolve(null);
-          };
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'fudfate-reading.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+          
+          // Registrar la descarga exitosa en el historial
+          if (typeof window !== 'undefined') {
+            const cardInfo = displayCards.map(card => ({
+              name: card.name,
+              id: card.id,
+              image: card.image
+            }));
+            
+            const downloadEntry: DownloadHistoryEntry = {
+              url: 'fudfate-reading.png',
+              timestamp: Date.now(),
+              success: true,
+              cards: cardInfo,
+              intention: source === 'history' && readingData ? readingData.intention : displayIntention,
+              source: source
+            };
 
-          img.onerror = (error) => {
-            debug('error', `Error loading image ${index}:`, img.src, error);
-            // Resolvemos en lugar de rechazar para no bloquear el proceso
-            resolve(null);
-          };
-
-          debug('debug', `Waiting for image ${index} to load:`, img.src);
-        });
-      });
-
-      debug('info', 'Waiting for all images to load...');
-      await Promise.all(imagePromises);
-      debug('info', 'All images loaded or handled');
-
-      debug('info', 'Starting canvas generation...');
-      const canvas = await html2canvas(readingRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: true,
-        onclone: (clonedDoc) => {
-          debug('debug', 'Cloning document for canvas...');
-          const element = clonedDoc.querySelector('[data-reading-container]') as HTMLElement;
-          if (element) {
-            element.style.transform = 'none';
-            element.style.position = 'relative';
-            element.style.left = '0';
-            debug('debug', 'Adjusted cloned element styles');
-          } else {
-            debug('warn', 'Could not find reading container in cloned document');
+            window.imageDownloadHistory = window.imageDownloadHistory || [];
+            window.imageDownloadHistory.unshift(downloadEntry);
+            window.dispatchEvent(new Event('imageDownloadHistoryUpdate'));
           }
-        }
-      });
-      debug('info', 'Canvas generated successfully');
-
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          debug('error', 'Failed to create blob from canvas');
+          
+          document.body.removeChild(tempContainer);
           toast.dismiss(loadingToast);
-          toast.error('Could not generate image');
-          return;
-        }
-
-        debug('info', 'Creating download link...');
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'fudfate-reading.png';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-        
-        toast.dismiss(loadingToast);
-        toast.success('Image downloaded! You can now attach it to your tweet.');
-        debug('info', 'Image generation and download completed successfully');
-      }, 'image/png', 1.0);
+          toast.success('Image downloaded successfully!');
+        },
+        'image/png',
+        1.0
+      );
 
     } catch (error) {
-      debug('error', 'Error in image generation process:', error);
+      console.error('Error generating image:', error);
+      if (typeof window !== 'undefined') {
+        window.imageDownloadHistory = window.imageDownloadHistory || [];
+        window.imageDownloadHistory.unshift({
+          url: 'Error generating image',
+          timestamp: Date.now(),
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error occurred',
+          source: source
+        });
+        window.dispatchEvent(new Event('imageDownloadHistoryUpdate'));
+      }
       toast.dismiss(loadingToast);
       toast.error('Could not generate image');
     }
   };
 
-  const shareOnTwitter = () => {
-    if (!selectedCards.length) return;
-    
-    let shareMessage = getWebhookMessage();
-    const maxMsgLength = 180;
-    
-    if (shareMessage.length > maxMsgLength) {
-      shareMessage = shareMessage.substring(0, maxMsgLength) + '...';
-    }
-    
-    const text = t('tarot.shareText', {
-      cards: selectedCards.map(card => card.name).join(', '),
-      intention: intention.length > 30 ? intention.substring(0, 30) + '...' : intention,
-      message: shareMessage ? `"${shareMessage}"` : ''
-    });
+  const generatePreviewImage = async () => {
+    if (!readingRef.current) return;
 
-    const url = 'https://app.fudfate.xyz/';
-    const token = '$FDft @FUDfate';
-    const hashtags = 'FUDfate,Tarot,Crypto';
+    const loadingToast = toast.loading('Generating preview...');
 
-    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent('FUDfate')}&text=${encodeURIComponent(`via $FDft`)}`;
-    window.open(twitterUrl, '_blank');
-  };
+    try {
+      const targetWidth = 1080;
+      const targetHeight = 1350;
 
-  const copyToClipboard = () => {
-    if (!selectedCards.length) return;
-    
-    const cardNames = selectedCards
-      .map(card => card.name)
-      .join(', ');
-    
-    let shareMessage = getWebhookMessage();
-    
-    if (shareMessage.length > 280) {
-      shareMessage = shareMessage.substring(0, 277) + '...';
-    }
-    
-    const text = t('tarot.shareClipboardText', {
-      cards: cardNames,
-      intention: intention,
-      interpretation: shareMessage || ''
-    });
-    
-    navigator.clipboard.writeText(text)
-      .then(() => {
-        toast.success(t('tarot.copiedToClipboard'));
-      })
-      .catch(err => {
-        console.error('Could not copy text: ', err);
-        toast.error(t('tarot.copyFailed'));
+      // Crear un contenedor temporal que sea una copia exacta del original
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.top = '0';
+      tempContainer.style.left = '0';
+      tempContainer.style.width = `${targetWidth}px`;
+      tempContainer.style.height = `${targetHeight}px`;
+      tempContainer.style.zIndex = '-9999';
+      tempContainer.style.backgroundColor = '#0a0014';
+      document.body.appendChild(tempContainer);
+
+      // Clonar el contenido manteniendo todos los estilos
+      const clone = readingRef.current.cloneNode(true) as HTMLElement;
+      
+      // Asegurarse de que el clon tenga las dimensiones correctas
+      clone.style.position = 'absolute';
+      clone.style.left = '0';
+      clone.style.top = '0';
+      clone.style.width = `${targetWidth}px`;
+      clone.style.height = `${targetHeight}px`;
+      clone.style.visibility = 'visible';
+      clone.style.opacity = '1';
+      clone.style.transform = 'none';
+      
+      // Asegurarse de que las imágenes mantengan su calidad
+      const images = clone.getElementsByTagName('img');
+      Array.from(images).forEach(img => {
+        img.style.imageRendering = 'pixelated';
+        img.style.transform = 'none';
       });
+      
+      tempContainer.appendChild(clone);
+
+      // Esperar a que las imágenes se carguen
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = resolve;
+          img.onerror = resolve;
+        });
+      }));
+
+      // Dar tiempo al navegador para renderizar
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Configuración de html2canvas con opciones optimizadas
+      const canvas = await html2canvas(tempContainer, {
+        width: targetWidth,
+        height: targetHeight,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0a0014',
+        logging: false,
+        onclone: (clonedDoc) => {
+          const clonedElement = clonedDoc.querySelector('[data-reading-container]');
+          if (clonedElement) {
+            (clonedElement as HTMLElement).style.transform = 'none';
+          }
+        },
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+      // Convertir a blob y luego a URL
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            toast.error('Failed to generate preview');
+            return;
+          }
+
+          const url = URL.createObjectURL(blob);
+          setPreviewImage(url);
+          setIsPreviewOpen(true);
+          
+          document.body.removeChild(tempContainer);
+          toast.dismiss(loadingToast);
+        },
+        'image/png',
+        1.0
+      );
+
+    } catch (error) {
+      console.error('Error generating preview:', error);
+      toast.dismiss(loadingToast);
+      toast.error('Could not generate preview');
+    }
   };
 
-  const getCardFileName = (card: any) => {
-    console.log('Processing card:', card);
-    
-    const id = card.id || card.cardId;
-    if (!id) {
-      console.warn('No card ID found, using default');
-      return '0_TheDegen.jpg';
+  // Función para obtener la ruta de la imagen de una carta
+  function getCardImage(card: ReadingCard): string {
+    try {
+      if (!card) {
+        debug('warn', 'No card provided to getCardImage');
+        return `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
+      }
+
+      // Si la carta tiene una imagen y es una ruta completa, usarla directamente
+      if (card.image && (card.image.startsWith('/') || card.image.startsWith('http'))) {
+        // Asegurarse de que la extensión sea .jpg
+        if (!card.image.endsWith('.jpg')) {
+          const pathWithoutExt = card.image.replace(/\.[^/.]+$/, "");
+          debug('info', 'Converting image extension to .jpg:', pathWithoutExt + '.jpg');
+          return pathWithoutExt + '.jpg';
+        }
+        debug('info', 'Using provided image path:', card.image);
+        return card.image;
+      }
+
+      // Si tenemos un ID numérico, buscar la carta en el deck
+      const numericId = typeof card.id === 'string' ? parseInt(card.id) : card.id;
+      if (!isNaN(numericId)) {
+        const deckCard = getCardFromDeck(numericId);
+        if (deckCard) {
+          debug('info', 'Using deck card image:', deckCard.image);
+          return deckCard.image;
+        }
+      }
+      
+      debug('warn', 'Could not determine image path, using fallback');
+      return `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
+    } catch (error) {
+      debug('error', 'Error in getCardImage:', error);
+      return `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
     }
-    
-    const cardName = getCardName(parseInt(id));
-    const fileName = `${id}_${cardName}.jpg`;
-    console.log('Generated filename:', fileName);
-    return fileName;
+  }
+
+  const handleCopyToClipboard = () => {
+    if (onCopyToClipboard) {
+      onCopyToClipboard();
+    }
+  };
+
+  const handleShareOnTwitter = () => {
+    if (onShareOnTwitter) {
+      onShareOnTwitter();
+    }
   };
 
   return (
     <>
-      <div 
+      <div
         ref={readingRef}
         data-reading-container
-        className="fixed left-[-9999px]"
-        style={{ 
-          width: '1200px',
-          padding: '40px',
-          background: 'linear-gradient(45deg, #000066, #6600cc)',
-          color: '#ffffff',
+        style={{
+          width: '1080px',
+          height: '1350px',
           position: 'relative',
-          overflow: 'hidden'
+          visibility: 'visible',
+          opacity: '1',
+          left: '-9999px',
+          top: 0,
+          background: 'linear-gradient(180deg, #ff1e6b 0%, #00fff2 100%)',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '40px',
+          fontFamily: '"Press Start 2P", system-ui',
+          imageRendering: 'pixelated',
+          overflow: 'visible'
         }}
       >
-        {/* Grid Background */}
+        {/* Base Sunburst Layer */}
         <div style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: `
-            linear-gradient(0deg, transparent 0%, rgba(0, 0, 0, 0.3) 2%, transparent 3%),
-            linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.3) 2%, transparent 3%),
-            linear-gradient(180deg, rgba(255, 0, 255, 0.1) 0%, rgba(0, 255, 255, 0.1) 100%)
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          background: `
+            conic-gradient(from 0deg at 50% 50%,
+              #ff1e6b 0deg 20deg,
+              transparent 20deg 40deg,
+              #ff1e6b 40deg 60deg,
+              transparent 60deg 80deg,
+              #ff1e6b 80deg 100deg,
+              transparent 100deg 120deg,
+              #ff1e6b 120deg 140deg,
+              transparent 140deg 160deg,
+              #ff1e6b 160deg 180deg,
+              transparent 180deg 200deg,
+              #ff1e6b 200deg 220deg,
+              transparent 220deg 240deg,
+              #ff1e6b 240deg 260deg,
+              transparent 260deg 280deg,
+              #ff1e6b 280deg 300deg,
+              transparent 300deg 320deg,
+              #ff1e6b 320deg 340deg,
+              transparent 340deg 360deg
+            )
           `,
-          backgroundSize: '40px 40px, 40px 40px, 100% 100%',
-          transform: 'perspective(500px) rotateX(30deg)',
-          transformOrigin: 'center center',
-          opacity: 0.5,
-          zIndex: 0
+          opacity: 0.7,
+          zIndex: 1,
+          animation: 'slowRotate 60s linear infinite'
         }} />
 
-        {/* Horizontal lines for retro effect */}
+        {/* Secondary Sunburst Layer - Offset */}
         <div style={{
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.1) 0px, rgba(0, 0, 0, 0.1) 1px, transparent 1px, transparent 2px)',
-          backgroundSize: '100% 4px',
-          opacity: 0.3,
-          pointerEvents: 'none',
-          zIndex: 1
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          background: `
+            conic-gradient(from 20deg at 50% 50%,
+              #00fff2 0deg 20deg,
+              transparent 20deg 40deg,
+              #00fff2 40deg 60deg,
+              transparent 60deg 80deg,
+              #00fff2 80deg 100deg,
+              transparent 100deg 120deg,
+              #00fff2 120deg 140deg,
+              transparent 140deg 160deg,
+              #00fff2 160deg 180deg,
+              transparent 180deg 200deg,
+              #00fff2 200deg 220deg,
+              transparent 220deg 240deg,
+              #00fff2 240deg 260deg,
+              transparent 260deg 280deg,
+              #00fff2 280deg 300deg,
+              transparent 300deg 320deg,
+              #00fff2 320deg 340deg,
+              transparent 340deg 360deg
+            )
+          `,
+          opacity: 0.5,
+          zIndex: 2,
+          animation: 'slowRotateReverse 45s linear infinite'
         }} />
 
-        <div className="flex flex-col items-center space-y-8" style={{
+        {/* Center Glow */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          width: '70%',
+          height: '70%',
+          transform: 'translate(-50%, -50%)',
+          background: `
+            radial-gradient(circle at center,
+              rgba(255, 255, 255, 0.8) 0%,
+              rgba(255, 30, 107, 0.6) 30%,
+              rgba(0, 255, 242, 0.4) 60%,
+              transparent 100%
+            )
+          `,
+          filter: 'blur(20px)',
+          zIndex: 3
+        }} />
+
+        {/* Sharp Ray Overlay */}
+        <div style={{
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100%',
+          background: `
+            repeating-conic-gradient(
+              from 0deg at 50% 50%,
+              rgba(255, 255, 255, 0.1) 0deg 5deg,
+              transparent 5deg 10deg,
+              rgba(255, 255, 255, 0.1) 10deg 15deg,
+              transparent 15deg 20deg
+            )
+          `,
+          zIndex: 4
+        }} />
+
+        {/* Content container */}
+        <div style={{
           position: 'relative',
-          zIndex: 2,
-          background: 'radial-gradient(circle at center, rgba(255, 0, 255, 0.2) 0%, rgba(0, 255, 255, 0.2) 100%)',
-          backdropFilter: 'blur(5px)',
-          padding: '20px',
-          borderRadius: '20px'
+          zIndex: 5,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
         }}>
-          <div className="flex items-center gap-4">
+          {/* Logo */}
+          <div style={{ 
+            width: '400px',
+            marginTop: '40px',
+            marginBottom: '20px',
+            filter: 'drop-shadow(0 0 15px rgba(255, 255, 255, 0.8))'
+          }}>
             <img 
               src="/img/logos/FUDFATE_logo.png" 
-              alt="FudFate Logo" 
-              className="h-16 w-auto"
-              crossOrigin="anonymous"
+              alt="FUDFATE"
               style={{
-                filter: 'drop-shadow(0 0 10px rgba(255, 0, 255, 0.5))'
+                width: '100%',
+                height: 'auto',
+                imageRendering: 'pixelated'
               }}
             />
           </div>
-          
-          <div className="text-2xl text-center" style={{
-            color: '#00ffff',
-            textShadow: '2px 2px 4px rgba(255, 0, 255, 0.5), -2px -2px 4px rgba(0, 255, 255, 0.5)',
-            fontStyle: 'italic'
+
+          {/* Question */}
+          <div className="text-center" style={{ 
+            marginBottom: '60px',
+            width: '90%'
           }}>
-            <p>"{intention}"</p>
+            <h2 style={{ 
+              color: '#ffffff',
+              textShadow: '2px 2px 15px rgba(255,30,107,0.6)',
+              letterSpacing: '4px',
+              fontFamily: '"Press Start 2P", system-ui',
+              transform: 'scale(1.3)',
+              fontSize: '42px',
+              lineHeight: '1.6',
+              padding: '0 40px'
+            }}>
+              {displayIntention}
+            </h2>
           </div>
-          
-          <div className="flex justify-center gap-8">
-            {getSelectedCards().map((card, index) => {
-              const fileName = getCardFileName(card);
-              console.log(`Card ${index} filename:`, fileName);
-              
-              return (
-                <div key={index} style={{
-                  width: '320px',
-                  height: '512px',
-                  background: 'linear-gradient(45deg, #ff00ff, #00ffff)',
-                  borderRadius: '16px',
-                  padding: '3px',
-                  boxShadow: '0 0 20px rgba(255, 0, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.3)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
+
+          {/* Cards */}
+          <div className="flex gap-6 justify-center" style={{ 
+            marginBottom: '60px'
+          }}>
+            {displayCards.map((card, index) => (
+              <div key={index} className="relative" style={{
+                boxShadow: '0 0 10px #ff1e6b, 0 0 20px #ff1e6b, 0 0 30px #ff1e6b, 0 0 40px #ff1e6b',
+                borderRadius: '30px',
+                overflow: 'hidden',
+                width: '300px',
+                height: '450px',
+                border: '8px solid #FFD700',
+                animation: 'borderGlow 2s infinite alternate'
+              }}>
+                <img
+                  src={getCardImage(card)}
+                  alt={card.name}
+                  style={{
+                    imageRendering: 'pixelated',
+                    borderRadius: '24px',
                     width: '100%',
                     height: '100%',
-                    background: '#000033',
-                    borderRadius: '14px',
-                    padding: '16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    {/* Decorative border */}
-                    <div style={{
-                      position: 'absolute',
-                      top: '8px',
-                      left: '8px',
-                      right: '8px',
-                      bottom: '8px',
-                      border: '2px solid rgba(255, 0, 255, 0.3)',
-                      borderRadius: '8px',
-                      pointerEvents: 'none',
-                      boxShadow: 'inset 0 0 10px rgba(0, 255, 255, 0.2)'
-                    }} />
-                    <img 
-                      src={`/img/cards/${selectedDeck}/${fileName}`}
-                      alt={card.name}
-                      crossOrigin="anonymous"
-                      style={{ 
-                        width: 'calc(100% - 32px)',
-                        height: 'calc(100% - 32px)',
-                        objectFit: 'contain',
-                        borderRadius: '4px',
-                        filter: 'drop-shadow(0 0 8px rgba(0, 255, 255, 0.3))'
-                      }}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        console.error('Failed to load image:', target.src);
-                        target.src = `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    const fallbackPath = `/img/cards/${selectedDeck}/99_BACK.png`;
+                    e.currentTarget.src = fallbackPath;
+                  }}
+                />
+              </div>
+            ))}
           </div>
           
-          <div className="text-xl text-center max-w-4xl" style={{
-            color: '#ffffff',
-            textShadow: '2px 2px 4px rgba(255, 0, 255, 0.5)',
-            background: 'linear-gradient(90deg, rgba(255, 0, 255, 0.2), rgba(0, 255, 255, 0.2))',
-            padding: '20px',
-            borderRadius: '8px',
-            fontStyle: 'italic',
-            backdropFilter: 'blur(5px)'
+          {/* Interpretation - Modified to be more transparent without borders */}
+          <div className="text-center" style={{ 
+            background: 'rgba(255, 255, 255, 0.5)',
+            padding: '45px',
+            borderRadius: '20px',
+            width: '92%',
+            maxHeight: '420px',
+            overflow: 'hidden',
+            backdropFilter: 'blur(8px)'
           }}>
-            <p>"{getWebhookMessage()}"</p>
-          </div>
-          
-          <div className="text-lg mt-4" style={{
-            color: '#00ffff',
-            textShadow: '1px 1px 2px rgba(255, 0, 255, 0.3), -1px -1px 2px rgba(0, 255, 255, 0.3)'
-          }}>
-            <p>Visit app.fudfate.xyz for your own reading</p>
+            <p style={{ 
+              color: '#ff1e6b',
+              letterSpacing: '2px',
+              lineHeight: '1.7',
+              fontFamily: '"Press Start 2P", system-ui',
+              fontSize: '28px',
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
+            }}>
+              {displayMessage}
+            </p>
           </div>
         </div>
+
+        <style>{`
+          @keyframes slowRotate {
+            from {
+              transform: rotate(0deg);
+            }
+            to {
+              transform: rotate(360deg);
+            }
+          }
+          @keyframes slowRotateReverse {
+            from {
+              transform: rotate(360deg);
+            }
+            to {
+              transform: rotate(0deg);
+            }
+          }
+          @keyframes pulse {
+            0% {
+              opacity: 0.5;
+              transform: translate(-50%, -50%) scale(1);
+            }
+            50% {
+              opacity: 0.7;
+              transform: translate(-50%, -50%) scale(1.1);
+            }
+            100% {
+              opacity: 0.5;
+              transform: translate(-50%, -50%) scale(1);
+            }
+          }
+          @keyframes borderGlow {
+            from {
+              border-color: #FFD700;
+              box-shadow: 0 0 10px #ff1e6b, 0 0 20px #ff1e6b, 0 0 30px #ff1e6b, 0 0 40px #ff1e6b;
+            }
+            to {
+              border-color: #ff1e6b;
+              box-shadow: 0 0 20px #ff1e6b, 0 0 40px #ff1e6b, 0 0 60px #ff1e6b, 0 0 80px #ff1e6b;
+            }
+          }
+        `}</style>
       </div>
 
-      <motion.div 
-        className={`flex flex-col sm:flex-row items-center justify-center gap-3 ${className}`}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.2, duration: 0.5 }}
-      >
-        <Button
-          variant="outline"
-          onClick={copyToClipboard}
-          className="w-full sm:w-auto flex items-center gap-2 border-amber-300 hover:bg-amber-50"
-        >
-          <Share2 className="h-4 w-4" />
-          {t('tarot.copyReading')}
+      {/* Botones */}
+      <div className={`flex gap-4 justify-center ${className}`}>
+        <Button onClick={generatePreviewImage} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
+          <Eye className="h-4 w-4" />
+          {t('tarot.previewImage')}
         </Button>
-
-        <Button
-          variant="outline"
-          onClick={downloadImage}
-          className="w-full sm:w-auto flex items-center gap-2 border-amber-300 hover:bg-amber-50"
-        >
+        <Button onClick={downloadImage} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
           <Download className="h-4 w-4" />
-          Download Image
+          {t('tarot.downloadImage')}
         </Button>
-        
-        <Button
-          onClick={shareOnTwitter}
-          className="w-full sm:w-auto flex items-center gap-2 bg-black hover:bg-gray-800 text-white"
-        >
-          <X className="h-4 w-4" />
-          {t('tarot.shareOnX')}
+        <Button onClick={handleShareOnTwitter} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
+          <Share2 className="h-4 w-4" />
+          {t('tarot.shareOnTwitter')}
         </Button>
-      </motion.div>
+        <Button onClick={handleCopyToClipboard} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
+          <Share2 className="h-4 w-4" />
+          {t('tarot.copyToClipboard')}
+        </Button>
+      </div>
+
+      {/* Preview Dialog */}
+      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{t('tarot.previewTitle')}</DialogTitle>
+          </DialogHeader>
+          <div className="flex justify-center">
+            {previewImage && (
+              <img 
+                src={previewImage} 
+                alt="Preview" 
+                className="w-full h-auto"
+                style={{ imageRendering: 'pixelated' }}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
 
 export default ShareReading;
+
 
