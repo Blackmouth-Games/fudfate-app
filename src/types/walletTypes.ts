@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type WalletType = 'metamask' | 'phantom' | null;
+export type WalletType = 'phantom' | 'solflare' | null;
 
 export interface UserData {
   userId: string;

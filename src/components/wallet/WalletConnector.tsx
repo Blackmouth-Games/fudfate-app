@@ -21,16 +21,15 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
   const { t } = useTranslation();
   const [isConnecting, setIsConnecting] = useState<WalletType | null>(null);
   const [isPhantomAvailable, setIsPhantomAvailable] = useState(false);
-  const [isMetamaskAvailable, setIsMetamaskAvailable] = useState(false);
+  const [isSolflareAvailable, setIsSolflareAvailable] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
   // Check wallet availability on component mount
   useEffect(() => {
     // Check if Phantom is available
     setIsPhantomAvailable(!!window.solana && !!window.solana.isPhantom);
-    
-    // Check if Metamask is available
-    setIsMetamaskAvailable(!!window.ethereum && !!window.ethereum.isMetaMask);
+    // Check if Solflare is available
+    setIsSolflareAvailable(!!window.solflare);
   }, []);
 
   // Format wallet address to show first and last few characters
@@ -53,12 +52,12 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
       return;
     }
     
-    if (type === 'metamask' && !isMetamaskAvailable) {
-      toast.error(t('wallet.metamaskNotInstalled'), {
-        description: "Please install Metamask wallet to connect.",
+    if (type === 'solflare' && !isSolflareAvailable) {
+      toast.error(t('wallet.solflareNotInstalled'), {
+        description: "Please install Solflare wallet to connect.",
         action: {
           label: "Install",
-          onClick: () => window.open("https://metamask.io/download/", "_blank")
+          onClick: () => window.open("https://solflare.com/", "_blank")
         }
       });
       return;
@@ -102,8 +101,8 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                 />
               ) : (
                 <img 
-                  src="/img/icons/MetaMask-icon-fox.svg" 
-                  alt="Metamask" 
+                  src="/img/icons/solflare-icon.svg" 
+                  alt="Solflare" 
                   className="w-4 h-4"
                 />
               )}
@@ -123,37 +122,6 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
         </DropdownMenu>
       ) : (
         <div className="flex flex-col gap-3 w-full">
-          <Button 
-            onClick={() => handleConnect('metamask')}
-            disabled={isConnecting !== null || !isMetamaskAvailable}
-            className={`w-full font-medium text-black ${!isMetamaskAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-            style={{ backgroundColor: '#FFA680', borderColor: '#FF8A57' }}
-          >
-            {isConnecting === 'metamask' ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {t('wallet.connecting')}
-              </>
-            ) : (
-              <>
-                <img 
-                  src="/img/icons/MetaMask-icon-fox.svg" 
-                  alt="Metamask" 
-                  className="w-5 h-5 mr-2"
-                />
-                {isMetamaskAvailable ? t('wallet.connectToMetamask') : (
-                  <div className="flex items-center">
-                    {t('wallet.metamaskNotInstalled')}
-                    <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
-                      e.stopPropagation();
-                      window.open("https://metamask.io/download/", "_blank");
-                    }} />
-                  </div>
-                )}
-              </>
-            )}
-          </Button>
-          
           <Button 
             onClick={() => handleConnect('phantom')}
             disabled={isConnecting !== null || !isPhantomAvailable}
@@ -178,6 +146,37 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                     <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
                       e.stopPropagation();
                       window.open("https://phantom.app/", "_blank");
+                    }} />
+                  </div>
+                )}
+              </>
+            )}
+          </Button>
+
+          <Button 
+            onClick={() => handleConnect('solflare')}
+            disabled={isConnecting !== null || !isSolflareAvailable}
+            className={`w-full font-medium text-white ${!isSolflareAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+            style={{ backgroundColor: '#4A90E2', borderColor: '#357ABD' }}
+          >
+            {isConnecting === 'solflare' ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {t('wallet.connecting')}
+              </>
+            ) : (
+              <>
+                <img 
+                  src="/img/icons/solflare-icon.svg" 
+                  alt="Solflare" 
+                  className="w-5 h-5 mr-2"
+                />
+                {isSolflareAvailable ? t('wallet.connectToSolflare') : (
+                  <div className="flex items-center">
+                    {t('wallet.solflareNotInstalled')}
+                    <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
+                      e.stopPropagation();
+                      window.open("https://solflare.com/", "_blank");
                     }} />
                   </div>
                 )}

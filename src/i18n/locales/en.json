@@ -33,10 +33,10 @@
   "wallet": {
     "connectWallet": "Connect Wallet",
     "walletConnected": "Wallet Connected",
-    "metamask": "MetaMask",
     "phantom": "Phantom",
-    "connectToMetamask": "Connect to MetaMask",
+    "solflare": "Solflare",
     "connectToPhantom": "Connect to Phantom",
+    "connectToSolflare": "Connect to Solflare",
     "connecting": "Connecting...",
     "noWallet": "No wallet detected",
     "installWallet": "Please install a supported wallet",
@@ -47,8 +47,8 @@
     "network": "Network",
     "balance": "Balance",
     "switchNetwork": "Switch Network",
-    "metamaskNotInstalled": "Metamask is not installed",
     "phantomNotInstalled": "Phantom is not installed",
+    "solflareNotInstalled": "Solflare is not installed",
     "disconnectWallet": "Disconnect Wallet"
   },
   "tarot": {

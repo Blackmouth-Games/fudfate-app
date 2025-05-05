@@ -1,4 +1,3 @@
-import { ethers } from 'ethers';
 import { PublicKey } from '@solana/web3.js';
 import { UserData, WalletType } from '@/types/walletTypes';
 import { toast } from 'sonner';
@@ -6,31 +5,10 @@ import { Environment } from '@/config/webhooks';
 
 declare global {
   interface Window {
-    ethereum?: any;
     solana?: any;
+    solflare?: any;
   }
 }
-
-export const connectMetamask = async (): Promise<{ address: string | null; networkId: string | null; error: string | null }> => {
-  if (typeof window.ethereum === 'undefined') {
-    return { address: null, networkId: null, error: 'MetaMask is not installed.' };
-  }
-
-  try {
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    // Use BrowserProvider from ethers.js v6
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const address = await signer.getAddress();
-    const network = await provider.getNetwork();
-    const networkId = network.chainId.toString();
-
-    return { address, networkId, error: null };
-  } catch (error: any) {
-    console.error("MetaMask connection error:", error);
-    return { address: null, networkId: null, error: error.message || 'Failed to connect to MetaMask.' };
-  }
-};
 
 export const connectPhantom = async (): Promise<{ address: string | null; networkId: string | null; error: string | null }> => {
   if (typeof window.solana === 'undefined') {
@@ -47,6 +25,34 @@ export const connectPhantom = async (): Promise<{ address: string | null; networ
   } catch (error: any) {
     console.error("Phantom connection error:", error);
     return { address: null, networkId: null, error: error.message || 'Failed to connect to Phantom.' };
+  }
+};
+
+export const connectSolflare = async (): Promise<{ address: string | null; networkId: string | null; error: string | null }> => {
+  // Soporte para Solflare como proveedor dedicado o como parte de window.solana
+  const solflareProvider = window.solflare || (window.solana && window.solana.isSolflare ? window.solana : null);
+
+  if (!solflareProvider) {
+    return { address: null, networkId: null, error: 'Solflare wallet is not installed or not detected.' };
+  }
+
+  try {
+    const resp = await solflareProvider.connect();
+    console.log('Solflare connect() response:', resp);
+    const publicKey = resp?.publicKey || solflareProvider.publicKey;
+    if (!publicKey) {
+      return { address: null, networkId: null, error: 'Failed to get public key from Solflare. Please approve the connection in your wallet.' };
+    }
+    const address = publicKey.toString();
+    const networkId = 'mainnet-beta';
+    return { address, networkId, error: null };
+  } catch (error: any) {
+    if (error && error.code === 4001) {
+      // Código estándar de rechazo de usuario
+      return { address: null, networkId: null, error: 'Connection request was rejected in Solflare.' };
+    }
+    console.error("Solflare connection error:", error);
+    return { address: null, networkId: null, error: error?.message || 'Failed to connect to Solflare.' };
   }
 };
 

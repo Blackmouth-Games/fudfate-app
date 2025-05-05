@@ -3,8 +3,8 @@ import { useEnvironment } from '@/hooks/useEnvironment';
 import { UserData, WalletType } from '@/types/walletTypes';
 import { toast } from 'sonner';
 import { 
-  connectMetamask, 
-  connectPhantom, 
+  connectPhantom,
+  connectSolflare,
   parseUserData,
   fetchAvailableDecks,
   processDecksFromApi
@@ -34,10 +34,10 @@ export const useWalletConnection = (
       
       let connectionResult;
       
-      if (type === 'metamask') {
-        connectionResult = await connectMetamask();
-      } else if (type === 'phantom') {
+      if (type === 'phantom') {
         connectionResult = await connectPhantom();
+      } else if (type === 'solflare') {
+        connectionResult = await connectSolflare();
       } else {
         toast.error(`Unknown wallet type: ${type}`);
         return false;
@@ -129,6 +129,12 @@ export const useWalletConnection = (
         } catch (error) {
           console.error("Error disconnecting from Phantom:", error);
         }
+      } else if (walletType === 'solflare' && window.solflare?.isConnected) {
+        try {
+          window.solflare.disconnect();
+        } catch (error) {
+          console.error("Error disconnecting from Solflare:", error);
+        }
       }
       
       toast.info(`Disconnected from wallet`);
@@ -146,7 +152,7 @@ export const useWalletConnection = (
   const overrideUserData = (data: Partial<UserData>) => {
     if (!userData) {
       const newUserData: UserData = {
-        userId: data.userId || `mock_${Math.random().toString(16).substring(2, 10)}`,
+        userId: data.userId || `mock_${Math.random().toString(16).substring(2, 8)}`,
         runsToday: data.runsToday !== undefined ? data.runsToday : false,
         whitelisted: data.whitelisted !== undefined ? data.whitelisted : false,
         ...(data.selectedDeck ? { selectedDeck: data.selectedDeck } : {})
