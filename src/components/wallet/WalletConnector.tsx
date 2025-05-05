@@ -101,7 +101,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                 />
               ) : (
                 <img 
-                  src="/img/icons/solflare-icon.svg" 
+                  src="/img/icons/Solflare_id5j73wBTF_1.svg" 
                   alt="Solflare" 
                   className="w-4 h-4"
                 />
@@ -156,8 +156,8 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
           <Button 
             onClick={() => handleConnect('solflare')}
             disabled={isConnecting !== null || !isSolflareAvailable}
-            className={`w-full font-medium text-white ${!isSolflareAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-            style={{ backgroundColor: '#4A90E2', borderColor: '#357ABD' }}
+            className={`w-full font-medium text-black ${!isSolflareAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+            style={{ backgroundColor: '#FFEF46', borderColor: '#EEDA0F' }}
           >
             {isConnecting === 'solflare' ? (
               <>
@@ -167,7 +167,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
             ) : (
               <>
                 <img 
-                  src="/img/icons/solflare-icon.svg" 
+                  src="/img/icons/Solflare_id5j73wBTF_1.svg" 
                   alt="Solflare" 
                   className="w-5 h-5 mr-2"
                 />
