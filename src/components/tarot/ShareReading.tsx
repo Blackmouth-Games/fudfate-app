@@ -1,19 +1,13 @@
-import React, { useRef, useMemo, useState } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Share2, Download, Eye } from 'lucide-react';
+import { Share2, Download, X, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTarot } from '@/contexts/TarotContext';
 import html2canvas from 'html2canvas';
 import { ReadingCard } from '@/types/tarot';
 import { DownloadHistoryEntry } from '@/types/debug';
 import tarotCards from '@/data/tarotCards';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 
 interface ShareReadingProps {
   className?: string;
@@ -75,8 +69,6 @@ const ShareReading: React.FC<ShareReadingProps> = ({
     selectedDeck 
   } = useTarot();
   const readingRef = useRef<HTMLDivElement>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Función para obtener una carta del deck actual por su ID numérico
   const getCardFromDeck = (cardId: number): ReadingCard | undefined => {
@@ -390,145 +382,6 @@ const ShareReading: React.FC<ShareReadingProps> = ({
     }
   };
 
-  const generatePreviewImage = async () => {
-    if (!readingRef.current) return;
-
-    const loadingToast = toast.loading('Generating preview...');
-
-    try {
-      const targetWidth = 1080;
-      const targetHeight = 1350;
-
-      // Crear un contenedor temporal que sea una copia exacta del original
-      const tempContainer = document.createElement('div');
-      tempContainer.style.position = 'fixed';
-      tempContainer.style.top = '0';
-      tempContainer.style.left = '0';
-      tempContainer.style.width = `${targetWidth}px`;
-      tempContainer.style.height = `${targetHeight}px`;
-      tempContainer.style.zIndex = '-9999';
-      tempContainer.style.backgroundColor = '#0a0014';
-      document.body.appendChild(tempContainer);
-
-      // Clonar el contenido manteniendo todos los estilos
-      const clone = readingRef.current.cloneNode(true) as HTMLElement;
-      
-      // Asegurarse de que el clon tenga las dimensiones correctas
-      clone.style.position = 'absolute';
-      clone.style.left = '0';
-      clone.style.top = '0';
-      clone.style.width = `${targetWidth}px`;
-      clone.style.height = `${targetHeight}px`;
-      clone.style.visibility = 'visible';
-      clone.style.opacity = '1';
-      clone.style.transform = 'none';
-      
-      // Asegurarse de que las imágenes mantengan su calidad
-      const images = clone.getElementsByTagName('img');
-      Array.from(images).forEach(img => {
-        img.style.imageRendering = 'pixelated';
-        img.style.transform = 'none';
-      });
-      
-      tempContainer.appendChild(clone);
-
-      // Esperar a que las imágenes se carguen
-      await Promise.all(Array.from(images).map(img => {
-        if (img.complete) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
-        });
-      }));
-
-      // Dar tiempo al navegador para renderizar
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // Configuración de html2canvas con opciones optimizadas
-      const canvas = await html2canvas(tempContainer, {
-        width: targetWidth,
-        height: targetHeight,
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#0a0014',
-        logging: false,
-        onclone: (clonedDoc) => {
-          const clonedElement = clonedDoc.querySelector('[data-reading-container]');
-          if (clonedElement) {
-            (clonedElement as HTMLElement).style.transform = 'none';
-          }
-        },
-        x: 0,
-        y: 0,
-        scrollX: 0,
-        scrollY: 0,
-      });
-
-      // Convertir a blob y luego a URL
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            toast.error('Failed to generate preview');
-            return;
-          }
-
-          const url = URL.createObjectURL(blob);
-          setPreviewImage(url);
-          setIsPreviewOpen(true);
-          
-          document.body.removeChild(tempContainer);
-          toast.dismiss(loadingToast);
-        },
-        'image/png',
-        1.0
-      );
-
-    } catch (error) {
-      console.error('Error generating preview:', error);
-      toast.dismiss(loadingToast);
-      toast.error('Could not generate preview');
-    }
-  };
-
-  // Función para obtener la ruta de la imagen de una carta
-  function getCardImage(card: ReadingCard): string {
-    try {
-      if (!card) {
-        debug('warn', 'No card provided to getCardImage');
-        return `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
-      }
-
-      // Si la carta tiene una imagen y es una ruta completa, usarla directamente
-      if (card.image && (card.image.startsWith('/') || card.image.startsWith('http'))) {
-        // Asegurarse de que la extensión sea .jpg
-        if (!card.image.endsWith('.jpg')) {
-          const pathWithoutExt = card.image.replace(/\.[^/.]+$/, "");
-          debug('info', 'Converting image extension to .jpg:', pathWithoutExt + '.jpg');
-          return pathWithoutExt + '.jpg';
-        }
-        debug('info', 'Using provided image path:', card.image);
-        return card.image;
-      }
-
-      // Si tenemos un ID numérico, buscar la carta en el deck
-      const numericId = typeof card.id === 'string' ? parseInt(card.id) : card.id;
-      if (!isNaN(numericId)) {
-        const deckCard = getCardFromDeck(numericId);
-        if (deckCard) {
-          debug('info', 'Using deck card image:', deckCard.image);
-          return deckCard.image;
-        }
-      }
-      
-      debug('warn', 'Could not determine image path, using fallback');
-      return `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
-    } catch (error) {
-      debug('error', 'Error in getCardImage:', error);
-      return `/img/cards/${selectedDeck}/0_TheDegen.jpg`;
-    }
-  }
-
   const handleCopyToClipboard = () => {
     if (onCopyToClipboard) {
       onCopyToClipboard();
@@ -549,7 +402,7 @@ const ShareReading: React.FC<ShareReadingProps> = ({
         style={{
           width: '1080px',
           height: '1350px',
-          position: 'relative',
+          position: 'absolute',
           visibility: 'visible',
           opacity: '1',
           left: '-9999px',
@@ -563,7 +416,8 @@ const ShareReading: React.FC<ShareReadingProps> = ({
           padding: '40px',
           fontFamily: '"Press Start 2P", system-ui',
           imageRendering: 'pixelated',
-          overflow: 'visible'
+          overflow: 'visible',
+          zIndex: -1
         }}
       >
         {/* SVG Sunburst Background */}
@@ -791,7 +645,7 @@ const ShareReading: React.FC<ShareReadingProps> = ({
                 animation: 'borderGlow 2s infinite alternate'
               }}>
                 <img
-                  src={getCardImage(card)}
+                  src={card.image}
                   alt={card.name}
                   style={{
                     imageRendering: 'pixelated',
@@ -917,43 +771,19 @@ const ShareReading: React.FC<ShareReadingProps> = ({
       </div>
 
       {/* Botones */}
-      <div className={`flex gap-4 justify-center ${className}`}>
-        <Button onClick={generatePreviewImage} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
-          <Eye className="h-4 w-4" />
-          {t('tarot.previewImage')}
+      <div className={`flex gap-2 justify-center ${className}`}>
+        <Button onClick={downloadImage} className="w-auto h-10 px-4 flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
+          <Download className="h-5 w-5" />
+          {t('tarot.download')}
         </Button>
-        <Button onClick={downloadImage} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
-          <Download className="h-4 w-4" />
-          {t('tarot.downloadImage')}
+        <Button onClick={handleShareOnTwitter} className="w-auto h-10 px-4 flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
+          <X className="h-5 w-5" />
+          {t('tarot.share')}
         </Button>
-        <Button onClick={handleShareOnTwitter} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
-          <Share2 className="h-4 w-4" />
-          {t('tarot.shareOnTwitter')}
-        </Button>
-        <Button onClick={handleCopyToClipboard} className="w-full sm:w-auto flex items-center gap-2 border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
-          <Share2 className="h-4 w-4" />
-          {t('tarot.copyToClipboard')}
+        <Button onClick={handleCopyToClipboard} className="w-10 h-10 p-0 flex items-center justify-center border-[#00fff2] hover:bg-[#00fff2]/10 text-[#00fff2]">
+          <Copy className="h-5 w-5" />
         </Button>
       </div>
-
-      {/* Preview Dialog */}
-      <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>{t('tarot.previewTitle')}</DialogTitle>
-          </DialogHeader>
-          <div className="flex justify-center">
-            {previewImage && (
-              <img 
-                src={previewImage} 
-                alt="Preview" 
-                className="w-full h-auto"
-                style={{ imageRendering: 'pixelated' }}
-              />
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };

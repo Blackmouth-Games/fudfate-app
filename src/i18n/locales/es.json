@@ -108,7 +108,9 @@
     "cosmicMessageReceived": "Mensaje Cósmico Recibido",
     "readingHistory": "Tu Historial de Lecturas",
     "cards": "Cartas",
-    "response": "Interpretación"
+    "response": "Interpretación",
+    "download": "Descargar",
+    "share": "Compartir"
   },
   "errors": {
     "readingFailed": "Error al iniciar la lectura. Por favor, inténtalo de nuevo más tarde.",

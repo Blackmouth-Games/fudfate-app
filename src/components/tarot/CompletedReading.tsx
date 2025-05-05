@@ -122,7 +122,7 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
       </motion.div>
       
       <motion.div 
-        className="flex justify-center pt-2"
+        className="block pt-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.5 }}

@@ -128,7 +128,9 @@
     "imageShared": "Image ready for sharing!",
     "imageUploadFailed": "Failed to upload image. Sharing without image.",
     "imageGenerationFailed": "Failed to generate image. Sharing without image.",
-    "sharingFailed": "Error sharing reading. Please try again."
+    "sharingFailed": "Error sharing reading. Please try again.",
+    "download": "Download",
+    "share": "Share"
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",
