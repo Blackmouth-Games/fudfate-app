@@ -611,56 +611,109 @@ const ShareReading: React.FC<ShareReadingProps> = ({
           </div>
 
           {/* Question */}
-          <div className="text-center" style={{ 
-            marginBottom: '60px',
-            width: '90%'
+          <div className="text-center" style={{
+            marginBottom: '16px',
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
           }}>
-            <h2 style={{ 
-              color: '#ffffff',
-              textShadow: '2px 2px 15px rgba(255,30,107,0.6)',
-              letterSpacing: '4px',
-              fontFamily: '"Press Start 2P", system-ui',
-              transform: 'scale(1.3)',
-              fontSize: '42px',
-              lineHeight: '1.6',
-              padding: '0 40px',
-              fontWeight: 'bold'
-            }}>
-              {displayIntention}
-            </h2>
+            {displayIntention.length <= 40 ? (
+              <svg width="800" height="100" viewBox="0 0 800 100" style={{ display: 'block', overflow: 'visible' }}>
+                <defs>
+                  <path id="arcPath" d="M 60 80 Q 400 0 740 80" fill="transparent" />
+                </defs>
+                <text fontFamily='"Press Start 2P", system-ui' fontSize="54" fontWeight="bold" fill="#00bfff" stroke="#0F2E6B" strokeWidth="2" letterSpacing="4" textAnchor="middle">
+                  <textPath href="#arcPath" startOffset="50%" dominantBaseline="middle">
+                    {displayIntention}
+                  </textPath>
+                </text>
+              </svg>
+            ) : (
+              <h2 style={{
+                color: '#00bfff',
+                textShadow: '2px 2px 15px rgba(0,191,255,0.4)',
+                letterSpacing: '4px',
+                fontFamily: '"Press Start 2P", system-ui',
+                fontSize: '54px',
+                fontWeight: 'bold',
+                WebkitTextStroke: '2px #0F2E6B',
+                textAlign: 'center',
+                margin: 0,
+                lineHeight: 1.2,
+                wordBreak: 'break-word',
+                maxWidth: '900px',
+                width: '100%',
+                display: 'block',
+              }}>
+                {displayIntention}
+              </h2>
+            )}
           </div>
 
           {/* Cards */}
-          <div className="flex gap-6 justify-center" style={{ 
-            marginBottom: '60px'
+          <div className="flex gap-2 justify-center" style={{ 
+            marginBottom: '16px'
           }}>
-            {displayCards.map((card, index) => (
-              <div key={index} className="relative" style={{
-                boxShadow: '0 0 10px #ff1e6b, 0 0 20px #ff1e6b, 0 0 30px #ff1e6b, 0 0 40px #ff1e6b',
-                borderRadius: '30px',
-                overflow: 'hidden',
-                width: '300px',
-                height: '450px',
-                border: '8px solid #FFD700',
-                animation: 'borderGlow 2s infinite alternate'
-              }}>
-                <img
-                  src={card.image}
-                  alt={card.name}
+            {displayCards.map((card, index) => {
+              // Calculate rotation for lateral cards
+              let rotation = 0;
+              let cardMarginTop = 0;
+              if (displayCards.length > 1) {
+                if (index === 0) { rotation = -8; cardMarginTop = 24; }
+                else if (index === displayCards.length - 1) { rotation = 8; cardMarginTop = 24; }
+              }
+              // Bigger cards
+              const cardW = 280, cardH = 480;
+              const wrapperWidth = cardW * 1.13;
+              const wrapperHeight = cardH * 1.13;
+              return (
+                <div
+                  key={index}
                   style={{
-                    imageRendering: 'pixelated',
-                    borderRadius: '24px',
-                    width: '100%',
-                    height: '100%',
-                    display: 'block'
+                    width: `${wrapperWidth}px`,
+                    height: `${wrapperHeight}px`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: `rotate(${rotation}deg)`,
+                    transition: 'transform 0.3s',
+                    marginTop: `${cardMarginTop}px`,
                   }}
-                  onError={(e) => {
-                    const fallbackPath = `/img/cards/${selectedDeck}/99_BACK.png`;
-                    e.currentTarget.src = fallbackPath;
-                  }}
-                />
-              </div>
-            ))}
+                >
+                  <div className="relative" style={{
+                    boxShadow: '0 0 10px #ff1e6b, 0 0 20px #ff1e6b, 0 0 30px #ff1e6b, 0 0 40px #ff1e6b',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    width: `${cardW}px`,
+                    height: `${cardH}px`,
+                    border: '4px solid #FFD700',
+                    animation: 'borderGlow 2s infinite alternate',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: '#000',
+                  }}>
+                    <img
+                      src={card.image}
+                      alt={card.name}
+                      style={{
+                        imageRendering: 'pixelated',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        display: 'block',
+                        borderRadius: '16px',
+                        background: '#000',
+                      }}
+                      onError={(e) => {
+                        const fallbackPath = `/img/cards/${selectedDeck}/99_BACK.png`;
+                        e.currentTarget.src = fallbackPath;
+                      }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
           
           {/* Interpretation - Modified to be more transparent without borders */}
@@ -668,15 +721,15 @@ const ShareReading: React.FC<ShareReadingProps> = ({
             background: 'rgba(255, 255, 255, 0.7)',
             padding: '32px',
             borderRadius: '20px',
-            width: '92%',
-            maxHeight: '320px',
-            marginTop: '24px',
-            overflow: 'auto',
+            width: '100%',
+            maxWidth: '900px',
+            margin: '8px auto 12px auto',
             backdropFilter: 'blur(8px)',
-            border: 'none',
+            border: '4px solid #00bfff',
+            boxShadow: '0 0 16px #00bfff55',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           }}>
             <p style={{ 
               color: '#0F2E6B',
@@ -685,25 +738,30 @@ const ShareReading: React.FC<ShareReadingProps> = ({
               fontFamily: '"Press Start 2P", system-ui',
               fontSize: '24px',
               fontWeight: 'bold',
-              margin: 0
+              margin: 0,
+              width: '100%',
+              textAlign: 'center',
+              wordBreak: 'break-word',
+              whiteSpace: 'normal',
             }}>
               {displayMessage}
             </p>
           </div>
           {/* CTA: Discover your fate at FUDfate */}
           <div style={{
-            marginTop: '18px',
-            marginBottom: '32px',
+            marginTop: '12px',
+            marginBottom: '8px',
             textAlign: 'center',
             fontFamily: '"Press Start 2P", system-ui',
-            fontSize: '28px',
+            fontSize: '20px',
             color: '#111',
             borderRadius: '12px',
-            padding: '16px 10px',
+            padding: '8px 6px',
             letterSpacing: '1.5px',
             userSelect: 'text',
             background: 'transparent',
             display: 'inline-block',
+            fontWeight: 'bold',
           }}>
             <span>
               Discover your fate at{' '}
@@ -712,11 +770,16 @@ const ShareReading: React.FC<ShareReadingProps> = ({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  color: '#0F2E6B',
                   textDecoration: 'underline',
                   fontWeight: 'bold',
                   cursor: 'pointer',
-                  fontSize: '1.1em'
+                  fontSize: '1.1em',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  color: 'unset',
+                  padding: '0 2px',
+                  background: 'none',
                 }}
               >
                 FUDfate
