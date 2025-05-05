@@ -554,7 +554,7 @@ const ShareReading: React.FC<ShareReadingProps> = ({
           opacity: '1',
           left: '-9999px',
           top: 0,
-          background: 'linear-gradient(180deg, #ff1e6b 0%, #00fff2 100%)',
+          background: 'radial-gradient(circle at 50% 50%, #ff1e6b 0%, #FFD700 50%, #00bfff 100%)',
           color: '#fff',
           display: 'flex',
           flexDirection: 'column',
@@ -566,6 +566,81 @@ const ShareReading: React.FC<ShareReadingProps> = ({
           overflow: 'visible'
         }}
       >
+        {/* SVG Sunburst Background */}
+        <svg
+          width="1080"
+          height="1350"
+          viewBox="0 0 1080 1350"
+          style={{ position: 'absolute', top: 0, left: 0, zIndex: 0, pointerEvents: 'none' }}
+        >
+          {Array.from({ length: 10 }).map((_, i) => {
+            const cx = 540, cy = 675, r = 900;
+            const angleStart = ((360 / 20) * (2 * i - 0.5)) * Math.PI / 180;
+            const angleEnd = ((360 / 20) * (2 * i + 0.5)) * Math.PI / 180;
+            const x1 = cx + r * Math.cos(angleStart);
+            const y1 = cy + r * Math.sin(angleStart);
+            const x2 = cx + r * Math.cos(angleEnd);
+            const y2 = cy + r * Math.sin(angleEnd);
+            // Paleta vaporwave
+            const vaporwaveColors = [
+              '#ff71ce', // pink
+              '#01cdfa', // cyan
+              '#b967ff', // purple
+              '#faff00', // yellow
+              '#05ffa1', // mint
+              '#00bfff', // electric blue
+              '#fffb96', // pastel yellow
+              '#ff1e6b', // hot pink
+              '#3ad6ff', // light blue
+              '#a259ff'  // violet
+            ];
+            const color = vaporwaveColors[i % vaporwaveColors.length];
+            return (
+              <polygon
+                key={i}
+                points={`${cx},${cy} ${x1},${y1} ${x2},${y2}`}
+                fill={color}
+                opacity="0.6"
+                style={{ filter: `drop-shadow(0 0 64px ${color}) drop-shadow(0 0 32px #fff)` }}
+              />
+            );
+          })}
+        </svg>
+
+        {/* Confetti Pixel Stars */}
+        {Array.from({ length: 200 }).map((_, i) => {
+          // Paleta vaporwave/confetti ajustada para un look más vaporwave y crypto-pixelart
+          const confettiColors = [
+            '#ff71ce', '#01cdfa', '#b967ff', '#faff00', '#05ffa1', '#00bfff', '#fffb96', '#ff1e6b', '#3ad6ff', '#a259ff',
+            '#ff00ff', '#00ffff', '#ffff00', '#ff00ff', '#00ff00', '#ff0000', '#0000ff', '#ff00ff', '#00ffff', '#ffff00'
+          ];
+          // Selección determinista de color para evitar repeticiones adyacentes
+          const color = confettiColors[i % confettiColors.length];
+          // Distribución cuadrática para más densidad en el centro
+          const rand = () => 50 + (Math.random() - 0.5) * 2 * 50 * Math.pow(Math.random(), 0.5);
+          const left = rand();
+          const top = rand();
+          // Variación de tamaño entre 4px y 12px
+          const size = 4 + Math.random() * 8;
+          // Reducir la opacidad de los píxeles detrás de la interpretación
+          const opacity = top > 50 ? 0.85 : 0.4;
+          return (
+            <div
+              key={i}
+              style={{
+                position: 'absolute',
+                width: `${size}px`,
+                height: `${size}px`,
+                background: color,
+                left: `${left}%`,
+                top: `${top}%`,
+                zIndex: 2,
+                opacity: opacity
+              }}
+            />
+          );
+        })}
+
         {/* Base Sunburst Layer */}
         <div style={{
           position: 'absolute',
@@ -634,26 +709,6 @@ const ShareReading: React.FC<ShareReadingProps> = ({
           animation: 'slowRotateReverse 45s linear infinite'
         }} />
 
-        {/* Center Glow */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '70%',
-          height: '70%',
-          transform: 'translate(-50%, -50%)',
-          background: `
-            radial-gradient(circle at center,
-              rgba(255, 255, 255, 0.8) 0%,
-              rgba(255, 30, 107, 0.6) 30%,
-              rgba(0, 255, 242, 0.4) 60%,
-              transparent 100%
-            )
-          `,
-          filter: 'blur(20px)',
-          zIndex: 3
-        }} />
-
         {/* Sharp Ray Overlay */}
         <div style={{
           position: 'absolute',
@@ -714,7 +769,8 @@ const ShareReading: React.FC<ShareReadingProps> = ({
               transform: 'scale(1.3)',
               fontSize: '42px',
               lineHeight: '1.6',
-              padding: '0 40px'
+              padding: '0 40px',
+              fontWeight: 'bold'
             }}>
               {displayIntention}
             </h2>
@@ -755,25 +811,64 @@ const ShareReading: React.FC<ShareReadingProps> = ({
           
           {/* Interpretation - Modified to be more transparent without borders */}
           <div className="text-center" style={{ 
-            background: 'rgba(255, 255, 255, 0.5)',
-            padding: '45px',
+            background: 'rgba(255, 255, 255, 0.7)',
+            padding: '32px',
             borderRadius: '20px',
             width: '92%',
-            maxHeight: '420px',
-            overflow: 'hidden',
-            backdropFilter: 'blur(8px)'
+            maxHeight: '320px',
+            marginTop: '24px',
+            overflow: 'auto',
+            backdropFilter: 'blur(8px)',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}>
             <p style={{ 
-              color: '#ff1e6b',
+              color: '#0F2E6B',
               letterSpacing: '2px',
-              lineHeight: '1.7',
+              lineHeight: '1.6',
               fontFamily: '"Press Start 2P", system-ui',
-              fontSize: '28px',
+              fontSize: '24px',
               fontWeight: 'bold',
-              textShadow: '2px 2px 4px rgba(0, 0, 0, 0.5)'
+              margin: 0
             }}>
               {displayMessage}
             </p>
+          </div>
+          {/* CTA: Discover your fate at FUDfate */}
+          <div style={{
+            marginTop: '18px',
+            marginBottom: '32px',
+            textAlign: 'center',
+            fontFamily: '"Press Start 2P", system-ui',
+            fontSize: '28px',
+            color: '#111',
+            borderRadius: '12px',
+            padding: '16px 10px',
+            letterSpacing: '1.5px',
+            userSelect: 'text',
+            background: 'transparent',
+            display: 'inline-block',
+          }}>
+            <span>
+              Discover your fate at{' '}
+              <a
+                href="https://app.fudfate.xyz"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  color: '#0F2E6B',
+                  textDecoration: 'underline',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  fontSize: '1.1em'
+                }}
+              >
+                FUDfate
+              </a>
+              : app.fudfate.xyz
+            </span>
           </div>
         </div>
 
