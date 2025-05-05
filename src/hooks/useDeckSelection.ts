@@ -18,13 +18,17 @@ export const useDeckSelection = (availableDecks: DeckInfo[]) => {
   // Use login response to set initial deck
   useEffect(() => {
     if (userData?.selectedDeck) {
-      // If user data has selected deck, use it
+      console.log('[useDeckSelection] Setting selectedDeck from userData:', userData.selectedDeck);
       setSelectedDeck(userData.selectedDeck);
     } else {
-      // Otherwise default to "deck_1"
+      console.log('[useDeckSelection] Setting selectedDeck to default: deck_1');
       setSelectedDeck("deck_1");
     }
   }, [userData, setSelectedDeck]);
+
+  useEffect(() => {
+    console.log('[useDeckSelection] selectedDeck changed:', selectedDeck);
+  }, [selectedDeck]);
 
   // Check if images are loaded
   useEffect(() => {

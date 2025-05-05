@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Share2, X } from "lucide-react";
 import { formatDate } from '@/utils/date-utils';
 import ReadingCardPreview from './ReadingCardPreview';
+import tarotCards from '@/data/tarotCards';
 
 interface Reading {
   id: string;
@@ -27,6 +28,7 @@ interface ReadingListItemProps {
   onTwitterShare: (reading: Reading) => void;
   getCardName: (cardId: string | number) => string;
   getCardImagePath: (cardId: string | number) => string;
+  deck: string;
 }
 
 const ReadingListItem: React.FC<ReadingListItemProps> = ({
@@ -35,7 +37,8 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
   onShare,
   onTwitterShare,
   getCardName,
-  getCardImagePath
+  getCardImagePath,
+  deck
 }) => {
   const { t } = useTranslation();
   
@@ -49,6 +52,8 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
     (typeof reading.cards === 'string' && reading.cards.startsWith('[') && reading.cards.endsWith(']')) ?
       JSON.parse(reading.cards) :
       [];
+
+  const deckCards = tarotCards.filter(card => card.deck === deck);
 
   const getDisplayMessage = () => {
     const message = reading.webhookResponse?.message || reading.result || reading.response || reading.interpretation;
@@ -105,7 +110,11 @@ const ReadingListItem: React.FC<ReadingListItemProps> = ({
             <p className="text-sm text-gray-500 mb-1">{t('tarot.cards')}:</p>
             <p className="text-sm text-gray-700">
               {Array.isArray(reading.cards) 
-                ? reading.cards.map(cardId => getCardName(cardId)).join(' • ')
+                ? reading.cards.map(cardIndex => {
+                    const idx = typeof cardIndex === 'number' ? cardIndex : parseInt(cardIndex, 10);
+                    const card = deckCards[idx];
+                    return card?.name ?? `Card ${cardIndex}`;
+                  }).join(' • ')
                 : t('tarot.noCards')}
             </p>
           </div>

@@ -224,17 +224,18 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setPhase('reading');
       
       // Now prepare the cards from webhook for reveal phase
-      if (webhookResponse.selected_cards && webhookResponse.selected_cards.length > 0) {
-        const webhookCards = webhookResponse.selected_cards.map((cardId: number) => {
-          const card = tarotCards.find(c => c.id === cardId.toString()) || tarotCards[0];
+      if (webhookResponse.selected_cards && webhookResponse.selected_cards.length > 0 && phase === 'reading') {
+        // Usar los índices para seleccionar cartas del deck seleccionado
+        const deckCards = tarotCards.filter(c => c.deck === selectedDeck);
+        const webhookCards = webhookResponse.selected_cards.map((cardIndex: number) => {
+          const card = deckCards[cardIndex] || deckCards[0];
           return {
             ...card,
             revealed: false,
             deck: selectedDeck
           };
         });
-        
-        console.log("Setting cards from webhook for reveal phase:", webhookCards);
+        console.log("Setting cards from webhook for reveal phase (by index):", webhookCards);
         setSelectedCards(webhookCards);
       }
     }
@@ -312,6 +313,14 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     
     toast.success(t('tarot.newReadingStarted'));
   };
+
+  // Global sync: update selectedDeck from userData if it changes
+  useEffect(() => {
+    if (userData?.selectedDeck && userData.selectedDeck !== selectedDeck) {
+      console.log('[TarotContext] Syncing selectedDeck from userData:', userData.selectedDeck);
+      setSelectedDeck(userData.selectedDeck);
+    }
+  }, [userData?.selectedDeck]);
 
   const value = {
     selectedDeck,

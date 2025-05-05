@@ -14,6 +14,7 @@ import ReadingListItem from './ReadingListItem';
 import ReadingDetails from './ReadingDetails';
 import GlitchText from '@/components/GlitchText';
 import '@/styles/reading-history.css';
+import tarotCards from '@/data/tarotCards';
 
 interface Reading {
   id: string;
@@ -30,7 +31,9 @@ interface Reading {
     message: string;
     selected_cards: number[];
     question?: string;
+    deck?: string;
   };
+  deck?: string;
 }
 
 interface ReadingHistoryProps {
@@ -96,7 +99,8 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
             selected_cards: Array.isArray(reading.webhookResponse.selected_cards) 
               ? reading.webhookResponse.selected_cards.map(Number)
               : parsedCards,
-            question: reading.webhookResponse.question || reading.question || reading.intention || ''
+            question: reading.webhookResponse.question || reading.question || reading.intention || '',
+            deck: reading.webhookResponse.deck || undefined
           };
           console.log("Processed webhook data:", webhookData);
         } else if (reading.selected_cards || reading.interpretation) {
@@ -109,10 +113,22 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                   typeof card === 'number' ? card : parseInt(String(card), 10)
                 ).filter(num => !isNaN(num))
               : parsedCards,
-            question: reading.question || reading.intention || ''
+            question: reading.question || reading.intention || '',
+            deck: reading.deck || undefined
           };
           console.log("Created webhook data:", webhookData);
         }
+        
+        // Obtener el deck del reading o del webhook
+        let deck = reading.deck || (reading.webhookResponse?.deck);
+        // Si viene en returnwebhoock como stringified JSON
+        if (!deck && reading.returnwebhoock) {
+          try {
+            const parsed = JSON.parse(reading.returnwebhoock);
+            if (parsed.selected_deck) deck = parsed.selected_deck;
+          } catch {}
+        }
+        if (!deck) deck = 'deck_1';
         
         const formattedReading = {
           id: reading.id || String(Math.random()),
@@ -124,7 +140,8 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
           interpretation: reading.interpretation || '',
           user_id: reading.user_id || reading.userid || userData?.userId || '',
           selected_cards: reading.selected_cards || [],
-          webhookResponse: webhookData
+          webhookResponse: webhookData,
+          deck
         } as Reading;
 
         console.log("Formatted reading:", formattedReading);
@@ -230,18 +247,20 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       console.log("Using reading.cards:", cardsToUse);
     }
     
+    // Obtener el deck correcto
+    const deckName = reading.deck || reading.webhookResponse?.deck || 'deck_1';
+    const deckCards = tarotCards.filter(card => card.deck === deckName);
+    
     // Convert to ReadingCard format
-    const readingCards: ReadingCard[] = cardsToUse.map((cardId: number) => {
-      const cardName = getCardName(cardId);
-      const imagePath = `/img/cards/deck_1/${cardId}_${cardName.replace(/\s+/g, '')}.jpg`;
-      console.log("Creating card:", { cardId, cardName, imagePath });
-      
+    const readingCards: ReadingCard[] = cardsToUse.map((cardIndex: number) => {
+      const card = deckCards[cardIndex];
       return {
-        id: String(cardId),
-        name: cardName,
-        image: imagePath,
-        description: "",
-        revealed: true
+        id: card?.id ?? String(cardIndex),
+        name: card?.name ?? `Card ${cardIndex}`,
+        image: card?.image?.replace('.png', '.jpg') ?? '',
+        description: card?.description ?? '',
+        revealed: true,
+        deck: deckName
       };
     });
     
@@ -375,6 +394,7 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
                       onTwitterShare={shareOnTwitter}
                       getCardName={getCardName}
                       getCardImagePath={getCardImagePath}
+                      deck={reading.deck || reading.webhookResponse?.deck || 'deck_1'}
                     />
                   ))}
                 </div>

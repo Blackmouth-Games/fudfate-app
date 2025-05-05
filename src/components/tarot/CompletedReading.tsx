@@ -77,33 +77,29 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
   return (
     <div className="space-y-4">
       <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full min-h-0 min-w-0"
         variants={container}
         initial="hidden"
         animate="show"
       >
         {selectedCards.map((card, index) => (
-          <motion.div 
-            key={card?.id || `card-${index}`}
-            variants={item}
-            className="card-fullview border-2 border-amber-400 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
-          >
-            {card && (
-              <AspectRatio ratio={5/8}>
-                <div className="relative h-full w-full">
+          <div key={card?.id || `card-${index}`} className="flex flex-col items-center w-full min-w-0 min-h-0">
+            <div className="border-2 border-amber-400 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 w-full max-w-[240px] min-w-0 min-h-0 flex items-center justify-center">
+              {card && (
+                <AspectRatio ratio={414/710} className="w-full min-w-0 min-h-0">
                   <img 
                     src={card.image.replace('.png', '.jpg')} 
                     alt={card.name} 
-                    className="absolute inset-0 w-full h-full object-cover rounded-md"
+                    className="w-full h-full object-contain bg-black min-w-0 min-h-0"
                     onError={(e) => {
                       console.warn(`Failed to load card image: ${card.image}, using fallback`);
                       e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
                     }}
                   />
-                </div>
-              </AspectRatio>
-            )}
-          </motion.div>
+                </AspectRatio>
+              )}
+            </div>
+          </div>
         ))}
       </motion.div>
       

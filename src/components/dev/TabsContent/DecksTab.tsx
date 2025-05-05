@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTarot } from '@/contexts/TarotContext';
 import { useEnvironment } from '@/hooks/useEnvironment';
@@ -16,6 +15,9 @@ const DecksTab = () => {
   const [availableDecks, setAvailableDecks] = useState(getAllDecks());
   const [deckImageStatus, setDeckImageStatus] = useState<Record<string, Record<string, boolean>>>({});
   const [refreshing, setRefreshing] = useState(false);
+
+  // Log selectedDeck for debugging
+  console.log('[DecksTab] selectedDeck from context:', selectedDeck);
 
   // Check for image availability
   const refreshDeckStatus = async () => {
