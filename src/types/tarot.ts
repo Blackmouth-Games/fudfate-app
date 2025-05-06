@@ -45,6 +45,7 @@ export interface WebhookResponse {
   cards?: any;
   returnwebhoock?: any;
   isTemporary?: boolean;
+  deck?: string;
 }
 
 export interface WebhookArrayResponse extends Array<{
@@ -77,4 +78,5 @@ export interface TarotContextType {
   interpretation: Interpretation | null;
   webhookResponse: WebhookResponse | null;
   webhookError: string | null;
+  readingDeck?: Deck;
 }

@@ -48,29 +48,61 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
+  // ---
+  // Función robusta para extraer los datos finales del webhook (prioriza returnwebhoock si existe)
+  function parseFinalWebhookData(webhookResponse) {
+    if (!webhookResponse) return null;
+    let parsed = null;
+    if (typeof webhookResponse.returnwebhoock === 'string') {
+      try {
+        parsed = JSON.parse(webhookResponse.returnwebhoock);
+      } catch (e) {
+        parsed = null;
+      }
+    }
+    // Si el returnwebhoock es válido y tiene selected_cards, usarlo
+    if (parsed && Array.isArray(parsed.selected_cards)) {
+      return {
+        ...webhookResponse,
+        ...parsed,
+        selected_cards: parsed.selected_cards,
+        deck: parsed.selected_deck || parsed.deck || webhookResponse.deck,
+        message: parsed.message || webhookResponse.message,
+        question: parsed.question || webhookResponse.question,
+      };
+    }
+    // Si no, usar el objeto plano
+    return webhookResponse;
+  }
+
   const handleReadingReady = useCallback((event: CustomEvent) => {
     const readingData = event.detail;
     if (readingData && !readingData.isTemporary) {
       console.log("Reading ready event received:", readingData);
-      setWebhookResponse(readingData);
+      // Usar el parser robusto
+      const finalData = parseFinalWebhookData(readingData);
+      setWebhookResponse(finalData);
       setWebhookError(null);
-      
       // Update selected deck from webhook response if available
-      if (readingData.returnwebhoock) {
+      let deckFromWebhook = null;
+      if (finalData && finalData.deck) {
+        setSelectedDeck(finalData.deck);
+        deckFromWebhook = finalData.deck;
+      } else if (finalData && finalData.returnwebhoock) {
         try {
-          const parsedData = JSON.parse(readingData.returnwebhoock);
+          const parsedData = JSON.parse(finalData.returnwebhoock);
           if (parsedData.selected_deck) {
-            console.log('Updating deck from webhook response:', parsedData.selected_deck);
             setSelectedDeck(parsedData.selected_deck);
+            deckFromWebhook = parsedData.selected_deck;
           }
         } catch (error) {
           console.error("Error parsing webhook response for deck:", error);
         }
       }
-      
+      setReadingDeck(deckFromWebhook || selectedDeck);
       console.log("Storing final webhook response for later use in reveal phase");
     }
-  }, []);
+  }, [selectedDeck]);
 
   const handleReadingError = useCallback((event: CustomEvent) => {
     const errorData = event.detail;
@@ -106,6 +138,27 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [phase, webhookResponse]);
+
+  // ---
+  // ¡ATENCIÓN! Lógica CRÍTICA para la sincronización del deck tras login/cambio de usuario o deckSelect:
+  // Solo se debe actualizar el selectedDeck automáticamente cuando userData.selectedDeck cambie
+  // (es decir, tras login o cambio de usuario), o cuando el backend confirme un cambio de deck (deckSelect).
+  // NO sincronizar en otros flujos ni en cada render. Si se elimina o modifica esto, se pueden romper flujos de selección manual y causar bugs sutiles.
+  // ---
+  useEffect(() => {
+    if (userData?.selectedDeck && userData.selectedDeck !== selectedDeck) {
+      setSelectedDeck(userData.selectedDeck);
+      // ¡NO AGREGAR MÁS LÓGICA AQUÍ! Esto es solo para login/cambio de usuario.
+    }
+  }, [userData?.selectedDeck]);
+
+  // Permite actualizar el deck desde el backend (por ejemplo, tras deckSelect)
+  // ¡NO USAR PARA SINCRONIZACIÓN AUTOMÁTICA EN CADA RENDER!
+  const setDeckFromServer = (deckName: string) => {
+    if (deckName && deckName !== selectedDeck) {
+      setSelectedDeck(deckName);
+    }
+  };
 
   const startReading = async () => {
     if (!connected) {
@@ -224,7 +277,7 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
       setPhase('reading');
       
       // Now prepare the cards from webhook for reveal phase
-      if (webhookResponse.selected_cards && webhookResponse.selected_cards.length > 0 && phase === 'reading') {
+      if (webhookResponse.selected_cards && webhookResponse.selected_cards.length > 0 && phase === 'selection') {
         // Usar los índices para seleccionar cartas del deck seleccionado
         const deckCards = tarotCards.filter(c => c.deck === selectedDeck);
         const webhookCards = webhookResponse.selected_cards.map((cardIndex: number) => {
@@ -336,7 +389,8 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     loading,
     interpretation,
     webhookResponse,
-    webhookError
+    webhookError,
+    setDeckFromServer,
   };
 
   return <TarotContext.Provider value={value}>{children}</TarotContext.Provider>;

@@ -19,27 +19,30 @@ interface CardReadingProps {
 
 const CardReading: React.FC<CardReadingProps> = ({ selectedCards, onComplete, onReset }) => {
   const { t } = useTranslation();
-  const { selectedDeck, webhookResponse, phase, revealedCardIds, setRevealedCardIds } = useTarot();
+  const { selectedDeck, webhookResponse, phase, revealedCardIds, setRevealedCardIds, readingDeck } = useTarot();
   const [isLoading, setIsLoading] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
 
+  // Lógica robusta para obtener el deck real de la tirada
+  const deckToUse = webhookResponse?.deck || readingDeck || selectedDeck;
+  const deckCards = tarotCards.filter(c => c.deck === deckToUse);
+
   // Get the actual cards from webhook response
   const webhookCards = webhookResponse?.selected_cards?.map(cardIndex => {
-    // Find the card in tarotCards data using the numeric index
-    const card = tarotCards.find(c => {
-      const filename = c.image.split('/').pop() || '';
-      const numericId = parseInt(filename.split('_')[0]);
-      return numericId === cardIndex;
-    });
-
+    const card = deckCards[cardIndex];
     if (!card) {
-      console.error(`Card not found for index ${cardIndex}`);
+      console.error(`Card not found for index ${cardIndex} in deck ${deckToUse}`);
       return null;
     }
-
+    // Asegura que la imagen termina en .jpg
+    let image = card.image;
+    if (image && image.endsWith('.png')) {
+      image = image.replace('.png', '.jpg');
+    }
     return {
       ...card,
-      deck: selectedDeck,
+      image,
+      deck: deckToUse,
       revealed: revealedCardIds.includes(card.id)
     } as ReadingCard;
   }).filter((card): card is NonNullable<typeof card> => card !== null) || [];

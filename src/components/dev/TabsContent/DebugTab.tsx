@@ -148,6 +148,9 @@ const DebugTab = () => {
                     cardId = card.id;
                     cardName = card.name;
                     imagePath = card.image;
+                    if (imagePath && imagePath.endsWith('.png')) {
+                      imagePath = imagePath.replace('.png', '.jpg');
+                    }
                     if (revealedCardIds.includes(card.id)) status.push('Revealed');
                     break;
                   case 'webhook':
@@ -155,12 +158,18 @@ const DebugTab = () => {
                     cardId = card;
                     cardName = cardInfo?.name || `Card ${card}`;
                     imagePath = cardInfo?.image || 'Not found';
+                    if (imagePath && imagePath.endsWith('.png')) {
+                      imagePath = imagePath.replace('.png', '.jpg');
+                    }
                     status.push('From Webhook');
                     break;
                   case 'history':
                     cardId = card.id;
                     cardName = card.name;
                     imagePath = card.image;
+                    if (imagePath && imagePath.endsWith('.png')) {
+                      imagePath = imagePath.replace('.png', '.jpg');
+                    }
                     status.push('Historical');
                     break;
                 }
