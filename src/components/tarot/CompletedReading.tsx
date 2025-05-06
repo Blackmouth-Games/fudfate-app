@@ -93,7 +93,8 @@ const CompletedReading: React.FC<CompletedReadingProps> = ({
                     className="w-full h-full object-contain bg-black min-w-0 min-h-0"
                     onError={(e) => {
                       console.warn(`Failed to load card image: ${card.image}, using fallback`);
-                      e.currentTarget.src = `/img/cards/deck_1/0_TheDegen.jpg`;
+                      const deck = card.deck || 'deck_1';
+                      e.currentTarget.src = `/img/cards/${deck}/0_${deck === 'deck_1' ? 'TheDegen' : 'the fool'}.jpg`;
                     }}
                   />
                 </AspectRatio>

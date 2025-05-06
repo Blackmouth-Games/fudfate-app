@@ -15,17 +15,6 @@ export const useDeckSelection = (availableDecks: DeckInfo[]) => {
   const { userData } = useWallet();
   const { selectedDeck, setSelectedDeck } = useTarot();
 
-  // Use login response to set initial deck
-  useEffect(() => {
-    if (userData?.selectedDeck) {
-      console.log('[useDeckSelection] Setting selectedDeck from userData:', userData.selectedDeck);
-      setSelectedDeck(userData.selectedDeck);
-    } else {
-      console.log('[useDeckSelection] Setting selectedDeck to default: deck_1');
-      setSelectedDeck("deck_1");
-    }
-  }, [userData, setSelectedDeck]);
-
   useEffect(() => {
     console.log('[useDeckSelection] selectedDeck changed:', selectedDeck);
   }, [selectedDeck]);

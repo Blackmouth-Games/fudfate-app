@@ -251,17 +251,21 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
     const deckName = reading.deck || reading.webhookResponse?.deck || 'deck_1';
     const deckCards = tarotCards.filter(card => card.deck === deckName);
     
-    // Convert to ReadingCard format
+    // Convert to ReadingCard format y refuerzo el campo deck
     const readingCards: ReadingCard[] = cardsToUse.map((cardIndex: number) => {
       const card = deckCards[cardIndex];
-      return {
+      const cardObj: ReadingCard = {
         id: card?.id ?? String(cardIndex),
         name: card?.name ?? `Card ${cardIndex}`,
         image: card?.image?.replace('.png', '.jpg') ?? '',
         description: card?.description ?? '',
         revealed: true,
-        deck: deckName
+        deck: deckName // refuerzo deck
       };
+      if (!cardObj.deck || cardObj.deck !== deckName) {
+        console.warn('Carta sin deck correcto:', cardObj);
+      }
+      return cardObj;
     });
     
     console.log("Final reading cards:", readingCards);

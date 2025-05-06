@@ -314,14 +314,6 @@ export const TarotProvider = ({ children }: { children: ReactNode }) => {
     toast.success(t('tarot.newReadingStarted'));
   };
 
-  // Global sync: update selectedDeck from userData if it changes
-  useEffect(() => {
-    if (userData?.selectedDeck && userData.selectedDeck !== selectedDeck) {
-      console.log('[TarotContext] Syncing selectedDeck from userData:', userData.selectedDeck);
-      setSelectedDeck(userData.selectedDeck);
-    }
-  }, [userData?.selectedDeck]);
-
   const value = {
     selectedDeck,
     setSelectedDeck,
