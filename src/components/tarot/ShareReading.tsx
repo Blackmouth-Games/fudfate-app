@@ -442,9 +442,40 @@ const ShareReading: React.FC<ShareReadingProps> = ({
   };
 
   const handleCopyToClipboard = () => {
-    if (onCopyToClipboard) {
-      onCopyToClipboard();
+    // Determinar la intención
+    let intention = '';
+    if (source === 'history' && readingData?.intention) {
+      intention = readingData.intention;
+    } else if (currentIntention) {
+      intention = currentIntention;
     }
+    // Determinar el mensaje/interpretación
+    let messageRaw = '';
+    if (source === 'history' && readingData?.interpretation) {
+      messageRaw = String(readingData.interpretation);
+    } else if (webhookResponse?.message) {
+      messageRaw = webhookResponse.message;
+    } else if (contextFinalMessage) {
+      messageRaw = contextFinalMessage;
+    } else if (contextInterpretation) {
+      messageRaw = contextInterpretation;
+    }
+    const maxMessageLen = 120;
+    const message = messageRaw.length > maxMessageLen ? messageRaw.slice(0, maxMessageLen) + '...' : messageRaw;
+    const dare = t('tarot.dare');
+    const localizationText = t('tarot.shareText', {
+      intention,
+      message,
+      dare
+    });
+    navigator.clipboard.writeText(localizationText)
+      .then(() => {
+        toast.success(t('tarot.copiedToClipboard'));
+      })
+      .catch(err => {
+        console.error('Could not copy text: ', err);
+        toast.error(t('tarot.copyFailed'));
+      });
   };
 
   const handleShareOnTwitter = () => {
