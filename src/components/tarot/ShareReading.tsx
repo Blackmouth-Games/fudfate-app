@@ -52,6 +52,65 @@ const debug = (type: 'info' | 'error' | 'warn' | 'debug', ...args: any[]) => {
   console.log(`%c[ShareReading] ${type.toUpperCase()}:`, styles[type], ...args);
 };
 
+// Modular function to build localization text for the tarot tweet
+function buildLocalizationText(cardNames: string[], lang: string = 'es'): string {
+  const templates = {
+    es: {
+      prefix: 'Mi destino:',
+      suffix: '🔮 ¿Cuál será el tuyo?',
+      suffixLength: 2 + 19,
+    },
+    en: {
+      prefix: 'My fate:',
+      suffix: '🔮 What will yours be?',
+      suffixLength: 2 + 19,
+    },
+    // Add more languages as needed
+  };
+  const fixedPart = '$FDft #FUDfate #Tarot #Crypto via @fudfate https://app.fudfate.xyz/';
+  const fixedPartLength = 68;
+  const template = templates[lang] || templates['es'];
+  const maxTweetLength = 180;
+  const prefixLength = template.prefix.length + 1;
+  const suffixLength = template.suffixLength;
+  const availableForCards = maxTweetLength - fixedPartLength - prefixLength - suffixLength;
+  let cardsText = '';
+  let totalLength = 0;
+  let count = 0;
+  for (const card of cardNames) {
+    const next = count === 0 ? card : `, ${card}`;
+    if ((cardsText + next).length > Math.min(50, availableForCards)) break;
+    cardsText += next;
+    count++;
+  }
+  const localizationText = `${template.prefix} ${cardsText} ${template.suffix}`.trim();
+  const tweetLength = localizationText.length + fixedPartLength;
+  if (tweetLength > maxTweetLength) {
+    let safeCardsText = '';
+    let safeCount = 0;
+    for (const card of cardNames) {
+      const next = safeCount === 0 ? card : `, ${card}`;
+      if ((safeCardsText + next).length > 30) break;
+      safeCardsText += next;
+      safeCount++;
+    }
+    return `${template.prefix} ${safeCardsText} ${template.suffix}`.trim();
+  }
+  return localizationText;
+}
+
+function buildCardsText(cardNames: string[], maxLength: number): string {
+  let cardsText = '';
+  let count = 0;
+  for (const card of cardNames) {
+    const next = count === 0 ? card : `, ${card}`;
+    if ((cardsText + next).length > maxLength) break;
+    cardsText += next;
+    count++;
+  }
+  return cardsText;
+}
+
 const ShareReading: React.FC<ShareReadingProps> = ({ 
   className = '', 
   readingData,
@@ -389,9 +448,35 @@ const ShareReading: React.FC<ShareReadingProps> = ({
   };
 
   const handleShareOnTwitter = () => {
-    if (onShareOnTwitter) {
-      onShareOnTwitter();
+    // Determinar la intención
+    let intention = '';
+    if (source === 'history' && readingData?.intention) {
+      intention = readingData.intention;
+    } else if (currentIntention) {
+      intention = currentIntention;
     }
+    // Determinar el mensaje/interpretación
+    let messageRaw = '';
+    if (source === 'history' && readingData?.interpretation) {
+      messageRaw = readingData.interpretation;
+    } else if (webhookResponse?.message) {
+      messageRaw = webhookResponse.message;
+    } else if (contextFinalMessage) {
+      messageRaw = contextFinalMessage;
+    } else if (contextInterpretation) {
+      messageRaw = contextInterpretation;
+    }
+    const maxMessageLen = 120;
+    const message = messageRaw.length > maxMessageLen ? messageRaw.slice(0, maxMessageLen) + '...' : messageRaw;
+    const dare = t('tarot.dare');
+    const localizationText = t('tarot.shareText', {
+      intention,
+      message,
+      dare
+    });
+    const twitterText = localizationText;
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(twitterText)}`;
+    window.open(twitterUrl, '_blank');
   };
 
   return (

@@ -82,7 +82,8 @@
     "copyFailed": "Failed to copy reading",
     "shareToSocial": "Share to Social Media",
     "shareOnX": "Share",
-    "shareText": "#FUDfate #CryptoTarot",
+    "shareText": "{{intention}}\n\n🔮 {{message}}\n\n{{dare}}\n\n$FDft #FUDfate #Tarot #Crypto via @fudfate https://app.fudfate.xyz/",
+    "shareDare": "Dare to ask yours?",
     "shareClipboardText": "Hey i h",
     "newReadingStarted": "New reading initiated",
     "cryptoFortuneAwaits": "Your Crypto Fortune Awaits",
@@ -130,7 +131,9 @@
     "imageGenerationFailed": "Failed to generate image. Sharing without image.",
     "sharingFailed": "Error sharing reading. Please try again.",
     "download": "Download",
-    "share": "Share"
+    "share": "Share",
+    "intention": "{{intention}}",
+    "dare": "Dare to ask yours?"
   },
   "errors": {
     "readingFailed": "Error starting the reading. Please try again later.",

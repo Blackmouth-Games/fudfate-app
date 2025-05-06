@@ -314,41 +314,96 @@ const ReadingHistory: React.FC<ReadingHistoryProps> = ({
       });
   };
 
+  function truncateText(text: string, maxLen: number): string {
+    if (text.length <= maxLen) return text;
+    let truncated = text.slice(0, maxLen + 1);
+    if (truncated[maxLen] !== ' ' && truncated.lastIndexOf(' ') > 0) {
+      truncated = truncated.slice(0, truncated.lastIndexOf(' '));
+    } else {
+      truncated = truncated.slice(0, maxLen);
+    }
+    return truncated.trim() + '...';
+  }
+
+  function buildMessage(cardKeys: (string|number)[], t: any, deckCards: any[], lang: string, maxLen: number): string {
+    let message = lang === 'es' ? 'Mi destino:' : 'My fate:';
+    let count = 0;
+    for (const key of cardKeys) {
+      const idx = typeof key === 'number' ? key : parseInt(key, 10);
+      const card = deckCards[idx];
+      const name = card?.name || `Card ${key}`;
+      const next = count === 0 ? ` ${name}` : `, ${name}`;
+      if ((message + next).length > maxLen) break;
+      message += next;
+      count++;
+      if (count >= 5) break;
+    }
+    return message;
+  }
+
+  function buildShareLocalizationText({
+    intention,
+    cardKeys,
+    t,
+    deckCards,
+    lang,
+    dare
+  }: {
+    intention: string,
+    cardKeys: (string|number)[],
+    t: any,
+    deckCards: any[],
+    lang: string,
+    dare: string
+  }): string {
+    const maxTweetLength = 280;
+    const template = t('tarot.shareText', { intention: '', message: '', dare: '' });
+    const templateLength = template.replace('{{intention}}', '').replace('{{message}}', '').replace('{{dare}}', '').length;
+    const availableForIntention = 40;
+    const availableForMessage = maxTweetLength - templateLength - availableForIntention;
+    let truncatedIntention = truncateText(intention, availableForIntention);
+    const message = buildMessage(cardKeys, t, deckCards, lang, availableForMessage);
+    let localizationText = t('tarot.shareText', {
+      intention: truncatedIntention,
+      message,
+      dare
+    });
+    let tweet = `${localizationText}`;
+    if (tweet.length + templateLength > maxTweetLength) {
+      const shorterMessage = buildMessage(cardKeys, t, deckCards, lang, availableForMessage - 20);
+      localizationText = t('tarot.shareText', {
+        intention: truncatedIntention,
+        message: shorterMessage,
+        dare
+      });
+    }
+    return localizationText;
+  }
+
   const shareOnTwitter = (reading: Reading) => {
     if (!reading) return;
-    
-    const cardIds = Array.isArray(reading.cards) ? reading.cards : [];
-    const cardNames = cardIds.map((cardId, index) => {
-      return getCardName(
-        typeof cardId === 'number' ? cardId : 
-        typeof cardId === 'string' ? parseInt(cardId, 10) : index, 
-        index
-      );
-    }).join(', ');
-    
-    let shareMessage = reading.result || reading.response || '';
-    const maxMsgLength = 180; // Allow room for the URL, hashtags, and token
-    
-    // Truncate message if needed
-    if (shareMessage.length > maxMsgLength) {
-      shareMessage = shareMessage.substring(0, maxMsgLength) + '...';
+    let cardsToUse: (number | string)[] = [];
+    if (reading.webhookResponse?.selected_cards) {
+      cardsToUse = reading.webhookResponse.selected_cards;
+    } else if (Array.isArray(reading.cards)) {
+      cardsToUse = reading.cards;
     }
-    
+    const deckName = reading.deck || reading.webhookResponse?.deck || 'deck_1';
+    const deckCards = tarotCards.filter(card => card.deck === deckName);
+    const lang = (typeof t === 'function' && t('lang')) || (typeof t === 'function' && t('i18n.language')) || 'es';
     const intention = reading.question || '';
-    const formattedIntention = intention.length > 30 ? intention.substring(0, 30) + '...' : intention;
-    
-    const text = t('tarot.shareText', {
-      cards: cardNames,
-      intention: formattedIntention,
-      message: shareMessage ? `"${shareMessage}"` : ''
+    // Obtener la interpretación/mensaje real
+    const messageRaw = reading.webhookResponse?.message || reading.interpretation || reading.result || reading.response || '';
+    const maxMessageLen = 120;
+    const message = truncateText(messageRaw, maxMessageLen);
+    const dare = t('tarot.dare');
+    const localizationText = t('tarot.shareText', {
+      intention,
+      message,
+      dare
     });
-    
-    const url = 'https://app.fudfate.xyz/';
-    const token = '$FDft @fudfate';
-    const hashtags = 'FUDfate,Tarot,Crypto';
-    
-    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&hashtags=${encodeURIComponent(hashtags)}&via=${encodeURIComponent(token)}`;
-    
+    const twitterText = localizationText;
+    const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(twitterText)}`;
     window.open(twitterUrl, '_blank');
   };
 
