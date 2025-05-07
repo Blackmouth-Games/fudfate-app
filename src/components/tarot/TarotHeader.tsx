@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sparkles, History, Layers } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import WalletBalance from '@/components/wallet/WalletBalance';
 import WalletConnector from '@/components/wallet/WalletConnector';
+import TokenInlineBalance from '@/components/wallet/TokenInlineBalance';
 import { Link } from 'react-router-dom';
+import { TOKENS_TO_SHOW } from '@/config/tokensToShow';
 
 interface TarotHeaderProps {
   connected: boolean;
@@ -65,13 +66,16 @@ const TarotHeader: React.FC<TarotHeaderProps> = ({
         )}
         
         <div className="flex items-center gap-3">
-          <LanguageSwitcher />
-          {connected && <WalletBalance />}
           {connected && (
-            <div>
+            <div className="flex items-center gap-2">
+              {TOKENS_TO_SHOW.map(mint => (
+                <TokenInlineBalance key={mint} mintAddress={mint} />
+              ))}
               <WalletConnector showButtons={false} />
             </div>
           )}
+          {connected && <WalletBalance />}
+          <LanguageSwitcher />
         </div>
       </div>
     </header>

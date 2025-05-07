@@ -1,5 +1,6 @@
-
 // Token utilities for handling balances and token info
+
+import { TOKEN_INFO } from '@/config/tokenConfig';
 
 // Mapping of token mint addresses to token info
 export interface TokenInfo {
@@ -85,16 +86,73 @@ export const getTokenBalance = async (
     return await getSolanaBalance(walletAddress);
   }
   
-  // Here you would implement the logic to get the balance of other tokens
-  // Using SPL Token Program for Solana tokens
-  return '0.0000'; // Default to 0 for other tokens
+  try {
+    // Use the Solana RPC API to get token account info
+    const response = await fetch(`https://api.mainnet-beta.solana.com`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getTokenAccountsByOwner',
+        params: [
+          walletAddress,
+          {
+            mint: mintAddress
+          },
+          {
+            encoding: 'jsonParsed'
+          }
+        ]
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`Error accessing Solana API: ${response.status} ${response.statusText}`);
+      return '0.0000';
+    }
+
+    const data = await response.json();
+    
+    if (data.error) {
+      console.error('Error getting token balance:', data.error);
+      return '0.0000';
+    }
+
+    // Get token info to know decimals
+    const tokenInfo = getTokenInfo(mintAddress);
+    const decimals = tokenInfo?.decimals || 9;
+
+    // Calculate balance from token accounts
+    let totalBalance = 0;
+    if (data.result?.value) {
+      for (const account of data.result.value) {
+        const balance = account.account.data.parsed.info.tokenAmount.uiAmount;
+        totalBalance += balance;
+      }
+    }
+
+    return totalBalance.toFixed(decimals);
+  } catch (error) {
+    console.error('Error fetching token balance:', error);
+    return '0.0000';
+  }
 };
 
 /**
  * Get info about a token by its mint address
  */
 export const getTokenInfo = (mintAddress: string): TokenInfo | null => {
-  return TOKEN_LIST[mintAddress] || null;
+  const tokenInfo = TOKEN_INFO[mintAddress];
+  if (!tokenInfo) return null;
+  return {
+    symbol: tokenInfo.symbol,
+    decimals: tokenInfo.decimals,
+    name: tokenInfo.name,
+    icon: tokenInfo.icon
+  };
 };
 
 /**

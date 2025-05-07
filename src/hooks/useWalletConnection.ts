@@ -12,6 +12,8 @@ import {
 import { useWalletStorage } from '@/hooks/useWalletStorage';
 import { logLoginWebhook } from '@/services/webhook';
 import { Environment } from '@/config/webhooks';
+import { TOKENS_TO_SHOW } from '@/config/tokensToShow';
+import { getTokenBalance } from '@/utils/token-utils';
 
 export const useWalletConnection = (
   walletAddress: string | null,
@@ -61,11 +63,17 @@ export const useWalletConnection = (
       saveWalletData(address, type, networkId);
       
       try {
+        // Obtener balances de los tokens a mostrar
+        const tokenBalances: Record<string, string> = {};
+        for (const mint of TOKENS_TO_SHOW) {
+          tokenBalances[mint] = await getTokenBalance(address, mint) || '0';
+        }
         const data = await callLoginWebhook(
           webhooks.login, 
           address, 
           type, 
-          environment
+          environment,
+          tokenBalances
         );
         
         const userDataObj = parseUserData(data);
@@ -185,7 +193,8 @@ const callLoginWebhook = async (
   webhookUrl: string,
   address: string,
   walletType: string,
-  environment: Environment
+  environment: Environment,
+  tokenBalances?: Record<string, string>
 ): Promise<any> => {
   try {
     const response = await fetch(webhookUrl, {
@@ -196,7 +205,8 @@ const callLoginWebhook = async (
       body: JSON.stringify({
         date: new Date().toISOString(),
         wallet: address,
-        type: walletType
+        type: walletType,
+        tokenBalances: tokenBalances || {},
       }),
     });
     
