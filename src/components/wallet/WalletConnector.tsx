@@ -26,10 +26,18 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
 
   // Check wallet availability on component mount
   useEffect(() => {
-    // Check if Phantom is available
-    setIsPhantomAvailable(!!window.solana && !!window.solana.isPhantom);
-    // Check if Solflare is available
-    setIsSolflareAvailable(!!window.solflare);
+    const checkWallets = () => {
+      setIsPhantomAvailable(!!window.solana && !!window.solana.isPhantom);
+      setIsSolflareAvailable(!!window.solflare);
+    };
+
+    checkWallets(); // Comprobar al montar
+
+    window.addEventListener('focus', checkWallets); // Comprobar al volver a la pestaña
+
+    return () => {
+      window.removeEventListener('focus', checkWallets);
+    };
   }, []);
 
   // Format wallet address to show first and last few characters

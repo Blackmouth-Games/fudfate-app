@@ -140,7 +140,8 @@
     "cryptoDeck": "Mazo de Tarot Crypto",
     "classicDeck": "Mazo de Tarot Clásico",
     "noDescription": "No hay descripción disponible",
-    "noCardsInDeck": "No se encontraron cartas en este mazo"
+    "noCardsInDeck": "No se encontraron cartas en este mazo",
+    "deckViewerMemeDescription": "Aquí puedes fardear todas las cartas de este mazo. Nada de esto es consejo financiero, ni tu destino—solo pura energía NFT coleccionable, memeable y personalizable. Edita, remixa o simplemente míralas. Tu mazo, tus reglas."
   },
   "history": {
     "title": "Historial de Lecturas",

@@ -7,11 +7,13 @@ import GlitchLogo from '@/components/GlitchLogo';
 import GlitchText from '@/components/GlitchText';
 import AnimatedSection from '@/components/AnimatedSection';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import RocketCelebration from '@/components/animations/RocketCelebration';
 
 const Congrats: React.FC = () => {
   const navigate = useNavigate();
   const { connected, userData } = useWallet();
   const { t } = useTranslation();
+  const [showCelebration, setShowCelebration] = React.useState(true);
 
   // Redirect to index if wallet is connected and we have user data
   React.useEffect(() => {
@@ -22,6 +24,11 @@ const Congrats: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
+      {/* Rocket Celebration Effect */}
+      <RocketCelebration 
+        show={showCelebration} 
+        onComplete={() => setShowCelebration(false)} 
+      />
       {/* Language Switcher */}
       <div className="fixed top-4 right-4 z-50">
         <LanguageSwitcher />
