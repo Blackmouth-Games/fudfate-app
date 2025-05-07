@@ -85,6 +85,9 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
     }
   };
 
+  // Detectar si es móvil
+  const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+
   // If not showing buttons and not connected, return nothing
   if (!showButtons && !connected) {
     return null;
@@ -191,6 +194,26 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
               </>
             )}
           </Button>
+
+          {isMobile && (
+            <Button
+              onClick={() => handleConnect('mobile')}
+              disabled={isConnecting !== null}
+              className="w-full font-medium text-white bg-gradient-to-r from-fuchsia-500 to-cyan-500 border-fuchsia-500/30 hover:border-cyan-500/50"
+            >
+              {isConnecting === 'mobile' ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t('wallet.connecting')}
+                </>
+              ) : (
+                <>
+                  <Wallet className="w-5 h-5 mr-2" />
+                  {t('wallet.connectToMobileWallet', 'Conectar Wallet Móvil')}
+                </>
+              )}
+            </Button>
+          )}
         </div>
       )}
     </div>

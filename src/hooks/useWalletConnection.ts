@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { 
   connectPhantom,
   connectSolflare,
+  connectMobileWallet,
   parseUserData,
   fetchAvailableDecks,
   processDecksFromApi
@@ -40,6 +41,8 @@ export const useWalletConnection = (
         connectionResult = await connectPhantom();
       } else if (type === 'solflare') {
         connectionResult = await connectSolflare();
+      } else if (type === 'mobile') {
+        connectionResult = await connectMobileWallet();
       } else {
         toast.error(`Unknown wallet type: ${type}`);
         return false;

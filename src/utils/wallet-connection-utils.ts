@@ -2,6 +2,8 @@ import { PublicKey } from '@solana/web3.js';
 import { UserData, WalletType } from '@/types/walletTypes';
 import { toast } from 'sonner';
 import { Environment } from '@/config/webhooks';
+import { SolanaMobileWalletAdapter, createDefaultAuthorizationResultCache, AddressSelector, createDefaultAddressSelector } from '@solana-mobile/wallet-adapter-mobile';
+import { clusterApiUrl } from '@solana/web3.js';
 
 declare global {
   interface Window {
@@ -53,6 +55,29 @@ export const connectSolflare = async (): Promise<{ address: string | null; netwo
     }
     console.error("Solflare connection error:", error);
     return { address: null, networkId: null, error: error?.message || 'Failed to connect to Solflare.' };
+  }
+};
+
+export const connectMobileWallet = async (): Promise<{ address: string | null; networkId: string | null; error: string | null }> => {
+  try {
+    const mobileWallet = new SolanaMobileWalletAdapter({
+      appIdentity: { name: 'FudFate' },
+      authorizationResultCache: createDefaultAuthorizationResultCache(),
+      addressSelector: createDefaultAddressSelector(),
+      chain: 'mainnet-beta',
+      onWalletNotFound: async () => {
+        window.open('https://solanamobile.com/wallets', '_blank');
+      },
+    });
+    await mobileWallet.connect();
+    const address = mobileWallet.publicKey?.toString() || null;
+    const networkId = 'mainnet-beta';
+    if (!address) {
+      return { address: null, networkId: null, error: 'No address returned from mobile wallet' };
+    }
+    return { address, networkId, error: null };
+  } catch (error: any) {
+    return { address: null, networkId: null, error: error?.message || 'Failed to connect to mobile wallet.' };
   }
 };
 
