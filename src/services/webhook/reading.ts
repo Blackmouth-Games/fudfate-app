@@ -29,7 +29,18 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
         console.log("Successfully parsed returnwebhoock in array response:", parsedReturnData);
         
         if (Array.isArray(parsedReturnData.selected_cards)) {
-          result.selected_cards = parsedReturnData.selected_cards;
+          result.selected_cards = parsedReturnData.selected_cards.map(card =>
+            typeof card === 'number' ? card : parseInt(String(card), 10)
+          ).filter(num => !isNaN(num));
+        } else if (typeof parsedReturnData.selected_cards === 'string') {
+          try {
+            const arr = JSON.parse(parsedReturnData.selected_cards);
+            if (Array.isArray(arr)) {
+              result.selected_cards = arr.map(card =>
+                typeof card === 'number' ? card : parseInt(String(card), 10)
+              ).filter(num => !isNaN(num));
+            }
+          } catch {}
         }
         
         if (parsedReturnData.message) {
@@ -55,7 +66,18 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
     
     // Direct access to selected_cards
     if (!result.selected_cards && Array.isArray(firstItem.selected_cards)) {
-      result.selected_cards = firstItem.selected_cards;
+      result.selected_cards = firstItem.selected_cards.map(card =>
+        typeof card === 'number' ? card : parseInt(String(card), 10)
+      ).filter(num => !isNaN(num));
+    } else if (!result.selected_cards && typeof firstItem.selected_cards === 'string') {
+      try {
+        const arr = JSON.parse(firstItem.selected_cards);
+        if (Array.isArray(arr)) {
+          result.selected_cards = arr.map(card =>
+            typeof card === 'number' ? card : parseInt(String(card), 10)
+          ).filter(num => !isNaN(num));
+        }
+      } catch {}
     }
 
     // If we still don't have a message, try to get it from the response data
@@ -78,8 +100,19 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
   if (data && typeof data === 'object') {
     // Try to get direct properties first
     if (Array.isArray(data.selected_cards)) {
-      result.selected_cards = data.selected_cards;
-      console.log("Found selected_cards directly in webhook object:", data.selected_cards);
+      result.selected_cards = data.selected_cards.map(card =>
+        typeof card === 'number' ? card : parseInt(String(card), 10)
+      ).filter(num => !isNaN(num));
+      console.log("Found selected_cards directly in webhook object:", result.selected_cards);
+    } else if (typeof data.selected_cards === 'string') {
+      try {
+        const arr = JSON.parse(data.selected_cards);
+        if (Array.isArray(arr)) {
+          result.selected_cards = arr.map(card =>
+            typeof card === 'number' ? card : parseInt(String(card), 10)
+          ).filter(num => !isNaN(num));
+        }
+      } catch {}
     }
     
     if (data.message) {
@@ -104,7 +137,18 @@ const parseWebhookData = (data: any): ParsedWebhookData => {
         
         // Only use these if not already set
         if (!result.selected_cards && Array.isArray(parsedData.selected_cards)) {
-          result.selected_cards = parsedData.selected_cards;
+          result.selected_cards = parsedData.selected_cards.map(card =>
+            typeof card === 'number' ? card : parseInt(String(card), 10)
+          ).filter(num => !isNaN(num));
+        } else if (!result.selected_cards && typeof parsedData.selected_cards === 'string') {
+          try {
+            const arr = JSON.parse(parsedData.selected_cards);
+            if (Array.isArray(arr)) {
+              result.selected_cards = arr.map(card =>
+                typeof card === 'number' ? card : parseInt(String(card), 10)
+              ).filter(num => !isNaN(num));
+            }
+          } catch {}
         }
         
         if (!result.message && parsedData.message) {
