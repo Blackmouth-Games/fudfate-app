@@ -73,7 +73,7 @@ export const connectMobileWallet = async (): Promise<{ address: string | null; n
     const address = mobileWallet.publicKey?.toString() || null;
     const networkId = 'mainnet-beta';
     if (!address) {
-      return { address: null, networkId: null, error: 'No address returned from mobile wallet' };
+      return { address: null, networkId: null, error: 'No se pudo conectar con la wallet móvil. Asegúrate de tener una wallet compatible instalada y de aceptar la conexión en la app. Más info: https://solanamobile.com/wallets' };
     }
     return { address, networkId, error: null };
   } catch (error: any) {

@@ -133,68 +133,71 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
         </DropdownMenu>
       ) : (
         <div className="flex flex-col gap-3 w-full">
-          <Button 
-            onClick={() => handleConnect('phantom')}
-            disabled={isConnecting !== null || !isPhantomAvailable}
-            className={`w-full font-medium text-white ${!isPhantomAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-            style={{ backgroundColor: '#AB9FF2', borderColor: '#9887E0' }}
-          >
-            {isConnecting === 'phantom' ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {t('wallet.connecting')}
-              </>
-            ) : (
-              <>
-                <img 
-                  src="/img/icons/Phantom-Icon_Transparent_White.svg" 
-                  alt="Phantom" 
-                  className="w-5 h-5 mr-2"
-                />
-                {isPhantomAvailable ? t('wallet.connectToPhantom') : (
-                  <div className="flex items-center">
-                    {t('wallet.phantomNotInstalled')}
-                    <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
-                      e.stopPropagation();
-                      window.open("https://phantom.app/", "_blank");
-                    }} />
-                  </div>
+          {!isMobile && (
+            <>
+              <Button 
+                onClick={() => handleConnect('phantom')}
+                disabled={isConnecting !== null || !isPhantomAvailable}
+                className={`w-full font-medium text-white ${!isPhantomAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                style={{ backgroundColor: '#AB9FF2', borderColor: '#9887E0' }}
+              >
+                {isConnecting === 'phantom' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('wallet.connecting')}
+                  </>
+                ) : (
+                  <>
+                    <img 
+                      src="/img/icons/Phantom-Icon_Transparent_White.svg" 
+                      alt="Phantom" 
+                      className="w-5 h-5 mr-2"
+                    />
+                    {isPhantomAvailable ? t('wallet.connectToPhantom') : (
+                      <div className="flex items-center">
+                        {t('wallet.phantomNotInstalled')}
+                        <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
+                          e.stopPropagation();
+                          window.open("https://phantom.app/", "_blank");
+                        }} />
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </Button>
+              </Button>
 
-          <Button 
-            onClick={() => handleConnect('solflare')}
-            disabled={isConnecting !== null || !isSolflareAvailable}
-            className={`w-full font-medium text-black ${!isSolflareAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
-            style={{ backgroundColor: '#FFEF46', borderColor: '#EEDA0F' }}
-          >
-            {isConnecting === 'solflare' ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {t('wallet.connecting')}
-              </>
-            ) : (
-              <>
-                <img 
-                  src="/img/icons/Solflare_id5j73wBTF_1.svg" 
-                  alt="Solflare" 
-                  className="w-5 h-5 mr-2"
-                />
-                {isSolflareAvailable ? t('wallet.connectToSolflare') : (
-                  <div className="flex items-center">
-                    {t('wallet.solflareNotInstalled')}
-                    <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
-                      e.stopPropagation();
-                      window.open("https://solflare.com/", "_blank");
-                    }} />
-                  </div>
+              <Button 
+                onClick={() => handleConnect('solflare')}
+                disabled={isConnecting !== null || !isSolflareAvailable}
+                className={`w-full font-medium text-black ${!isSolflareAvailable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                style={{ backgroundColor: '#FFEF46', borderColor: '#EEDA0F' }}
+              >
+                {isConnecting === 'solflare' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('wallet.connecting')}
+                  </>
+                ) : (
+                  <>
+                    <img 
+                      src="/img/icons/Solflare_id5j73wBTF_1.svg" 
+                      alt="Solflare" 
+                      className="w-5 h-5 mr-2"
+                    />
+                    {isSolflareAvailable ? t('wallet.connectToSolflare') : (
+                      <div className="flex items-center">
+                        {t('wallet.solflareNotInstalled')}
+                        <ExternalLink className="ml-1 h-3 w-3" onClick={(e) => {
+                          e.stopPropagation();
+                          window.open("https://solflare.com/", "_blank");
+                        }} />
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </Button>
-
+              </Button>
+            </>
+          )}
           {isMobile && (
             <Button
               onClick={() => handleConnect('mobile')}
