@@ -200,7 +200,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                           window.open("https://solflare.com/", "_blank");
                         }} />
                       </div>
-                    )}º o
+                    )}
                   </>
                 )}
               </Button>
