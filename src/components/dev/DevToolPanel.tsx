@@ -18,6 +18,7 @@ import WebhookLogTab from './TabsContent/WebhookLogTab';
 import DecksTab from './TabsContent/DecksTab';
 import ReadingLogsTab from './TabsContent/ReadingLogsTab';
 import { useTarot } from '@/contexts/TarotContext';
+import ConnectionLogsTab from './TabsContent/ConnectionLogsTab';
 
 interface DevToolPanelProps {
   routes?: Array<{
@@ -152,8 +153,11 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                     </Button>
                   </div>
 
-                  <Tabs defaultValue="reading" className="flex-grow overflow-hidden flex flex-col">
+                  <Tabs defaultValue="connectionlogs" className="flex-grow overflow-hidden flex flex-col">
                     <TabsList className="justify-start px-2 pt-2 border-b border-gray-100 h-10 overflow-x-auto">
+                      <TabsTrigger value="connectionlogs" className="text-xs py-1 px-2 h-7">
+                        Connection Logs
+                      </TabsTrigger>
                       <TabsTrigger value="reading" className="text-xs py-1 px-2 h-7">
                         Reading
                       </TabsTrigger>
@@ -180,30 +184,27 @@ const DevToolPanel = ({ routes = [] }: DevToolPanelProps) => {
                     </TabsList>
 
                     <div className="flex-grow overflow-hidden">
+                      <TabsContent value="connectionlogs" className="h-full m-0">
+                        <ConnectionLogsTab />
+                      </TabsContent>
                       <TabsContent value="reading" className="h-full m-0">
                         <ReadingLogsTab />
                       </TabsContent>
-                      
                       <TabsContent value="webhooks" className="h-full m-0">
                         <WebhookLogTab />
                       </TabsContent>
-
                       <TabsContent value="debug" className="m-0">
                         <DebugTab />
                       </TabsContent>
-
                       <TabsContent value="wallet" className="m-0 p-4">
                         <WalletTab />
                       </TabsContent>
-
                       <TabsContent value="env" className="m-0 p-4">
                         <ConfigTab />
                       </TabsContent>
-
                       <TabsContent value="decks" className="m-0 p-4">
                         <DecksTab />
                       </TabsContent>
-
                       {routes.length > 0 && (
                         <TabsContent value="nav" className="m-0 p-4">
                           <RoutesTab routes={routes} />

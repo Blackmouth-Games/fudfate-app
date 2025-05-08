@@ -58,7 +58,7 @@ export const connectSolflare = async (): Promise<{ address: string | null; netwo
   }
 };
 
-export const connectMobileWallet = async (): Promise<{ address: string | null; networkId: string | null; error: string | null }> => {
+export const connectMobileWallet = async (addConnectionLog?: (type: string, message: string, details?: any) => void): Promise<{ address: string | null; networkId: string | null; error: string | null }> => {
   try {
     const mobileWallet = new SolanaMobileWalletAdapter({
       appIdentity: { name: 'FudFate' },
@@ -73,11 +73,26 @@ export const connectMobileWallet = async (): Promise<{ address: string | null; n
     const address = mobileWallet.publicKey?.toString() || null;
     const networkId = 'mainnet-beta';
     if (!address) {
-      return { address: null, networkId: null, error: 'No se pudo conectar con la wallet móvil. Asegúrate de tener una wallet compatible instalada y de aceptar la conexión en la app. Más info: https://solanamobile.com/wallets' };
+      if (addConnectionLog) addConnectionLog('adapter_fail', 'Adapter móvil no devolvió address, intentando deep links');
+      // Intentar deep links de wallets conocidas
+      const deepLinks = [
+        { name: 'Phantom', url: 'phantom://app/connect' },
+        { name: 'Solflare', url: 'solflare://' },
+        { name: 'Glow', url: 'https://glow.app/' },
+        { name: 'Backpack', url: 'backpack://' }
+      ];
+      for (const wallet of deepLinks) {
+        if (addConnectionLog) addConnectionLog('deeplink_attempt', `Intentando abrir ${wallet.name}`, wallet.url);
+        window.open(wallet.url, '_blank');
+        // Espera breve entre intentos
+        await new Promise(res => setTimeout(res, 1000));
+      }
+      return { address: null, networkId: null, error: 'No se pudo conectar con la wallet móvil. Se intentaron deep links. Si el problema persiste, abre esta web desde el navegador interno de tu wallet (Phantom, Solflare, etc.) para conectar.' };
     }
     return { address, networkId, error: null };
   } catch (error: any) {
-    return { address: null, networkId: null, error: error?.message || 'Failed to connect to mobile wallet.' };
+    if (addConnectionLog) addConnectionLog('adapter_exception', String(error), error);
+    return { address: null, networkId: null, error: (error?.message || 'Failed to connect to mobile wallet.') + ' Si el problema persiste, abre esta web desde el navegador interno de tu wallet (Phantom, Solflare, etc.) para conectar.' };
   }
 };
 

@@ -27,6 +27,13 @@ interface WebhookResponse {
 
 const MAX_LOGS = 100;
 
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 /**
  * Get stored webhook logs from localStorage
  */
@@ -89,7 +96,7 @@ export const logWebhookCall = (
   method: string = 'POST'
 ): void => {
   const log: WebhookLog = {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     type,
     url,
     timestamp: new Date().toISOString(),

@@ -8,6 +8,8 @@ import WalletConnector from '@/components/wallet/WalletConnector';
 import TokenInlineBalance from '@/components/wallet/TokenInlineBalance';
 import { Link } from 'react-router-dom';
 import { TOKENS_TO_SHOW } from '@/config/tokensToShow';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import ConnectionLogsTab from '@/components/dev/TabsContent/ConnectionLogsTab';
 
 interface TarotHeaderProps {
   connected: boolean;
@@ -21,6 +23,7 @@ const TarotHeader: React.FC<TarotHeaderProps> = ({
   onTabChange 
 }) => {
   const { t } = useTranslation();
+  const [showLogs, setShowLogs] = React.useState(false);
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-md">
@@ -76,6 +79,25 @@ const TarotHeader: React.FC<TarotHeaderProps> = ({
           )}
           {connected && <WalletBalance />}
           <LanguageSwitcher />
+          <Dialog open={showLogs} onOpenChange={setShowLogs}>
+            <DialogTrigger asChild>
+              <button
+                className="ml-2 px-2 py-1 rounded bg-gray-200 text-xs border border-gray-300 hover:bg-gray-300 transition"
+                aria-label="Show connection logs"
+                type="button"
+              >
+                Logs
+              </button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg w-full">
+              <DialogHeader>
+                <DialogTitle>Connection Logs</DialogTitle>
+              </DialogHeader>
+              <div className="max-h-[60vh] overflow-y-auto">
+                <ConnectionLogsTab />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </header>

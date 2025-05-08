@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
 import RocketCelebration from '@/components/animations/RocketCelebration';
+import QRCode from 'qrcode.react';
 
 interface WalletConnectorProps {
   showButtons?: boolean;
@@ -23,6 +24,9 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
   const [isPhantomAvailable, setIsPhantomAvailable] = useState(false);
   const [isSolflareAvailable, setIsSolflareAvailable] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const [copied, setCopied] = useState(false);
 
   // Check wallet availability on component mount
   useEffect(() => {
@@ -85,8 +89,13 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
     }
   };
 
-  // Detectar si es móvil
-  const isMobile = typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+  const handleCopyUrl = () => {
+    if (navigator.clipboard && currentUrl) {
+      navigator.clipboard.writeText(currentUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // If not showing buttons and not connected, return nothing
   if (!showButtons && !connected) {
@@ -165,7 +174,6 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                   </>
                 )}
               </Button>
-
               <Button 
                 onClick={() => handleConnect('solflare')}
                 disabled={isConnecting !== null || !isSolflareAvailable}
@@ -199,23 +207,44 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
             </>
           )}
           {isMobile && (
-            <Button
-              onClick={() => handleConnect('mobile')}
-              disabled={isConnecting !== null}
-              className="w-full font-medium text-white bg-gradient-to-r from-fuchsia-500 to-cyan-500 border-fuchsia-500/30 hover:border-cyan-500/50"
-            >
-              {isConnecting === 'mobile' ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t('wallet.connecting')}
-                </>
-              ) : (
-                <>
-                  <Wallet className="w-5 h-5 mr-2" />
-                  {t('wallet.connectToMobileWallet', 'Conectar Wallet Móvil')}
-                </>
-              )}
-            </Button>
+            <>
+              <Button
+                onClick={async () => {
+                  if (typeof window !== 'undefined' && !window.solflare) {
+                    // Copia la URL antes de abrir la app
+                    if (navigator.clipboard && window.location.href) {
+                      await navigator.clipboard.writeText(window.location.href);
+                      toast.success('URL copiada. Pégala en el navegador de Solflare.');
+                    }
+                    window.open('solflare://', '_blank');
+                  } else {
+                    handleConnect('solflare');
+                  }
+                }}
+                disabled={isConnecting !== null}
+                className="w-full font-medium text-black"
+                style={{ backgroundColor: '#FFEF46', borderColor: '#EEDA0F' }}
+              >
+                {isConnecting === 'solflare' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    {t('wallet.connecting')}
+                  </>
+                ) : (
+                  <>
+                    <img 
+                      src="/img/icons/Solflare_id5j73wBTF_1.svg" 
+                      alt="Solflare" 
+                      className="w-5 h-5 mr-2"
+                    />
+                    <span>Conectar con Solflare</span>
+                  </>
+                )}
+              </Button>
+              <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-900 text-xs text-center">
+                Para conectar tu wallet móvil, abre esta web desde el navegador interno de tu wallet (Phantom o Solflare).
+              </div>
+            </>
           )}
         </div>
       )}
