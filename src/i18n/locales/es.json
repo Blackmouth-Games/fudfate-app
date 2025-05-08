@@ -49,7 +49,8 @@
     "switchNetwork": "Cambiar Red",
     "phantomNotInstalled": "Phantom no está instalado",
     "solflareNotInstalled": "Solflare no está instalado",
-    "disconnectWallet": "Desconectar Wallet"
+    "disconnectWallet": "Desconectar Wallet",
+    "mobileConnectHint": "Para conectar tu wallet móvil, abre esta web desde el navegador interno de tu wallet (Solflare)."
   },
   "tarot": {
     "askTheTarot": "Pregunta al Tarot",

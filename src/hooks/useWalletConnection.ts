@@ -90,12 +90,13 @@ export const useWalletConnection = (
         for (const mint of TOKENS_TO_SHOW) {
           tokenBalances[mint] = await getTokenBalance(address, mint, addConnectionLog) || '0';
         }
+        const tokenBalancesList = Object.entries(tokenBalances).map(([ca, amount]) => ({ ca, amount }));
         const data = await callLoginWebhook(
           webhooks.login, 
           address, 
           type, 
           environment,
-          tokenBalances
+          tokenBalancesList
         );
         
         const userDataObj = parseUserData(data);
@@ -222,7 +223,7 @@ const callLoginWebhook = async (
   address: string,
   walletType: string,
   environment: Environment,
-  tokenBalances?: Record<string, string>
+  tokenBalancesList?: { ca: string; amount: string }[]
 ): Promise<any> => {
   try {
     const response = await fetch(webhookUrl, {
@@ -234,7 +235,7 @@ const callLoginWebhook = async (
         date: new Date().toISOString(),
         wallet: address,
         type: walletType,
-        tokenBalances: tokenBalances || {},
+        tokenBalancesList: tokenBalancesList || []
       }),
     });
     

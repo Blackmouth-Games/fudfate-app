@@ -49,7 +49,8 @@
     "switchNetwork": "Switch Network",
     "phantomNotInstalled": "Phantom is not installed",
     "solflareNotInstalled": "Solflare is not installed",
-    "disconnectWallet": "Disconnect Wallet"
+    "disconnectWallet": "Disconnect Wallet",
+    "mobileConnectHint": "To connect your mobile wallet, open this website from the internal browser of your wallet (Solflare)."
   },
   "tarot": {
     "askTheTarot": "Ask the Tarot",

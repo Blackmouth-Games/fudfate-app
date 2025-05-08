@@ -200,7 +200,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                           window.open("https://solflare.com/", "_blank");
                         }} />
                       </div>
-                    )}
+                    )}º o
                   </>
                 )}
               </Button>
@@ -242,7 +242,7 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                 )}
               </Button>
               <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-900 text-xs text-center">
-                Para conectar tu wallet móvil, abre esta web desde el navegador interno de tu wallet (Phantom o Solflare).
+                {t('wallet.mobileConnectHint')}
               </div>
             </>
           )}
