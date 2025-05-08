@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useWallet } from '@/contexts/WalletContext';
 import { Coins, AlertCircle } from 'lucide-react';
@@ -9,11 +8,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 interface WalletBalanceProps {
   className?: string;
   tokenMint?: string; // Allow specifying a specific token
+  addConnectionLog?: (type: string, message: string, details?: any) => void;
 }
 
 const WalletBalance: React.FC<WalletBalanceProps> = ({ 
   className = '',
-  tokenMint
+  tokenMint,
+  addConnectionLog
 }) => {
   const { walletType, walletAddress, network } = useWallet();
   const [balance, setBalance] = useState<string | null>(null);
@@ -51,8 +52,8 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
       
       setLoading(true);
       try {
-        const tokenBalance = await getTokenBalance(walletAddress, currentToken);
-        setBalance(tokenBalance);
+        const balanceResult = await getTokenBalance(walletAddress, currentToken, addConnectionLog);
+        setBalance(balanceResult);
         setHasError(false);
         setErrorMessage(null);
       } catch (error) {
@@ -70,7 +71,7 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({
     // Update every 30 seconds
     const intervalId = setInterval(fetchBalance, 30000);
     return () => clearInterval(intervalId);
-  }, [walletAddress, walletType, currentToken, hasError]);
+  }, [walletAddress, walletType, currentToken, hasError, addConnectionLog]);
 
   if (!walletAddress || !walletType || !currentToken) return null;
 

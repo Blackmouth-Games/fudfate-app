@@ -8,8 +8,6 @@ import WalletConnector from '@/components/wallet/WalletConnector';
 import TokenInlineBalance from '@/components/wallet/TokenInlineBalance';
 import { Link } from 'react-router-dom';
 import { TOKENS_TO_SHOW } from '@/config/tokensToShow';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ConnectionLogsTab from '@/components/dev/TabsContent/ConnectionLogsTab';
 
 interface TarotHeaderProps {
   connected: boolean;
@@ -23,81 +21,71 @@ const TarotHeader: React.FC<TarotHeaderProps> = ({
   onTabChange 
 }) => {
   const { t } = useTranslation();
-  const [showLogs, setShowLogs] = React.useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-md">
-      <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex items-center">
-          <Link to="/">
-            <img 
-              src="/img/logos/FUDFATE_logo.png" 
-              alt="FUDFATE" 
-              className="h-12"
-            />
-          </Link>
-        </div>
-        
-        {connected && (
-          <div className="flex-grow flex justify-center">
-            <Tabs value={activeTab} onValueChange={onTabChange}>
-              <TabsList className="grid grid-cols-3">
-                <TabsTrigger 
-                  value="reading" 
-                  className="flex items-center"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {t('tarot.reading')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="history" 
-                  className="flex items-center"
-                >
-                  <History className="mr-2 h-4 w-4" />
-                  {t('tarot.history')}
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="decks" 
-                  className="flex items-center"
-                >
-                  <Layers className="mr-2 h-4 w-4" />
-                  {t('tarot.decks')}
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+    <header className="w-full bg-white border-b border-gray-200">
+      <div className="container mx-auto px-4 py-4">
+        {/* Desktop: todo en una línea, móvil: columnas */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-0 md:relative">
+          {/* Logo y lenguaje juntos en móvil, separados en desktop */}
+          <div className="flex items-center md:flex-none md:w-auto">
+            <Link to="/">
+              <img 
+                src="/img/logos/FUDFATE_logo.png" 
+                alt="FUDFATE" 
+                className="h-12"
+              />
+            </Link>
+            {/* Idioma solo visible aquí en móvil */}
+            <div className="ml-2 md:hidden">
+              <LanguageSwitcher />
+            </div>
           </div>
-        )}
-        
-        <div className="flex items-center gap-3">
+          {/* Menú centrado en desktop, debajo en móvil */}
           {connected && (
-            <div className="flex items-center gap-2">
-              {TOKENS_TO_SHOW.map(mint => (
-                <TokenInlineBalance key={mint} mintAddress={mint} />
-              ))}
-              <WalletConnector showButtons={false} />
+            <div className="order-2 md:order-none md:absolute md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 flex justify-center w-full md:w-auto">
+              <Tabs value={activeTab} onValueChange={onTabChange}>
+                <TabsList className="grid grid-cols-3">
+                  <TabsTrigger 
+                    value="reading" 
+                    className="flex items-center"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {t('tarot.reading')}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="history" 
+                    className="flex items-center"
+                  >
+                    <History className="mr-2 h-4 w-4" />
+                    {t('tarot.history')}
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="decks" 
+                    className="flex items-center"
+                  >
+                    <Layers className="mr-2 h-4 w-4" />
+                    {t('tarot.decks')}
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           )}
-          {connected && <WalletBalance />}
-          <LanguageSwitcher />
-          <Dialog open={showLogs} onOpenChange={setShowLogs}>
-            <DialogTrigger asChild>
-              <button
-                className="ml-2 px-2 py-1 rounded bg-gray-200 text-xs border border-gray-300 hover:bg-gray-300 transition"
-                aria-label="Show connection logs"
-                type="button"
-              >
-                Logs
-              </button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg w-full">
-              <DialogHeader>
-                <DialogTitle>Connection Logs</DialogTitle>
-              </DialogHeader>
-              <div className="max-h-[60vh] overflow-y-auto">
-                <ConnectionLogsTab />
+          {/* Tokens y wallet a la derecha del menú, idioma al final en desktop */}
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-2 md:ml-auto md:order-3">
+            {connected && (
+              <div className="flex flex-row items-center gap-2">
+                {TOKENS_TO_SHOW.map(mint => (
+                  <TokenInlineBalance key={mint} mintAddress={mint} />
+                ))}
+                <WalletConnector showButtons={false} />
               </div>
-            </DialogContent>
-          </Dialog>
+            )}
+            {/* Idioma solo visible aquí en desktop */}
+            <div className="hidden md:block md:ml-4">
+              <LanguageSwitcher />
+            </div>
+          </div>
         </div>
       </div>
     </header>

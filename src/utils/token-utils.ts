@@ -21,14 +21,16 @@ export const TOKEN_LIST: Record<string, TokenInfo> = {
   // Add more tokens as needed
 };
 
+const SOLANA_RPC_URL = 'https://solana-mainnet.g.alchemy.com/v2/WxXnJ7G5b18ho3IyvoET55AiOGKV8oTP';
+
 /**
  * Get the balance of SOL for a given wallet address
  * Uses the Solana blockchain API with proper error handling
  */
-export const getSolanaBalance = async (walletAddress: string): Promise<string> => {
+export const getSolanaBalance = async (walletAddress: string, addConnectionLog?: Function): Promise<string> => {
   try {
-    // Try to use the public Solana API to get the balance
-    const response = await fetch(`https://api.mainnet-beta.solana.com`, {
+    if (addConnectionLog) addConnectionLog('balance_request', `SOL balance for ${walletAddress}`);
+    const response = await fetch(SOLANA_RPC_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,37 +42,25 @@ export const getSolanaBalance = async (walletAddress: string): Promise<string> =
         params: [walletAddress]
       }),
     });
-
-    // Check for non-OK responses
+    if (addConnectionLog) addConnectionLog('balance_response', `SOL balance response for ${walletAddress}`, response);
     if (!response.ok) {
-      // If we get a 403 or other error, return 0 instead of mock value
-      console.warn(`Error accessing Solana API: ${response.status} ${response.statusText}`);
-      return '0.0000'; // Return 0 balance when API access fails
-    }
-
-    const data = await response.json();
-    
-    // Handle API errors
-    if (data.error) {
-      console.error('Error getting SOL balance:', data.error);
-      return '0.0000'; // Return 0 balance for API errors
-    }
-
-    // The balance is returned in lamports (1 SOL = 1,000,000,000 lamports)
-    const lamports = data.result?.value || 0;
-    const solBalance = (lamports / 1000000000).toFixed(4);
-    
-    // If balance is suspiciously high (more than 10000 SOL) on a test environment,
-    // consider it a test environment balance issue and return 0
-    if (parseFloat(solBalance) > 10000) {
-      console.warn('Unrealistic SOL balance detected, possibly test environment. Returning 0.');
+      if (addConnectionLog) addConnectionLog('balance_error', `SOL balance error for ${walletAddress}`, response.statusText);
       return '0.0000';
     }
-    
+    const data = await response.json();
+    if (addConnectionLog) addConnectionLog('balance_response', `SOL balance response for ${walletAddress}`, data);
+    if (data.error) {
+      if (addConnectionLog) addConnectionLog('balance_error', `SOL balance error for ${walletAddress}`, data.error);
+      return '0.0000';
+    }
+    const lamports = data.result?.value || 0;
+    const solBalance = (lamports / 1000000000).toFixed(4);
+    if (parseFloat(solBalance) > 10000) {
+      return '0.0000';
+    }
     return solBalance;
   } catch (error) {
-    console.error('Error fetching SOL balance:', error);
-    // Return 0 instead of a mock balance
+    if (addConnectionLog) addConnectionLog('balance_error', `SOL balance error for ${walletAddress}`, error);
     return '0.0000';
   }
 };
@@ -80,63 +70,89 @@ export const getSolanaBalance = async (walletAddress: string): Promise<string> =
  */
 export const getTokenBalance = async (
   walletAddress: string, 
-  mintAddress: string
+  mintAddress: string,
+  addConnectionLog?: Function
 ): Promise<string | null> => {
   if (mintAddress === 'So11111111111111111111111111111111111111112') {
-    return await getSolanaBalance(walletAddress);
+    return await getSolanaBalance(walletAddress, addConnectionLog);
   }
   
   try {
-    // Use the Solana RPC API to get token account info
-    const response = await fetch(`https://api.mainnet-beta.solana.com`, {
+    if (addConnectionLog) addConnectionLog('balance_request', `Token balance for ${walletAddress} - ${mintAddress}`);
+    const requestBody = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'getTokenAccountsByOwner',
+      params: [
+        walletAddress,
+        { mint: mintAddress },
+        { encoding: 'jsonParsed' }
+      ]
+    };
+    const response = await fetch(SOLANA_RPC_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method: 'getTokenAccountsByOwner',
-        params: [
-          walletAddress,
-          {
-            mint: mintAddress
-          },
-          {
-            encoding: 'jsonParsed'
-          }
-        ]
-      }),
+      body: JSON.stringify(requestBody),
     });
-
+    if (addConnectionLog) addConnectionLog('balance_response', `Token balance response for ${walletAddress} - ${mintAddress}`, { status: response.status, statusText: response.statusText });
     if (!response.ok) {
-      console.warn(`Error accessing Solana API: ${response.status} ${response.statusText}`);
+      let bodyText = '';
+      try { bodyText = await response.text(); } catch {}
+      if (addConnectionLog) addConnectionLog('balance_error', `Token balance error for ${walletAddress} - ${mintAddress}`, { status: response.status, statusText: response.statusText, body: bodyText, request: requestBody });
       return '0.0000';
     }
-
     const data = await response.json();
-    
+    if (addConnectionLog) addConnectionLog('balance_response', `Token balance response for ${walletAddress} - ${mintAddress}`, data);
     if (data.error) {
-      console.error('Error getting token balance:', data.error);
+      if (addConnectionLog) addConnectionLog('balance_error', `Token balance error for ${walletAddress} - ${mintAddress}`, { error: data.error, request: requestBody });
       return '0.0000';
     }
-
-    // Get token info to know decimals
     const tokenInfo = getTokenInfo(mintAddress);
     const decimals = tokenInfo?.decimals || 9;
-
-    // Calculate balance from token accounts
     let totalBalance = 0;
-    if (data.result?.value) {
+    if (data.result?.value && Array.isArray(data.result.value)) {
+      if (data.result.value.length === 0) {
+        if (addConnectionLog) addConnectionLog('balance_warning', `El usuario nunca ha recibido el token ${mintAddress} (no hay cuentas asociadas)`, { walletAddress, mintAddress, request: requestBody });
+        return '0.0000';
+      }
       for (const account of data.result.value) {
         const balance = account.account.data.parsed.info.tokenAmount.uiAmount;
         totalBalance += balance;
       }
+    } else {
+      if (addConnectionLog) addConnectionLog('balance_warning', `Respuesta inesperada al consultar el balance del token ${mintAddress}`, { walletAddress, mintAddress, data, request: requestBody });
+      return '0.0000';
     }
-
     return totalBalance.toFixed(decimals);
-  } catch (error) {
-    console.error('Error fetching token balance:', error);
+  } catch (error: any) {
+    let errorDetail: any = {};
+    if (error instanceof Response) {
+      let bodyText = '';
+      try { bodyText = await error.text(); } catch {}
+      errorDetail = {
+        message: `HTTP error: ${error.status} ${error.statusText}`,
+        status: error.status,
+        statusText: error.statusText,
+        body: bodyText,
+        error: error
+      };
+    } else if (typeof error === 'object' && error !== null && Object.keys(error).length === 0) {
+      errorDetail = {
+        message: 'Unknown error (empty object)',
+        keys: Object.keys(error),
+        props: Object.getOwnPropertyNames(error),
+        error: error
+      };
+    } else {
+      errorDetail = {
+        message: error?.message || String(error),
+        stack: error?.stack || null,
+        error: error
+      };
+    }
+    if (addConnectionLog) addConnectionLog('balance_error', `Token balance error for ${walletAddress} - ${mintAddress}`, errorDetail);
     return '0.0000';
   }
 };

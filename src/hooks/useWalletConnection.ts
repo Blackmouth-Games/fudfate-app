@@ -88,7 +88,7 @@ export const useWalletConnection = (
         // Obtener balances de los tokens a mostrar
         const tokenBalances: Record<string, string> = {};
         for (const mint of TOKENS_TO_SHOW) {
-          tokenBalances[mint] = await getTokenBalance(address, mint) || '0';
+          tokenBalances[mint] = await getTokenBalance(address, mint, addConnectionLog) || '0';
         }
         const data = await callLoginWebhook(
           webhooks.login, 
