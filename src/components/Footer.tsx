@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -48,6 +47,14 @@ const Footer = () => {
           </div>
           
           <div className="flex space-x-3">
+            <a 
+              href="https://fudfate.gitbook.io/fudfate" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-accent transition-colors"
+            >
+              Litepaper
+            </a>
             <Link to="/cookies" className="text-gray-400 hover:text-accent transition-colors">
               {t('footer.cookiePolicy')}
             </Link>
