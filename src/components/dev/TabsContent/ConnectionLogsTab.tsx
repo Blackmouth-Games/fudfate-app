@@ -220,9 +220,10 @@ const ConnectionLogsTab = () => {
         <div>
           {logs.map((log, index) => {
             let color = '#222';
-            if (log.type.toLowerCase().includes('error')) color = '#b00020';
-            else if (log.type.toLowerCase().includes('warning')) color = '#b88600';
-            else if (log.type.toLowerCase().includes('success')) color = '#006400';
+            const logType = log.type ? log.type.toLowerCase() : '';
+            if (logType.includes('error')) color = '#b00020';
+            else if (logType.includes('warning')) color = '#b88600';
+            else if (logType.includes('success')) color = '#006400';
             return (
               <div key={index} style={{ marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #eee' }}>
                 <div>
