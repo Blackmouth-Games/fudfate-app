@@ -77,7 +77,7 @@ const TarotApp: React.FC = () => {
   const commitSha = import.meta.env.VITE_COMMIT_SHA || '';
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 flex flex-col">
+    <div className="min-h-screen bg-white text-gray-800 flex flex-col" style={{ paddingTop: 48 }}>
       <TarotHeader 
         connected={connected} 
         activeTab={activeTab} 

@@ -14,6 +14,7 @@ import DevToolPanel from '@/components/dev/DevToolPanel';
 import CookieConsent from './components/CookieConsent';
 import AppRoutes from './routes/AppRoutes';
 import CursorParticles from './components/CursorParticles';
+import NewsBar from './components/NewsBar';
 
 // Create React Query client with appropriate settings
 const queryClient = new QueryClient({
@@ -33,6 +34,7 @@ function App() {
           <WalletProvider>
             <TarotProvider>
               <CursorParticles />
+              <NewsBar />
               <Router>
                 <AppRoutes />
                 <CookieConsent />
