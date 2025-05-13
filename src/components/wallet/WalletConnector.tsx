@@ -209,6 +209,23 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
           {isMobile && (
             <>
               <Button
+                onClick={() => {
+                  toast.warning(
+                    t('wallet.phantomMobileWarning') ||
+                      'Phantom solo está disponible en navegadores de escritorio. Por favor, usa un navegador desktop para conectar con Phantom.'
+                  );
+                }}
+                className="w-full font-medium text-white"
+                style={{ backgroundColor: '#AB9FF2', borderColor: '#9887E0' }}
+              >
+                <img
+                  src="/img/icons/Phantom-Icon_Transparent_White.svg"
+                  alt="Phantom"
+                  className="w-5 h-5 mr-2"
+                />
+                <span>Conectar con Phantom</span>
+              </Button>
+              <Button
                 onClick={async () => {
                   if (typeof window !== 'undefined' && !window.solflare) {
                     // Copia la URL antes de abrir la app
@@ -232,9 +249,9 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ showButtons = true })
                   </>
                 ) : (
                   <>
-                    <img 
-                      src="/img/icons/Solflare_id5j73wBTF_1.svg" 
-                      alt="Solflare" 
+                    <img
+                      src="/img/icons/Solflare_id5j73wBTF_1.svg"
+                      alt="Solflare"
                       className="w-5 h-5 mr-2"
                     />
                     <span>Conectar con Solflare</span>

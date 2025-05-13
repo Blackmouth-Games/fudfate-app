@@ -50,7 +50,8 @@
     "phantomNotInstalled": "Phantom no está instalado",
     "solflareNotInstalled": "Solflare no está instalado",
     "disconnectWallet": "Desconectar Wallet",
-    "mobileConnectHint": "Para conectar tu wallet móvil, abre esta web desde el navegador interno de tu wallet (Solflare)."
+    "mobileConnectHint": "Para conectar tu wallet móvil, abre esta web desde el navegador interno de tu wallet (Solflare).",
+    "phantomMobileWarning": "Phantom solo está disponible en navegadores de escritorio. Por favor, usa un navegador desktop para conectar con Phantom."
   },
   "tarot": {
     "askTheTarot": "Pregunta al Tarot",
