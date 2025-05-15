@@ -25,7 +25,8 @@ const DeckCard: React.FC<DeckCardProps> = ({
   loadedImages,
   t
 }) => {
-  const isUnlocked = deck.isActive;
+  const isLocked = !!deck.lock;
+  const isUnlocked = deck.isActive && !isLocked;
   const isSelectingThis = isSelecting === deck.name;
   const [isHovered, setIsHovered] = React.useState(false);
   const [showCelebration, setShowCelebration] = React.useState(false);
@@ -35,7 +36,10 @@ const DeckCard: React.FC<DeckCardProps> = ({
   console.log('DeckCard render:', { 
     deckName: deck.name, 
     isSelected, 
-    showCelebration 
+    showCelebration,
+    lock: deck.lock,
+    minTokensRequired: deck.minTokensRequired,
+    isActive: deck.isActive
   });
 
   // Cleanup on unmount
@@ -164,7 +168,7 @@ const DeckCard: React.FC<DeckCardProps> = ({
             ${isSelected ? 'border-[#3ADDD9] border-[3px] shadow-[#3ADDD9]/20' : 'border-amber-400 border-2'}
             ${!isUnlocked ? 'opacity-50 grayscale' : 'hover:shadow-lg hover:border-amber-500'}`}
           onClick={() => {
-            if (isUnlocked) {
+            if (deck.isActive) {
               onDetailsOpen(deck.id);
             }
           }}
@@ -202,7 +206,20 @@ const DeckCard: React.FC<DeckCardProps> = ({
           <span className="text-xs text-amber-600 font-medium mb-1 flex items-center">
             <CheckCircle2 className="h-3 w-3 mr-1" /> {t('tarot.selected')}
           </span>
-        ) : isUnlocked ? (
+        ) : !deck.isActive ? (
+          <span className="text-xs text-gray-400 italic">
+            {t('tarot.comingSoon')}
+          </span>
+        ) : isLocked ? (
+          <div className="flex flex-col items-center mt-1">
+            <span className="text-xs text-red-500 font-semibold flex items-center gap-1">
+              <LockIcon className="h-3 w-3" /> {t('tarot.locked')}
+            </span>
+            <span className="text-xs text-gray-500 mt-1">
+              {t('tarot.requiresTokens').replace('{{count}}', String(deck.minTokensRequired))}
+            </span>
+          </div>
+        ) : (
           <Button 
             size="sm" 
             variant="outline" 
@@ -212,10 +229,6 @@ const DeckCard: React.FC<DeckCardProps> = ({
           >
             {isSelectingThis ? t('tarot.selecting') : t('tarot.select')}
           </Button>
-        ) : (
-          <span className="text-xs text-gray-400 italic">
-            {t('tarot.comingSoon')}
-          </span>
         )}
       </div>
     </div>

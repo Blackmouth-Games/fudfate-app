@@ -5,11 +5,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Trash, Download, CheckCircle2, XCircle } from 'lucide-react';
+import { Trash, Download, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import tarotCards from '@/data/tarotCards';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DownloadHistoryEntry, HistoryViewingCard } from '@/types/debug';
+import { useEnvironment } from '@/hooks/useEnvironment';
+import { useWallet } from '@/contexts/WalletContext';
+import { fetchAvailableDecks } from '@/utils/wallet-connection-utils';
 
 // Initialize the download history if it doesn't exist
 if (typeof window !== 'undefined') {
@@ -19,10 +22,13 @@ if (typeof window !== 'undefined') {
 
 const DebugTab = () => {
   const { webhookResponse, selectedCards, selectedDeck, phase, revealedCardIds } = useTarot();
+  const { webhooks, environment } = useEnvironment();
+  const { userData } = useWallet();
   const [webhookCards, setWebhookCards] = useState<number[]>([]);
   const [parsedWebhook, setParsedWebhook] = useState<any>(null);
   const [webhookMessage, setWebhookMessage] = useState<string | null>(null);
   const [downloadHistory, setDownloadHistory] = useState<DownloadHistoryEntry[]>([]);
+  const [isLoadingDecks, setIsLoadingDecks] = useState(false);
   
   // Load download history on mount and update when it changes
   useEffect(() => {
@@ -199,12 +205,41 @@ const DebugTab = () => {
     );
   };
 
+  const handleFetchDecks = async () => {
+    if (!userData?.userId) {
+      toast.error('No hay usuario conectado');
+      return;
+    }
+
+    setIsLoadingDecks(true);
+    try {
+      const decksData = await fetchAvailableDecks(webhooks.deck, userData.userId, environment);
+      console.log('Decks webhook response:', decksData);
+      toast.success('Decks obtenidos exitosamente');
+    } catch (error) {
+      console.error('Error fetching decks:', error);
+      toast.error('Error al obtener los decks');
+    } finally {
+      setIsLoadingDecks(false);
+    }
+  };
+
   return (
     <ScrollArea className="h-[600px]">
       <div className="space-y-4 p-4">
         <div className="flex justify-between items-center">
           <h3 className="text-sm font-semibold">Current Phase</h3>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleFetchDecks}
+              disabled={isLoadingDecks}
+              className="h-7 text-xs flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-600 hover:text-green-700"
+            >
+              <RefreshCw className={`h-3 w-3 ${isLoadingDecks ? 'animate-spin' : ''}`} />
+              Fetch Decks
+            </Button>
             <Button
               variant="outline"
               size="sm"

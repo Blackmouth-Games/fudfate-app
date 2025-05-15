@@ -104,6 +104,7 @@
     "selecting": "Seleccionando...",
     "comingSoon": "Próximamente",
     "locked": "Bloqueado",
+    "requiresTokens": "Requiere tener {{count}} $FDFT",
     "noReadingsTitle": "Sin Lecturas Aún",
     "noReadingsDescription": "Todavía no has realizado ninguna lectura de tarot. ¡Inicia una nueva lectura para descubrir lo que las estrellas crypto tienen preparado para ti!",
     "backToHistory": "Volver al Historial",

@@ -1,4 +1,3 @@
-
 import { Deck } from '@/types/tarot';
 
 export interface ApiDeckResponse {
@@ -8,6 +7,8 @@ export interface ApiDeckResponse {
   created_at: string;
   url: string;
   is_active: boolean;
+  lock?: boolean | string;
+  min_tokens_required?: number;
 }
 
 export interface DeckInfo {
@@ -20,6 +21,8 @@ export interface DeckInfo {
   directory: string;
   backImage: string;
   unlocked?: boolean;
+  lock?: boolean;
+  minTokensRequired?: number;
 }
 
 /**
@@ -90,7 +93,15 @@ export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => 
   
   // Get back image path
   const backImage = `/img/cards/deck_${deckNumber}/99_BACK.jpg`;
-  
+
+  // Normalizar lock a booleano
+  let lock = false;
+  if (typeof apiDeck.lock === 'string') {
+    lock = apiDeck.lock === 'true';
+  } else if (typeof apiDeck.lock === 'boolean') {
+    lock = apiDeck.lock;
+  }
+
   return {
     id: apiDeck.id,
     name: deckName,
@@ -100,7 +111,9 @@ export const convertApiDeckToInternal = (apiDeck: ApiDeckResponse): DeckInfo => 
     createdAt: apiDeck.created_at,
     directory,
     backImage,
-    unlocked: apiDeck.is_active // Only unlocked if active
+    unlocked: apiDeck.is_active && !lock,
+    lock,
+    minTokensRequired: apiDeck.min_tokens_required ?? 0
   };
 };
 

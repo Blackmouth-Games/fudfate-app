@@ -186,12 +186,6 @@ export const fetchAvailableDecks = async (
 };
 
 export const processDecksFromApi = (decksData: any[]): any[] => {
-  return decksData.map(deck => ({
-    id: deck.id,
-    name: deck.name,
-    description: deck.description,
-    image: deck.image,
-    is_active: deck.is_active || false,
-    created_at: deck.created_at || new Date().toISOString()
-  }));
+  // Devolver todos los campos originales del backend
+  return decksData.map(deck => ({ ...deck }));
 };

@@ -98,8 +98,15 @@ export const useTarotData = () => {
         
         // Convert API deck format to internal format
         const formattedDecks = processedDecks.map(deck => convertApiDeckToInternal(deck));
-        setAvailableDecks(formattedDecks);
-        console.log("Available decks for UI:", formattedDecks);
+        // Filtrar duplicados por id, dejando el último (el del backend)
+        const uniqueDecks = Object.values(
+          formattedDecks.reduce((acc, deck) => {
+            acc[deck.id] = deck;
+            return acc;
+          }, {} as Record<string, DeckInfo>)
+        );
+        setAvailableDecks(uniqueDecks);
+        console.log("Available decks for UI (unique):", uniqueDecks);
       } else {
         // If no decks or error, use deck1 as fallback
         console.log("No decks returned from API, using fallback");
